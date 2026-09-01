@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Festivals of the World — A Year of Celebrations</title>
+<meta name="description" content="A scrollytelling journey through ten world festivals in calendar order — Lunar New Year, Holi, Hanami, Songkran, Eid al-Fitr, Inti Raymi, Obon, Día de los Muertos, Diwali and Hogmanay.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎆</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{margin:0;font-family:Inter,system-ui,sans-serif;background:#0d0b14;color:#fff;line-height:1.6;overflow-x:clip}
+  .hub-link{position:fixed;top:14px;left:14px;z-index:1000;padding:8px 14px;border-radius:999px;font:600 13px/1 Inter,system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(8px);background:rgba(15,15,25,.55);color:#fff;border:1px solid rgba(255,255,255,.25)}
+  .hub-link:hover{background:rgba(15,15,25,.85)}
+  a:focus-visible,button:focus-visible{outline:3px solid #ffd166;outline-offset:3px;border-radius:6px}
+
+  /* ---------- Intro ---------- */
+  .intro{
+    min-height:100vh;display:grid;place-items:center;text-align:center;padding:24px;
+    background:radial-gradient(1000px 600px at 50% 120%, #2a1a3a, transparent 70%), #0d0b14;
+    position:relative;overflow:hidden;
+  }
+  .intro-inner{max-width:760px}
+  .intro .year-ring{font-size:clamp(1.6rem,4vw,2.2rem);letter-spacing:.6em;margin-bottom:18px;opacity:.85}
+  .intro h1{font-family:Fraunces,Georgia,serif;font-weight:700;font-size:clamp(2.6rem,8vw,5.4rem);line-height:1.03;margin:0 0 18px}
+  .intro h1 em{font-style:italic;color:#ffd166}
+  .intro p{color:#cfc6de;max-width:540px;margin:0 auto;font-size:clamp(1rem,2.2vw,1.14rem)}
+  .scroll-cue{margin-top:44px;display:inline-flex;flex-direction:column;align-items:center;gap:8px;color:#9d92b5;font:600 12px/1 Inter,sans-serif;letter-spacing:.2em;text-transform:uppercase}
+  .scroll-cue .chev{animation:cueBob 1.8s ease-in-out infinite}
+  @keyframes cueBob{0%,100%{transform:translateY(0)}50%{transform:translateY(9px)}}
+
+  /* ---------- Sections ---------- */
+  .fest{
+    min-height:100vh;position:relative;overflow:hidden;
+    display:flex;align-items:center;padding:96px 22px;
+    background:linear-gradient(180deg,var(--bg1),var(--bg2));
+    color:var(--ink,#fff);
+  }
+  .fest-inner{width:100%;max-width:1160px;margin:0 auto;display:flex}
+  .fest:nth-of-type(even) .fest-inner{justify-content:flex-end}
+  .panel{
+    position:relative;z-index:5;width:min(600px,100%);
+    background:var(--panel,rgba(10,8,18,.55));backdrop-filter:blur(10px);
+    border:1px solid var(--panel-line,rgba(255,255,255,.16));
+    border-radius:22px;padding:clamp(24px,4vw,44px);
+    box-shadow:0 30px 60px -30px rgba(0,0,0,.55);
+  }
+  .month-tag{
+    display:inline-block;font:600 12px/1 Inter,sans-serif;letter-spacing:.24em;text-transform:uppercase;
+    color:var(--accent,#ffd166);border:1px solid currentColor;border-radius:999px;padding:8px 14px;margin-bottom:16px;
+  }
+  .panel h2{font-family:Fraunces,Georgia,serif;font-weight:700;font-size:clamp(2rem,5.5vw,3.4rem);line-height:1.05;margin:0 0 10px}
+  .meta{display:flex;flex-wrap:wrap;gap:8px 22px;margin:0 0 16px;padding:0;list-style:none;font-size:.9rem}
+  .meta b{color:var(--accent,#ffd166);font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:.72rem;display:block}
+  .panel p.story{margin:0;font-size:clamp(.98rem,2vw,1.08rem);color:var(--body,inherit)}
+  .motif{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+
+  /* ---------- Palettes ---------- */
+  .lny{--bg1:#7c1015;--bg2:#3c090c;--accent:#f7c948;--panel:rgba(35,5,7,.55);}
+  .holi{--bg1:#fdf3e3;--bg2:#f4e3d0;--ink:#33203a;--body:#4c3a55;--accent:#c9184a;--panel:rgba(255,252,246,.72);--panel-line:rgba(51,32,58,.18)}
+  .hanami{--bg1:#cfe6f4;--bg2:#f9e3ec;--ink:#31394a;--body:#485062;--accent:#c04a6d;--panel:rgba(255,255,255,.68);--panel-line:rgba(49,57,74,.16)}
+  .songkran{--bg1:#0a5b76;--bg2:#0e8aa2;--accent:#b9f0ff;--panel:rgba(4,42,56,.55)}
+  .eid{--bg1:#141a4d;--bg2:#0b0e2c;--accent:#e8c877;--panel:rgba(8,10,38,.55)}
+  .inti{--bg1:#f6c14a;--bg2:#dd7a1c;--ink:#3d1d06;--body:#54300f;--accent:#8c3b0a;--panel:rgba(255,244,220,.72);--panel-line:rgba(61,29,6,.2)}
+  .obon{--bg1:#1c2547;--bg2:#0c1126;--accent:#ffb45e;--panel:rgba(7,10,26,.55)}
+  .dia{--bg1:#3a1150;--bg2:#4d1233;--accent:#ff9a3c;--panel:rgba(30,6,42,.55)}
+  .diwali{--bg1:#33102e;--bg2:#1c0a1c;--accent:#ffb84d;--panel:rgba(25,7,24,.55)}
+  .hogmanay{--bg1:#0b1330;--bg2:#141f42;--accent:#8fd3ff;--panel:rgba(6,10,28,.55)}
+
+  /* ---------- Motif pieces ---------- */
+  .motif .p{position:absolute;will-change:transform}
+
+  /* Lanterns */
+  .lantern{top:104%;animation:rise var(--d,16s) linear var(--dl,0s) infinite}
+  .lantern .body{width:30px;height:40px;background:#e6392f;border-radius:9px;border-top:4px solid #f7c948;border-bottom:4px solid #f7c948;box-shadow:0 0 26px 8px rgba(247,180,60,.35);animation:sway 3.6s ease-in-out infinite alternate}
+  .lantern .body::after{content:"";position:absolute;left:50%;bottom:-14px;width:2px;height:12px;background:#f7c948;transform:translateX(-50%)}
+  @keyframes rise{to{transform:translate3d(0,-135vh,0)}}
+  @keyframes sway{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}
+
+  /* Holi powder */
+  .puff{border-radius:50%;filter:blur(16px);opacity:.7;animation:drift var(--d,9s) ease-in-out var(--dl,0s) infinite alternate}
+  @keyframes drift{from{transform:translate3d(0,14px,0) scale(1)}to{transform:translate3d(36px,-26px,0) scale(1.18)}}
+
+  /* Petals */
+  .petal{top:-6%;width:15px;height:12px;background:#f2a9bd;border-radius:72% 28% 62% 38%;opacity:.9;animation:fall var(--d,11s) linear var(--dl,0s) infinite}
+  @keyframes fall{
+    0%{transform:translate3d(0,-8vh,0) rotate(0deg)}
+    25%{transform:translate3d(30px,26vh,0) rotate(85deg)}
+    50%{transform:translate3d(-18px,54vh,0) rotate(165deg)}
+    75%{transform:translate3d(24px,80vh,0) rotate(250deg)}
+    100%{transform:translate3d(-12px,112vh,0) rotate(335deg)}
+  }
+
+  /* Ripples */
+  .ripple{width:70px;height:70px;border:2px solid rgba(255,255,255,.6);border-radius:50%;animation:rippleGrow var(--d,5s) ease-out var(--dl,0s) infinite}
+  @keyframes rippleGrow{0%{transform:scale(.12);opacity:.95}65%{opacity:.35}100%{transform:scale(3.4);opacity:0}}
+
+  /* Eid crescent + stars */
+  .eid .motif::before{
+    content:"";position:absolute;inset:0;opacity:.08;
+    background:
+      repeating-linear-gradient(45deg,#e8c877 0 1px,transparent 1px 34px),
+      repeating-linear-gradient(-45deg,#e8c877 0 1px,transparent 1px 34px);
+  }
+  .crescent{width:150px;height:150px;border-radius:50%;box-shadow:inset -26px 16px 0 0 var(--accent);animation:floaty 7s ease-in-out infinite alternate;filter:drop-shadow(0 0 22px rgba(232,200,119,.45))}
+  @keyframes floaty{from{transform:translateY(-8px)}to{transform:translateY(10px)}}
+  .twinkle{width:9px;height:9px;background:var(--accent);clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);animation:tw var(--d,3s) ease-in-out var(--dl,0s) infinite alternate}
+  @keyframes tw{from{opacity:.15;transform:scale(.65)}to{opacity:1;transform:scale(1.15)}}
+
+  /* Inti Raymi sun */
+  .sunwheel{
+    left:50%;top:12%;width:min(92vmin,720px);aspect-ratio:1;border-radius:50%;
+    background:repeating-conic-gradient(rgba(255,244,214,.5) 0deg 6deg,transparent 6deg 20deg);
+    animation:spin 90s linear infinite;
+  }
+  .sunwheel::after{content:"";position:absolute;inset:33%;border-radius:50%;background:radial-gradient(circle,#fff3cf 0 42%,#f6b83c 60%,rgba(246,184,60,0) 75%)}
+  @keyframes spin{from{transform:translateX(-50%) rotate(0)}to{transform:translateX(-50%) rotate(360deg)}}
+
+  /* Obon floating lanterns */
+  .obon .motif::after{content:"";position:absolute;left:0;right:0;bottom:0;height:32%;background:linear-gradient(180deg,transparent,rgba(3,5,14,.75))}
+  .toro{bottom:14%;width:26px;height:30px;background:linear-gradient(180deg,#ffe9c0,#ffb45e);border-radius:5px 5px 3px 3px;box-shadow:0 0 22px 8px rgba(255,180,94,.4), 0 26px 18px -8px rgba(255,180,94,.25);animation:floatAcross var(--d,26s) linear var(--dl,0s) infinite}
+  @keyframes floatAcross{
+    0%{transform:translate3d(-8vw,0,0)}
+    25%{transform:translate3d(22vw,-7px,0)}
+    50%{transform:translate3d(52vw,4px,0)}
+    75%{transform:translate3d(82vw,-5px,0)}
+    100%{transform:translate3d(112vw,0,0)}
+  }
+
+  /* Día de los Muertos */
+  .banner{position:absolute;top:0;left:-4%;right:-4%;display:flex;justify-content:space-around;gap:6px;transform-origin:50% 0;animation:bannerSway 6s ease-in-out infinite alternate}
+  @keyframes bannerSway{from{transform:rotate(-1.4deg)}to{transform:rotate(1.4deg)}}
+  .flag{flex:none;width:44px;height:56px;clip-path:polygon(0 0,100% 0,100% 76%,50% 100%,0 76%);opacity:.92}
+  .banner::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:rgba(255,255,255,.5)}
+  .mari{border-radius:50%;background:radial-gradient(circle at 50% 42%,#ffd23f 0 26%,#ff9a3c 30% 60%,#e05e12 64% 100%);animation:bloom var(--d,4s) ease-in-out var(--dl,0s) infinite alternate}
+  @keyframes bloom{from{transform:scale(.92)}to{transform:scale(1.08)}}
+
+  /* Diwali diyas */
+  .diya{bottom:9%;width:56px;height:24px;background:linear-gradient(180deg,#7a3a24,#4a2013);border-radius:4px 4px 30px 30px}
+  .diya .flame{position:absolute;left:50%;top:-24px;width:16px;height:24px;transform:translateX(-50%);background:radial-gradient(ellipse at 50% 70%,#fff7d9 0 30%,#ffb84d 55%,rgba(255,140,40,0) 78%);border-radius:50% 50% 45% 45%;animation:flick var(--d,1.4s) ease-in-out var(--dl,0s) infinite alternate;filter:drop-shadow(0 0 14px rgba(255,184,77,.8))}
+  @keyframes flick{from{transform:translateX(-50%) scale(.9);opacity:.85}to{transform:translateX(-50%) scale(1.18);opacity:1}}
+
+  /* Hogmanay fireworks */
+  .burst{width:4px;height:4px}
+  .spark{position:absolute;left:0;top:0;transform:rotate(var(--r,0deg))}
+  .spark i{display:block;width:4px;height:13px;border-radius:2px;background:var(--c,#8fd3ff);animation:shoot var(--d,3.4s) ease-out var(--dl,0s) infinite;opacity:0}
+  @keyframes shoot{
+    0%{transform:translateY(0) scaleY(.4);opacity:0}
+    6%{opacity:1}
+    30%{transform:translateY(-64px) scaleY(1);opacity:.9}
+    48%,100%{transform:translateY(-78px) scaleY(.8);opacity:0}
+  }
+
+  /* ---------- Month rail ---------- */
+  .rail{position:fixed;right:10px;top:50%;transform:translateY(-50%);z-index:900;display:flex;align-items:stretch;gap:8px}
+  .rail-line{width:2px;border-radius:2px;background:rgba(255,255,255,.18);position:relative;overflow:hidden}
+  .rail-fill{position:absolute;inset:0;background:#ffd166;transform:scaleY(0);transform-origin:top}
+  .rail ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+  .rail button{
+    display:flex;align-items:center;gap:8px;background:none;border:none;cursor:pointer;
+    min-height:44px;min-width:44px;padding:0 4px;justify-content:flex-end;color:rgba(255,255,255,.55);
+  }
+  .rail .dot{width:9px;height:9px;border-radius:50%;background:currentColor;flex:none;transition:transform .25s,background .25s}
+  .rail .mon{font:600 10.5px/1 Inter,sans-serif;letter-spacing:.14em;text-transform:uppercase;opacity:0;transform:translateX(4px);transition:opacity .25s,transform .25s}
+  .rail button:hover .mon,.rail button:focus-visible .mon,.rail button.active .mon{opacity:1;transform:none}
+  .rail button.active{color:#ffd166}
+  .rail button.active .dot{transform:scale(1.5)}
+  @media (max-width:640px){.rail .mon{display:none}.rail{right:2px}}
+
+  /* ---------- Outro ---------- */
+  .outro{min-height:60vh;display:grid;place-items:center;text-align:center;padding:60px 22px;background:#0d0b14}
+  .outro p{color:#cfc6de;max-width:520px}
+  .outro h2{font-family:Fraunces,Georgia,serif;font-size:clamp(1.8rem,5vw,2.8rem);margin:0 0 12px}
+  .outro a{color:#ffd166}
+
+  /* ---------- Reveal states (applied only when JS takes over) ---------- */
+  .fade-io .panel{opacity:0;transition:opacity .8s ease}
+  .fade-io .panel.visible{opacity:1}
+
+  @media (prefers-reduced-motion:reduce){
+    .motif .p,.motif .banner,.crescent,.sunwheel,.spark i,.diya .flame,.lantern .body,.scroll-cue .chev{animation:none !important}
+    .spark i{opacity:.85;transform:translateY(-64px)}
+    .rail .dot,.rail .mon{transition:none}
+  }
+</style>
+</head>
+<body>
+<a class="hub-link" href="https://thirty-worlds.vercel.app/" aria-label="All thirty sites">← All 30</a>
+
+<nav class="rail" aria-label="Festival timeline">
+  <ol id="railList">
+    <li><button data-target="s-lny" aria-label="Lunar New Year, January to February"><span class="mon">Jan–Feb</span><span class="dot" aria-hidden="true"></span></button></li>
+    <li><button data-target="s-holi" aria-label="Holi, March"><span class="mon">Mar</span><span class="dot" aria-hidden="true"></span></button></li>
+    <li><button data-target="s-hanami" aria-label="Hanami, March to April"><span class="mon">Mar–Apr</span><span class="dot" aria-hidden="true"></span></button></li>
+    <li><button data-target="s-songkran" aria-label="Songkran, April"><span class="mon">Apr</span><span class="dot" aria-hidden="true"></span></button></li>
+    <li><button data-target="s-eid" aria-label="Eid al-Fitr, date follows the lunar calendar"><span class="mon">☾ Eid</span><span class="dot" aria-hidden="true"></span></button></li>
+    <li><button data-target="s-inti" aria-label="Inti Raymi, June"><span class="mon">Jun</span><span class="dot" aria-hidden="true"></span></button></li>
+    <li><button data-target="s-obon" aria-label="Obon, August"><span class="mon">Aug</span><span class="dot" aria-hidden="true"></span></button></li>
+    <li><button data-target="s-dia" aria-label="Día de los Muertos, November first and second"><span class="mon">Nov 1–2</span><span class="dot" aria-hidden="true"></span></button></li>
+    <li><button data-target="s-diwali" aria-label="Diwali, October to November"><span class="mon">Oct–Nov</span><span class="dot" aria-hidden="true"></span></button></li>
+    <li><button data-target="s-hogmanay" aria-label="Hogmanay, December thirty-first"><span class="mon">Dec 31</span><span class="dot" aria-hidden="true"></span></button></li>
+  </ol>
+  <div class="rail-line" aria-hidden="true"><div class="rail-fill" id="railFill"></div></div>
+</nav>
+
+<header class="intro" id="intro">
+  <div class="intro-inner">
+    <div class="year-ring" aria-hidden="true">🏮 🎨 🌸 💧 🌙 ☀️ 🕯️ 🌼 🪔 🎆</div>
+    <h1>Festivals <em>of the</em> World</h1>
+    <p>One year on Earth, ten ways to celebrate it. Scroll through the calendar — from the first new moon of spring to the last fireworks of December.</p>
+    <div class="scroll-cue"><span>Begin the year</span><span class="chev" aria-hidden="true">▼</span></div>
+  </div>
+</header>
+
+<main id="story">
+
+  <section class="fest lny" id="s-lny" data-motif="lanterns" aria-labelledby="h-lny">
+    <div class="motif" aria-hidden="true"></div>
+    <div class="fest-inner"><div class="panel">
+      <span class="month-tag">January – February</span>
+      <h2 id="h-lny">Lunar New Year</h2>
+      <ul class="meta">
+        <li><b>Where</b>China, Vietnam (Tết), Korea (Seollal) &amp; communities worldwide</li>
+        <li><b>When</b>First new moon of the lunisolar year</li>
+      </ul>
+      <p class="story">The most important reunion of the year begins on the first new moon of the lunisolar calendar. Families travel vast distances for a New Year's Eve reunion dinner; homes are cleaned to sweep out bad luck, couplets go up in red, and elders hand children red envelopes of lucky money. Firecrackers and lion dances drive off misfortune — legend says the beast Nian feared noise and the color red — and fifteen days later, the Lantern Festival closes the season.</p>
+    </div></div>
+  </section>
+
+  <section class="fest holi" id="s-holi" data-motif="powder" aria-labelledby="h-holi">
+    <div class="motif" aria-hidden="true"></div>
+    <div class="fest-inner"><div class="panel">
+      <span class="month-tag">March</span>
+      <h2 id="h-holi">Holi</h2>
+      <ul class="meta">
+        <li><b>Where</b>India &amp; Nepal, and South Asian communities worldwide</li>
+        <li><b>When</b>Full moon of the month of Phalguna</li>
+      </ul>
+      <p class="story">On the eve, the bonfires of Holika Dahan burn away evil, recalling the devotee Prahlad saved from the flames. Next morning every street becomes a canvas: friends and strangers dust each other with gulal — powder in fuchsia, saffron and green — soak passersby with water, and share gujiya pastries and cool thandai. For a day, distinctions of age, class and rank blur. Holi celebrates spring's arrival, the playfulness of Radha and Krishna, and forgiveness — old grudges are meant to wash off with the color.</p>
+    </div></div>
+  </section>
+
+  <section class="fest hanami" id="s-hanami" data-motif="petals" aria-labelledby="h-hanami">
+    <div class="motif" aria-hidden="true"></div>
+    <div class="fest-inner"><div class="panel">
+      <span class="month-tag">Late March – April</span>
+      <h2 id="h-hanami">Hanami</h2>
+      <ul class="meta">
+        <li><b>Where</b>Japan, as the blossom front moves north</li>
+        <li><b>When</b>Roughly a week per town, when the sakura peak</li>
+      </ul>
+      <p class="story">Hanami, “flower viewing,” is less a festival than a national pause. As the sakura zensen — the cherry-blossom front — sweeps up the archipelago, forecasters track it like weather, and friends, families and coworkers claim picnic spots under blooming trees, staying into lantern-lit yozakura evenings. The blossoms hold for barely a week before scattering, and that is the point: they embody mono no aware, the gentle ache of impermanence, savored with bento boxes, sake and falling petals.</p>
+    </div></div>
+  </section>
+
+  <section class="fest songkran" id="s-songkran" data-motif="ripples" aria-labelledby="h-songkran">
+    <div class="motif" aria-hidden="true"></div>
+    <div class="fest-inner"><div class="panel">
+      <span class="month-tag">April 13 – 15</span>
+      <h2 id="h-songkran">Songkran</h2>
+      <ul class="meta">
+        <li><b>Where</b>Thailand, nationwide</li>
+        <li><b>When</b>The traditional Thai New Year</li>
+      </ul>
+      <p class="story">Thailand's New Year begins with quiet rituals: Buddha images are bathed in scented water, and younger people pour water over their elders' palms to ask a blessing. Then the cleansing spills outward — streets across the country erupt into the world's largest friendly water fight, with buckets, bowls and water guns dousing everyone in reach. The water carries the old year's misfortune away. Homes are cleaned, sand stupas are raised at temples, and in 2023 UNESCO recognized Songkran as intangible cultural heritage.</p>
+    </div></div>
+  </section>
+
+  <section class="fest eid" id="s-eid" data-motif="eid" aria-labelledby="h-eid">
+    <div class="motif" aria-hidden="true"></div>
+    <div class="fest-inner"><div class="panel">
+      <span class="month-tag">1 Shawwal · moves with the moon</span>
+      <h2 id="h-eid">Eid al-Fitr</h2>
+      <ul class="meta">
+        <li><b>Where</b>Muslim communities worldwide</li>
+        <li><b>When</b>The day after Ramadan ends, about 11 days earlier each year</li>
+      </ul>
+      <p class="story">The “festival of breaking the fast” arrives with the sighting of the new crescent moon. Before the morning prayer, every household gives zakat al-fitr, a charity ensuring no neighbor goes without a holiday meal; then congregations gather in mosques and open fields, dressed in their finest. The day belongs to visiting — embraces of “Eid Mubarak,” children receiving gifts and Eidi money, and tables of dates, ma'amoul and sheer khurma, sweets so central that many simply call it Sweet Eid.</p>
+    </div></div>
+  </section>
+
+  <section class="fest inti" id="s-inti" data-motif="sun" aria-labelledby="h-inti">
+    <div class="motif" aria-hidden="true"></div>
+    <div class="fest-inner"><div class="panel">
+      <span class="month-tag">June 24</span>
+      <h2 id="h-inti">Inti Raymi</h2>
+      <ul class="meta">
+        <li><b>Where</b>Cusco, Peru</li>
+        <li><b>When</b>The southern winter solstice season</li>
+      </ul>
+      <p class="story">In the shortest days of the Andean year, the Inca honored Inti, the sun, asking him to return. Banned by Spanish colonial authorities in 1572, the Festival of the Sun was revived in 1944 from colonial chronicles and is now Cusco's greatest day: hundreds of performers in Inca regalia process from the Qorikancha, the golden temple of the sun, to the fortress of Sacsayhuamán, where the Sapa Inca invokes the sun in Quechua before crowds tens of thousands strong.</p>
+    </div></div>
+  </section>
+
+  <section class="fest obon" id="s-obon" data-motif="toro" aria-labelledby="h-obon">
+    <div class="motif" aria-hidden="true"></div>
+    <div class="fest-inner"><div class="panel">
+      <span class="month-tag">Mid-August</span>
+      <h2 id="h-obon">Obon</h2>
+      <ul class="meta">
+        <li><b>Where</b>Japan (mid-July in parts of Tokyo)</li>
+        <li><b>When</b>Three days when ancestors visit home</li>
+      </ul>
+      <p class="story">For a few summer days, the ancestors come home. Families light mukaebi welcoming fires and lanterns to guide the spirits back, clean family graves, and set offerings at household altars. Neighborhoods gather for Bon Odori — circle dances in cotton yukata around a raised yagura stage, to taiko drums. When the visit ends, send-off fires burn — Kyoto ignites giant characters on its mountainsides — and in tōrō nagashi, paper lanterns drift downriver, carrying the spirits gently back.</p>
+    </div></div>
+  </section>
+
+  <section class="fest dia" id="s-dia" data-motif="muertos" aria-labelledby="h-dia">
+    <div class="motif" aria-hidden="true"></div>
+    <div class="fest-inner"><div class="panel">
+      <span class="month-tag">November 1 – 2</span>
+      <h2 id="h-dia">Día de los Muertos</h2>
+      <ul class="meta">
+        <li><b>Where</b>Mexico, and Mexican communities abroad</li>
+        <li><b>When</b>All Saints' and All Souls' days</li>
+      </ul>
+      <p class="story">Death arrives as an honored guest. Families build ofrendas — home altars layered with cempasúchil marigolds, candles, photographs, sugar skulls, pan de muerto and the favorite dishes of those being remembered — because the scent of marigolds is said to guide souls home. Cemeteries fill with music, stories and candlelight through the night. Blending Indigenous Mesoamerican rites with the Catholic calendar, it is remembrance without gloom: for one night each year, the dead return to celebrate with the living.</p>
+    </div></div>
+  </section>
+
+  <section class="fest diwali" id="s-diwali" data-motif="diyas" aria-labelledby="h-diwali">
+    <div class="motif" aria-hidden="true"></div>
+    <div class="fest-inner"><div class="panel">
+      <span class="month-tag">October – November</span>
+      <h2 id="h-diwali">Diwali</h2>
+      <ul class="meta">
+        <li><b>Where</b>India, South Asia &amp; the diaspora; also observed by Jains, Sikhs and Newar Buddhists</li>
+        <li><b>When</b>The new moon of Kartika</li>
+      </ul>
+      <p class="story">The festival of lights fills the darkest night of the lunar month with rows of clay diyas on windowsills and rooftops. For many Hindus it marks Rama and Sita's return to Ayodhya, welcomed home by lamplight; households also honor Lakshmi, goddess of prosperity, with cleaned homes and rangoli patterns at the door. Five days run from Dhanteras to Bhai Dooj, filled with new clothes, mithai sweets, fireworks — and the shared conviction that light outlasts darkness.</p>
+    </div></div>
+  </section>
+
+  <section class="fest hogmanay" id="s-hogmanay" data-motif="fireworks" aria-labelledby="h-hogmanay">
+    <div class="motif" aria-hidden="true"></div>
+    <div class="fest-inner"><div class="panel">
+      <span class="month-tag">December 31 – January 1</span>
+      <h2 id="h-hogmanay">Hogmanay</h2>
+      <ul class="meta">
+        <li><b>Where</b>Scotland</li>
+        <li><b>When</b>New Year's Eve into Ne'erday</li>
+      </ul>
+      <p class="story">Scotland gives New Year's Eve its own name and takes it seriously — for centuries after the Reformation, when Christmas was suppressed, Hogmanay was the great winter feast. At midnight, strangers link arms for Auld Lang Syne; then comes first-footing, when the first visitor across your threshold brings coal, shortbread or whisky for luck. Edinburgh throws one of the world's great street parties with a torchlight procession through the Old Town, and in Stonehaven, locals swing blazing fireballs down the high street.</p>
+    </div></div>
+  </section>
+
+</main>
+
+<footer class="outro">
+  <div>
+    <h2>And then the year begins again.</h2>
+    <p>Ten of thousands — every culture keeps its own calendar of joy. Part of the <a href="/">Thirty Worlds</a> collection.</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var reduce = false;
+  try { reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
+
+  function rand(min, max) { return min + Math.random() * (max - min); }
+
+  /* ---------------- Motif generation ---------------- */
+  var HOLI_COLORS = ["#e0218a", "#f4a018", "#25a6c9", "#7cb518", "#8338ec", "#ef476f"];
+  var FLAG_COLORS = ["#ff9a3c", "#ff5da2", "#9b5de5", "#3bceac", "#ffd23f"];
+  var FW_COLORS = ["#8fd3ff", "#ffd166", "#ff5da2", "#9bf6a3", "#c8b6ff"];
+
+  function make(parent, cls) {
+    var el = document.createElement("div");
+    el.className = "p " + cls;
+    parent.appendChild(el);
+    return el;
+  }
+
+  function buildMotif(section) {
+    var type = section.getAttribute("data-motif");
+    var layer = section.querySelector(".motif");
+    if (!layer) return;
+    var i, el;
+
+    if (type === "lanterns") {
+      for (i = 0; i < 9; i++) {
+        el = make(layer, "lantern");
+        el.style.left = rand(4, 92) + "%";
+        el.style.setProperty("--d", rand(14, 26) + "s");
+        el.style.setProperty("--dl", (-rand(0, 24)) + "s");
+        el.innerHTML = '<div class="body"></div>';
+        var sc = rand(0.6, 1.25);
+        el.firstChild.style.width = Math.round(30 * sc) + "px";
+        el.firstChild.style.height = Math.round(40 * sc) + "px";
+        if (reduce) el.style.top = rand(8, 80) + "%";
+      }
+    } else if (type === "powder") {
+      for (i = 0; i < 11; i++) {
+        el = make(layer, "puff");
+        var size = rand(70, 190);
+        el.style.width = size + "px";
+        el.style.height = size + "px";
+        el.style.left = rand(-4, 92) + "%";
+        el.style.top = rand(-4, 88) + "%";
+        el.style.background = HOLI_COLORS[i % HOLI_COLORS.length];
+        el.style.setProperty("--d", rand(6, 12) + "s");
+        el.style.setProperty("--dl", (-rand(0, 10)) + "s");
+      }
+    } else if (type === "petals") {
+      for (i = 0; i < 15; i++) {
+        el = make(layer, "petal");
+        el.style.left = rand(0, 98) + "%";
+        el.style.setProperty("--d", rand(9, 17) + "s");
+        el.style.setProperty("--dl", (-rand(0, 15)) + "s");
+        if (reduce) el.style.top = rand(5, 85) + "%";
+      }
+    } else if (type === "ripples") {
+      for (i = 0; i < 8; i++) {
+        el = make(layer, "ripple");
+        el.style.left = rand(4, 88) + "%";
+        el.style.top = rand(8, 82) + "%";
+        el.style.setProperty("--d", rand(4, 7) + "s");
+        el.style.setProperty("--dl", (-rand(0, 6)) + "s");
+      }
+    } else if (type === "eid") {
+      el = make(layer, "crescent");
+      el.style.right = "10%";
+      el.style.top = "12%";
+      for (i = 0; i < 14; i++) {
+        el = make(layer, "twinkle");
+        el.style.left = rand(2, 95) + "%";
+        el.style.top = rand(4, 80) + "%";
+        el.style.setProperty("--d", rand(2, 4.5) + "s");
+        el.style.setProperty("--dl", (-rand(0, 4)) + "s");
+      }
+    } else if (type === "sun") {
+      make(layer, "sunwheel");
+    } else if (type === "toro") {
+      for (i = 0; i < 7; i++) {
+        el = make(layer, "toro");
+        el.style.bottom = rand(6, 24) + "%";
+        el.style.setProperty("--d", rand(20, 38) + "s");
+        el.style.setProperty("--dl", (-rand(0, 34)) + "s");
+        if (reduce) { el.style.left = rand(5, 88) + "%"; }
+      }
+    } else if (type === "muertos") {
+      var banner = document.createElement("div");
+      banner.className = "banner";
+      for (i = 0; i < 24; i++) {
+        var flag = document.createElement("div");
+        flag.className = "flag";
+        flag.style.background = FLAG_COLORS[i % FLAG_COLORS.length];
+        banner.appendChild(flag);
+      }
+      layer.appendChild(banner);
+      for (i = 0; i < 9; i++) {
+        el = make(layer, "mari");
+        var ms = rand(26, 62);
+        el.style.width = ms + "px";
+        el.style.height = ms + "px";
+        el.style.left = rand(2, 94) + "%";
+        el.style.bottom = rand(2, 16) + "%";
+        el.style.setProperty("--d", rand(3, 6) + "s");
+        el.style.setProperty("--dl", (-rand(0, 5)) + "s");
+      }
+    } else if (type === "diyas") {
+      for (i = 0; i < 9; i++) {
+        el = make(layer, "diya");
+        el.style.left = (4 + i * 11 + rand(-2, 2)) + "%";
+        el.style.bottom = rand(6, 14) + "%";
+        el.innerHTML = '<div class="flame"></div>';
+        el.firstChild.style.setProperty("--d", rand(1, 1.8) + "s");
+        el.firstChild.style.setProperty("--dl", (-rand(0, 1.5)) + "s");
+      }
+    } else if (type === "fireworks") {
+      for (i = 0; i < 6; i++) {
+        var burst = make(layer, "burst");
+        burst.style.left = rand(8, 88) + "%";
+        burst.style.top = rand(10, 55) + "%";
+        var color = FW_COLORS[i % FW_COLORS.length];
+        var dur = rand(2.8, 4.6).toFixed(2) + "s";
+        var dl = (-rand(0, 4)).toFixed(2) + "s";
+        for (var s = 0; s < 8; s++) {
+          var spark = document.createElement("div");
+          spark.className = "spark";
+          spark.style.setProperty("--r", (s * 45) + "deg");
+          var inner = document.createElement("i");
+          inner.style.setProperty("--c", color);
+          inner.style.setProperty("--d", dur);
+          inner.style.setProperty("--dl", dl);
+          spark.appendChild(inner);
+          burst.appendChild(spark);
+        }
+      }
+    }
+  }
+
+  var sections = Array.prototype.slice.call(document.querySelectorAll(".fest"));
+  sections.forEach(buildMotif);
+
+  /* ---------------- Rail ---------------- */
+  var railButtons = Array.prototype.slice.call(document.querySelectorAll(".rail button"));
+  railButtons.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var target = document.getElementById(btn.getAttribute("data-target"));
+      if (target) target.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+    });
+  });
+
+  function setActive(id) {
+    railButtons.forEach(function (btn) {
+      var on = btn.getAttribute("data-target") === id;
+      btn.classList.toggle("active", on);
+      if (on) btn.setAttribute("aria-current", "true");
+      else btn.removeAttribute("aria-current");
+    });
+  }
+
+  /* ---------------- Scroll choreography ---------------- */
+  var hasGsap = typeof window.gsap !== "undefined" && typeof window.ScrollTrigger !== "undefined";
+
+  if (hasGsap && !reduce) {
+    gsap.registerPlugin(ScrollTrigger);
+
+    /* Pinned intro: title holds, then drifts up and fades as the year begins */
+    gsap.to(".intro-inner", {
+      yPercent: -22, opacity: 0, ease: "none",
+      scrollTrigger: { trigger: "#intro", start: "top top", end: "bottom 35%", scrub: true, pin: true, pinSpacing: true }
+    });
+
+    sections.forEach(function (section) {
+      var panel = section.querySelector(".panel");
+      gsap.fromTo(panel,
+        { y: 70, opacity: 0 },
+        {
+          y: 0, opacity: 1, duration: 1, ease: "power2.out",
+          scrollTrigger: { trigger: section, start: "top 62%", toggleActions: "play none none reverse" }
+        });
+      /* gentle parallax on the motif layer */
+      gsap.fromTo(section.querySelector(".motif"),
+        { yPercent: -7 },
+        {
+          yPercent: 7, ease: "none",
+          scrollTrigger: { trigger: section, start: "top bottom", end: "bottom top", scrub: true }
+        });
+      ScrollTrigger.create({
+        trigger: section, start: "top 55%", end: "bottom 55%",
+        onToggle: function (self) { if (self.isActive) setActive(section.id); }
+      });
+    });
+
+    gsap.to("#railFill", {
+      scaleY: 1, ease: "none",
+      scrollTrigger: { trigger: "#story", start: "top 80%", end: "bottom bottom", scrub: true }
+    });
+  } else {
+    /* Reduced motion or GSAP unavailable: simple fades via IntersectionObserver */
+    document.body.classList.add("fade-io");
+    var fill = document.getElementById("railFill");
+    if (fill) fill.style.transform = "scaleY(1)";
+    if ("IntersectionObserver" in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            var panel = entry.target.querySelector(".panel");
+            if (panel) panel.classList.add("visible");
+            setActive(entry.target.id);
+          }
+        });
+      }, { threshold: 0.35 });
+      sections.forEach(function (s) { io.observe(s); });
+    } else {
+      document.body.classList.remove("fade-io");
+    }
+  }
+})();
+</script>
+</body>
+</html>

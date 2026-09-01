@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Myth Codex — Gods &amp; Legends of Five Traditions</title>
+<meta name="description" content="A dark-academia codex of thirty divine figures from Greek, Norse, Egyptian, Hindu and Japanese tradition — domains, symbols, sacred animals and their stories.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0b0906;
+    --panel:#120e09;
+    --panel-2:#17120b;
+    --gold:#c9a227;
+    --gold-bright:#e8c96a;
+    --gold-dim:rgba(201,162,39,.28);
+    --parchment:#e8ddc3;
+    --dim:#a4977c;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--void);color:var(--parchment);
+    font-family:"EB Garamond",Georgia,serif;font-size:17px;line-height:1.62;
+    overflow-x:clip;
+  }
+  .hub-link{position:fixed;top:14px;left:14px;z-index:1000;padding:8px 14px;border-radius:999px;font:600 13px/1 Inter,system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(8px);background:rgba(15,15,25,.55);color:#fff;border:1px solid rgba(255,255,255,.25)}
+  .hub-link:hover{background:rgba(201,162,39,.35)}
+  a:focus-visible,button:focus-visible{outline:3px solid var(--gold-bright);outline-offset:3px;border-radius:4px}
+
+  /* ---------- Star layers ---------- */
+  .stars{position:fixed;left:0;top:0;width:100%;height:230vh;z-index:0;pointer-events:none;will-change:transform}
+  .star{position:absolute;border-radius:50%;background:#f5ecd2}
+  .star.tw{animation:starTw var(--d,4s) ease-in-out var(--dl,0s) infinite alternate}
+  @keyframes starTw{from{opacity:.15}to{opacity:.9}}
+
+  .wrap{position:relative;z-index:2;max-width:1120px;margin:0 auto;padding:0 20px}
+
+  /* ---------- Header ---------- */
+  header{padding:100px 0 40px;text-align:center}
+  .ornament{color:var(--gold);letter-spacing:.9em;font-size:14px;margin-bottom:20px}
+  h1{
+    font-family:Cinzel,Georgia,serif;font-weight:700;margin:0 0 14px;
+    font-size:clamp(2.4rem,8vw,4.8rem);letter-spacing:.08em;line-height:1.05;
+    color:var(--gold-bright);
+    text-shadow:0 0 40px rgba(201,162,39,.25);
+  }
+  header .sub{max-width:620px;margin:0 auto;color:var(--dim);font-size:clamp(1.02rem,2.3vw,1.2rem);font-style:italic}
+  .rule-orn{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:28px;color:var(--gold)}
+  .rule-orn::before,.rule-orn::after{content:"";height:1px;width:min(140px,26vw);background:linear-gradient(90deg,transparent,var(--gold-dim))}
+  .rule-orn::after{background:linear-gradient(90deg,var(--gold-dim),transparent)}
+
+  /* ---------- Tabs ---------- */
+  .tabs{
+    position:sticky;top:0;z-index:100;background:rgba(11,9,6,.9);backdrop-filter:blur(10px);
+    border-top:1px solid var(--gold-dim);border-bottom:1px solid var(--gold-dim);
+  }
+  .tablist{display:flex;overflow-x:auto;max-width:1120px;margin:0 auto;scrollbar-width:thin}
+  .tab{
+    flex:1 0 auto;min-height:54px;padding:14px 22px;background:none;border:none;cursor:pointer;
+    font-family:Cinzel,Georgia,serif;font-weight:600;font-size:14px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--dim);position:relative;transition:color .25s;
+  }
+  .tab:hover{color:var(--parchment)}
+  .tab::after{
+    content:"";position:absolute;left:20%;right:20%;bottom:0;height:2px;background:var(--gold);
+    transform:scaleX(0);transition:transform .3s ease;
+  }
+  .tab[aria-selected="true"]{color:var(--gold-bright)}
+  .tab[aria-selected="true"]::after{transform:scaleX(1)}
+
+  /* ---------- Panels ---------- */
+  .panel{padding:44px 0 80px}
+  .panel[hidden]{display:none}
+  .pantheon-intro{
+    max-width:640px;margin:0 auto 40px;text-align:center;font-style:italic;color:var(--dim);
+    font-size:1.08rem;
+  }
+  .pantheon-intro .living{
+    display:block;margin-top:12px;color:var(--gold-bright);font-style:normal;font-size:.95rem;
+    border:1px solid var(--gold-dim);border-radius:10px;padding:12px 16px;
+  }
+  .grid{display:grid;gap:20px;grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr))}
+
+  .fig{
+    background:linear-gradient(165deg,var(--panel-2),var(--panel));
+    border:1px solid var(--gold-dim);border-radius:12px;overflow:hidden;
+    transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.3,1),border-color .3s;
+  }
+  .fig.pre{opacity:0;transform:translateY(28px)}
+  .fig:hover{border-color:rgba(201,162,39,.55)}
+  .fig-head{
+    display:flex;align-items:center;gap:16px;width:100%;min-height:44px;
+    padding:20px;background:none;border:none;cursor:pointer;text-align:left;color:inherit;
+  }
+  .initial{
+    flex:none;width:54px;height:54px;display:grid;place-items:center;
+    font-family:Cinzel,Georgia,serif;font-weight:700;font-size:1.7rem;color:var(--gold-bright);
+    border:1px solid var(--gold-dim);border-radius:4px;
+    background:radial-gradient(circle at 30% 25%,rgba(201,162,39,.18),transparent 70%);
+  }
+  .fig-name{flex:1}
+  .fig-name h3{margin:0;font-family:Cinzel,Georgia,serif;font-weight:600;font-size:1.22rem;letter-spacing:.06em;color:var(--parchment)}
+  .fig-name .epithet{color:var(--dim);font-style:italic;font-size:.95rem}
+  .chev{flex:none;color:var(--gold);transition:transform .3s ease;font-size:.8rem}
+  .fig-head[aria-expanded="true"] .chev{transform:rotate(180deg)}
+  .fig-body{padding:0 20px 22px;opacity:0;transform:translateY(-8px);transition:opacity .4s ease,transform .4s ease}
+  .fig-body.open{opacity:1;transform:none}
+  .fig-body[hidden]{display:none}
+  .attr{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:0 0 14px;padding:14px 0 0;border-top:1px solid var(--gold-dim)}
+  .attr dt{font-family:Cinzel,Georgia,serif;font-size:.68rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);padding-top:3px}
+  .attr dd{margin:0;font-size:.98rem}
+  .story{margin:0;font-size:1.02rem;color:#d9cfb4}
+  .story::first-letter{color:var(--gold-bright);font-family:Cinzel,Georgia,serif;font-size:1.5em;line-height:1;padding-right:1px}
+
+  footer{position:relative;z-index:2;border-top:1px solid var(--gold-dim);padding:36px 20px 96px;text-align:center;color:var(--dim);font-size:.95rem}
+  footer a{color:var(--gold-bright)}
+  footer .fo{color:var(--gold);letter-spacing:.7em;margin-bottom:14px}
+
+  @media (max-width:480px){
+    .tab{padding:14px 14px;letter-spacing:.12em}
+    header{padding-top:88px}
+  }
+  @media (min-width:2200px){.wrap,.tablist{max-width:1440px}body{font-size:19px}}
+  @media (prefers-reduced-motion:reduce){
+    .fig,.fig-body,.chev,.tab::after{transition:none}
+    .fig.pre{opacity:1;transform:none}
+    .star.tw{animation:none;opacity:.6}
+  }
+</style>
+</head>
+<body>
+<a class="hub-link" href="https://thirty-worlds.vercel.app/" aria-label="All thirty sites">← All 30</a>
+
+<div class="stars" id="stars1" aria-hidden="true"></div>
+<div class="stars" id="stars2" aria-hidden="true"></div>
+<div class="stars" id="stars3" aria-hidden="true"></div>
+
+<div class="wrap">
+  <header>
+    <div class="ornament" aria-hidden="true">✦ ✦ ✦</div>
+    <h1>Myth Codex</h1>
+    <p class="sub">Thirty divine figures from five great traditions — their domains, their symbols, and the stories told of them.</p>
+    <div class="rule-orn" aria-hidden="true">❖</div>
+  </header>
+</div>
+
+<nav class="tabs" aria-label="Choose a tradition">
+  <div class="tablist" role="tablist" id="tablist">
+    <button class="tab" role="tab" id="tab-greek" aria-controls="panel-greek" aria-selected="true">Greek</button>
+    <button class="tab" role="tab" id="tab-norse" aria-controls="panel-norse" aria-selected="false" tabindex="-1">Norse</button>
+    <button class="tab" role="tab" id="tab-egyptian" aria-controls="panel-egyptian" aria-selected="false" tabindex="-1">Egyptian</button>
+    <button class="tab" role="tab" id="tab-hindu" aria-controls="panel-hindu" aria-selected="false" tabindex="-1">Hindu</button>
+    <button class="tab" role="tab" id="tab-japanese" aria-controls="panel-japanese" aria-selected="false" tabindex="-1">Japanese</button>
+  </div>
+</nav>
+
+<main class="wrap">
+  <section class="panel" id="panel-greek" role="tabpanel" aria-labelledby="tab-greek"></section>
+  <section class="panel" id="panel-norse" role="tabpanel" aria-labelledby="tab-norse" hidden></section>
+  <section class="panel" id="panel-egyptian" role="tabpanel" aria-labelledby="tab-egyptian" hidden></section>
+  <section class="panel" id="panel-hindu" role="tabpanel" aria-labelledby="tab-hindu" hidden></section>
+  <section class="panel" id="panel-japanese" role="tabpanel" aria-labelledby="tab-japanese" hidden></section>
+</main>
+
+<footer>
+  <div class="fo" aria-hidden="true">✦ ✦ ✦</div>
+  <p>Sources: Homeric epic and Hesiod; the Poetic and Prose Eddas; Egyptian funerary texts; Hindu scripture and living practice; the Kojiki and Nihon Shoki.</p>
+  <p>Part of the <a href="/">Thirty Worlds</a> collection.</p>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  var MYTHS = {
+    greek: {
+      intro: "The Olympians of ancient Hellas — honored for a thousand years, remembered forever in epic and tragedy.",
+      figures: [
+        { name: "Zeus", epithet: "King of the Gods",
+          domain: "Sky, thunder, kingship, oaths & hospitality",
+          symbol: "Thunderbolt & royal sceptre",
+          sacred: "Eagle; the oracular oak of Dodona",
+          story: "Youngest child of the Titans Cronus and Rhea, Zeus escaped being swallowed like his siblings when Rhea hid him in a Cretan cave. Grown, he forced Cronus to disgorge the others, led the Olympians through the ten-year war against the Titans, and drew lots with his brothers for the cosmos — winning the sky. From Olympus he upholds oaths and xenia, the sacred duty of hospitality, and hurls thunderbolts at those who break either." },
+        { name: "Athena", epithet: "Goddess of Wisdom",
+          domain: "Wisdom, strategic warfare, weaving & crafts",
+          symbol: "The aegis & the olive tree",
+          sacred: "Owl",
+          story: "Athena was born in full armor from the head of Zeus, and she is warfare’s cool intelligence beside Ares’ blind fury. Contesting Poseidon for a great city’s patronage, she answered his salt spring with the first olive tree — food, oil and timber — and the citizens chose her gift, naming their city Athens. Mentor of heroes, she guided Perseus against Medusa and steered clever Odysseus through his long voyage home." },
+        { name: "Poseidon", epithet: "The Earth-Shaker",
+          domain: "The sea, earthquakes, storms & horses",
+          symbol: "Trident",
+          sacred: "Horse, dolphin & bull",
+          story: "When the three sons of Cronus divided the world by lot, Poseidon won the sea. From a golden palace beneath the Aegean he raises tempests and stills them, splits the earth with his trident, and is credited with creating the first horse. Greek sailors poured libations before every voyage to keep his favor — and the Odyssey turns on his long grudge against Odysseus for blinding his son, the Cyclops Polyphemus." },
+        { name: "Hades", epithet: "Lord of the Underworld",
+          domain: "The dead, the underworld & the wealth beneath the earth",
+          symbol: "Cap of invisibility; the cornucopia of Plouton",
+          sacred: "Cerberus, the three-headed hound; cypress & narcissus",
+          story: "The eldest brother drew the unseen realm, and rules it with grim fairness rather than cruelty. Greeks feared speaking his name and called him Plouton, ‘the Wealthy One’, for the silver, seed and ore beneath the soil. His abduction of Persephone — and her mother Demeter’s grief — became the myth of winter itself. He almost never leaves his kingdom, and of all the dead who begged to return, he relented only for the singer Orpheus." },
+        { name: "Artemis", epithet: "Lady of the Wild",
+          domain: "The hunt, wilderness, the Moon & the protection of girls",
+          symbol: "Silver bow & quiver",
+          sacred: "Deer; cypress",
+          story: "Daughter of Zeus and Leto and twin of Apollo, Artemis asked her father for eternal maidenhood, a silver bow, and the wild mountains for her own. She runs with a band of nymphs and hounds, guarding wild creatures, young women and mothers in childbirth. Her protection has a fierce edge: when the hunter Actaeon stumbled upon her bathing, she turned him into a stag, and his own hounds ran him down." },
+        { name: "Hermes", epithet: "Messenger of the Gods",
+          domain: "Travel, boundaries, trade, cunning & messages",
+          symbol: "Caduceus & winged sandals",
+          sacred: "Tortoise; ram",
+          story: "Born at dawn in an Arcadian cave, Hermes invented the lyre from a tortoise shell by midday and stole Apollo’s sacred cattle by nightfall — then charmed away his brother’s fury by trading him the instrument. Zeus made the quick-witted child herald of Olympus. With winged sandals he crosses every border, guards travelers, merchants and thieves alike, and performs the gentlest duty of all: guiding the souls of the dead safely down." }
+      ]
+    },
+    norse: {
+      intro: "The gods of the North — bound for Ragnarök and unbowed, their tales kept in the Eddas of medieval Iceland.",
+      figures: [
+        { name: "Odin", epithet: "The Allfather",
+          domain: "Wisdom, war, poetry, magic & the runes",
+          symbol: "The spear Gungnir; the valknut",
+          sacred: "Ravens Huginn & Muninn; wolves Geri & Freki; the eight-legged horse Sleipnir",
+          story: "Odin trades endlessly for wisdom. He gave an eye to drink from Mímir’s well, and hung nine nights on the world-tree Yggdrasil, pierced by his own spear — a sacrifice of himself to himself — to seize the runes. Each morning his ravens, Thought and Memory, fly across the world and return to whisper what they have seen. In Valhalla he gathers slain champions, the einherjar, for the last battle at Ragnarök." },
+        { name: "Thor", epithet: "Defender of Midgard",
+          domain: "Thunder, storms & the protection of gods and humans",
+          symbol: "The hammer Mjölnir",
+          sacred: "The goats Tanngrisnir & Tanngnjóstr; the oak",
+          story: "Red-bearded son of Odin and the earth itself, Thor rides a chariot drawn by two goats he can feast on at night and revive whole by morning. Mjölnir, dwarf-forged with its famously short handle, crushes giants and blesses weddings alike. When a giant stole it, Thor won it back disguised as a veiled bride, alarming his hosts by devouring an ox at his own wedding feast. At Ragnarök he slays the world-serpent — then walks nine steps, and falls." },
+        { name: "Loki", epithet: "The Trickster",
+          domain: "Mischief, shapeshifting & dangerous cunning",
+          symbol: "The knotted serpent; the net",
+          sacred: "Salmon & fly — shapes he wears to escape",
+          story: "Blood-brother to Odin yet born of giants, Loki is the knot in every Norse tale — the cause of trouble and its silver-tongued solution. He mothered the eight-legged horse Sleipnir while in the shape of a mare, and won the gods their greatest treasures, Mjölnir included, through a reckless wager with dwarven smiths. But when his scheming caused the death of beloved Baldr, patience ended: the gods bound him beneath a venom-dripping serpent until Ragnarök, when he breaks free." },
+        { name: "Freyja", epithet: "Lady of the Vanir",
+          domain: "Love, beauty, seiðr magic & the honored dead",
+          symbol: "The necklace Brísingamen; the falcon-feather cloak",
+          sacred: "Cats, who draw her chariot; the boar Hildisvíni",
+          story: "Foremost of the Vanir gods dwelling among the Æsir, Freyja rides a chariot drawn by cats and weeps tears of red gold. It was she who taught Odin the trance-magic called seiðr, and her falcon-feather cloak carries its wearer between the worlds. She is no gentle goddess of romance alone: she rides to every battlefield and chooses half the honored dead for her hall Fólkvangr, before Odin claims his own share for Valhalla." },
+        { name: "Heimdall", epithet: "Watchman of the Gods",
+          domain: "Vigilance, foresight & the guarding of the bridge",
+          symbol: "The horn Gjallarhorn",
+          sacred: "The rainbow bridge Bifröst; the ram",
+          story: "Born, the poems say, of nine mothers — perhaps the nine waves of the sea — Heimdall keeps watch where the rainbow bridge meets the sky. He needs less sleep than a bird, sees a hundred leagues by night as by day, and hears the grass growing and the wool lengthening on sheep. Wandering Midgard as Ríg, he fathered the lines of humankind. At Ragnarök his horn-blast wakes the gods, and he and Loki, oldest of enemies, slay each other." },
+        { name: "Hel", epithet: "Queen of the Dead",
+          domain: "The realm of those who die of sickness and old age",
+          symbol: "Her hall Éljúðnir, ‘sleet-sprayed’",
+          sacred: "Garmr, the hound who howls at her gate",
+          story: "Daughter of Loki and the giantess Angrboða, Hel was cast by Odin into the mist-world beneath Yggdrasil’s roots and given rule over all who die of sickness, age or mischance. Half her face is fair and half deathly dark; in her hall the dish is called Hunger and the knife Famine. When beloved Baldr was slain, she named his ransom: let every thing in creation weep for him. One giantess refused — and so Baldr stayed." }
+      ]
+    },
+    egyptian: {
+      intro: "The netjeru of the Nile — gods of sun, judgment and rebirth, worshipped for more than three thousand years.",
+      figures: [
+        { name: "Ra", epithet: "The Sun Itself",
+          domain: "The sun, creation & kingship",
+          symbol: "Sun disk encircled by the uraeus cobra",
+          sacred: "Falcon; the scarab of the morning sun",
+          story: "At Heliopolis it was taught that Ra rose from the primeval waters on the first mound of earth and spoke the world into being. Each day he sails the sky in the day-barque; each night he passes through the Duat, where the chaos-serpent Apep waits to swallow the sun, and the gods aboard must defeat it so dawn can come — every sunrise a victory renewed. Pharaohs took the title ‘Son of Ra’, and in time he merged with Thebes’ great god as Amun-Ra." },
+        { name: "Isis", epithet: "Great of Magic",
+          domain: "Magic, healing, motherhood & the throne",
+          symbol: "The throne-glyph crown; the tyet knot",
+          sacred: "The kite, keen-eyed bird of prey",
+          story: "When Set murdered her husband Osiris and scattered him across Egypt, Isis searched out every piece, reassembled him, and — taking the form of a kite — fanned breath back into his body with her wings, long enough to conceive their son Horus. Hidden in the Delta marshes she raised the boy to reclaim his father’s throne, shielding him with spells and healing his every sting. Her worship outlived pharaonic Egypt, spreading across the whole Roman Mediterranean." },
+        { name: "Osiris", epithet: "Lord of the Beautiful West",
+          domain: "The afterlife, resurrection & the fertile flood",
+          symbol: "Crook & flail; the atef crown; the djed pillar",
+          sacred: "The sprouting grain, green as his skin",
+          story: "Myth remembers Osiris as a good king who taught Egypt farming, betrayed by his jealous brother Set — sealed in a chest, drowned in the Nile, and cut into pieces. Restored by Isis but no longer of this world, he became king of the blessed dead in the West. His green skin is the green of sprouting grain, his story the Nile’s yearly rebirth; every Egyptian hoped, in death, to ‘become an Osiris’." },
+        { name: "Anubis", epithet: "Guardian of the Scales",
+          domain: "Embalming, cemeteries & the protection of the dead",
+          symbol: "The imiut fetish; the embalmer’s instruments",
+          sacred: "The jackal of the desert’s edge",
+          story: "The desert canids that prowled cemetery edges became, in Anubis, the tomb’s own guardian. It was he who embalmed Osiris, making the first mummy and founding the rites that embalming priests repeated for millennia, wearing his jackal mask as they worked. In the Hall of Two Truths he steadies the great scales while a heart is weighed against the feather of Maat, checking the balance that decides a soul’s eternity." },
+        { name: "Thoth", epithet: "Scribe of the Gods",
+          domain: "Writing, wisdom, the moon & reckoning",
+          symbol: "Reed pen & scribal palette",
+          sacred: "Ibis & baboon",
+          story: "Ibis-headed Thoth invented hieroglyphs — medu netjer, ‘the god’s words’ — and keeps the count of time. When the year held only 360 days, he won five more from the moon in a game, so the sky-goddess Nut could bear her children. At the judgment of the dead he stands beside the scales and records each verdict without favor. Scribes honored him before writing, and even the gods call on him to settle their disputes." },
+        { name: "Bastet", epithet: "Lady of the Home",
+          domain: "Home, women & children, cats, music & joy",
+          symbol: "The sistrum rattle",
+          sacred: "The cat; in her elder form, the lioness",
+          story: "Bastet began as a lioness of the sun’s burning protection and softened, over centuries, into the cat — claws sheathed but never gone, guardian of home, women and children. Her festival at Bubastis was among Egypt’s most joyous; Herodotus describes flotillas of pilgrims singing their way up the Delta. Cats were held so sacred that harming one, even by accident, was a grave offense, and devotees offered cat mummies to her shrines by the hundred thousand." }
+      ]
+    },
+    hindu: {
+      intro: "Deities of Hinduism, a living faith of more than a billion people — worshipped today in homes and temples across the world.",
+      living: "These are not figures of a vanished past: the deities on this page receive daily prayer and festival worship now. They are described here with reverence.",
+      figures: [
+        { name: "Vishnu", epithet: "The Preserver",
+          domain: "Preservation of the cosmos & protection of dharma",
+          symbol: "Conch, discus (Sudarshana chakra), lotus & mace",
+          sacred: "Garuda, the great eagle who bears him",
+          story: "In Hindu devotion Vishnu is the sustainer — the divine presence that upholds the universe between its creation and its dissolution. Scripture pictures him resting on the cosmic serpent Shesha upon the ocean of milk, the goddess Lakshmi beside him, ever watchful over dharma, the right order of things. When righteousness falters he descends as an avatar: as Rama, the ideal of virtue, and as Krishna, teacher of the Bhagavad Gita. For Vaishnava traditions he is the Supreme himself." },
+        { name: "Shiva", epithet: "The Auspicious One",
+          domain: "Transformation, dissolution & regeneration; yoga & meditation",
+          symbol: "Trishula trident, damaru drum & the crescent moon",
+          sacred: "Nandi, the bull who waits before his temples",
+          story: "Shiva is revered both as the great ascetic, absorbed in meditation on Mount Kailash with the Ganga flowing through his matted hair, and as the devoted husband of Parvati. As Nataraja, Lord of the Dance, he dances the universe through its endless cycles within a ring of flame. When the churning of the cosmic ocean yielded a poison that threatened all existence, he drank it and held it in his throat — which turned blue, earning him the name Nilakantha." },
+        { name: "Ganesha", epithet: "Remover of Obstacles",
+          domain: "Auspicious beginnings, wisdom & the arts",
+          symbol: "The broken tusk, held as a pen; the modak sweet",
+          sacred: "Mushika, the mouse, his humble mount",
+          story: "Beloved across nearly every Hindu tradition, elephant-headed Ganesha is invoked first — before journeys, weddings, examinations and new ventures — as the remover of obstacles. Devotees cherish the story that when the sage Vyasa needed a scribe for the Mahabharata, Ganesha broke off his own tusk to write without pause. Each year at Ganesh Chaturthi, millions welcome his clay image home, and after days of worship carry him in procession to the water in farewell." },
+        { name: "Durga", epithet: "The Invincible Mother",
+          domain: "Shakti — divine feminine power — and the victory of good",
+          symbol: "The weapons of every god, held in her many hands",
+          sacred: "The lion she rides into battle",
+          story: "When the buffalo demon Mahishasura could not be defeated by any god, scripture tells that the gods’ combined radiance blazed into the form of Durga — the Great Goddess, riding a lion, serene in the midst of battle. After nine nights she was victorious, a triumph honored every autumn at Navaratri and in the great Durga Puja of Bengal. To her devotees she is the fierce, protective face of the Divine Mother: power itself, acting for the good." },
+        { name: "Hanuman", epithet: "The Perfect Devotee",
+          domain: "Devotion, strength, courage & selfless service",
+          symbol: "The gada mace; a mountain carried in one palm",
+          sacred: "The vanaras, his monkey kin",
+          story: "Son of the wind god Vayu, Hanuman embodies bhakti — love of the divine expressed as fearless service. In the Ramayana he leaps the ocean to Lanka carrying Rama’s ring and hope to the captive Sita; when a healing herb is needed on the battlefield, he lifts the entire mountain rather than risk bringing the wrong plant. Millions recite the Hanuman Chalisa daily for strength and protection, and his temples fill with devotees on Tuesdays and Saturdays." },
+        { name: "Saraswati", epithet: "Goddess of Knowledge",
+          domain: "Knowledge, speech, music, the arts & learning",
+          symbol: "The veena, a book & a crystal rosary",
+          sacred: "The hamsa (swan); the white lotus",
+          story: "Dressed in white and seated upon a white lotus, Saraswati holds the veena, a book and a rosary — knowledge as sound, word and contemplation. She is honored as the very power of speech, and a sacred river in the Rigveda, the oldest of Hindu scriptures, bears her name. On Vasant Panchami, students place their books and instruments before her image for blessing, and many children trace their first letters that day, beginning education in her name." }
+      ]
+    },
+    japanese: {
+      intro: "Kami of the Shinto tradition — still honored at shrines across Japan, their stories kept in the Kojiki and Nihon Shoki.",
+      figures: [
+        { name: "Amaterasu", epithet: "Great Kami of the Sun",
+          domain: "The sun, order & the imperial line",
+          symbol: "The mirror Yata no Kagami",
+          sacred: "The rooster, herald of dawn",
+          story: "When her storm-brother Susanoo rampaged through her heavenly halls, Amaterasu shut herself inside the rock cave of heaven, and every world went dark. The eight million kami gathered at the cave mouth, where the dawn-goddess Uzume danced so outrageously that laughter shook the heavens. Curious, Amaterasu peeked out — met her own radiance in a mirror — and was drawn back into the sky. Her Grand Shrine at Ise is rebuilt anew every twenty years." },
+        { name: "Susanoo", epithet: "Kami of Storms",
+          domain: "Storms, the sea & heroic victory",
+          symbol: "The sword Kusanagi-no-Tsurugi",
+          sacred: "The eight-headed serpent he slew",
+          story: "Banished from heaven for his rampage, the storm kami descended to Izumo and found an old couple weeping: the eight-headed serpent Yamata no Orochi had devoured seven of their daughters and was coming for the last. Susanoo brewed eight vats of strong sake, waited until every head drank itself senseless, and cut the monster down. In its tail he found the sword Kusanagi — offered to Amaterasu in reconciliation, and counted ever since among Japan’s three imperial regalia." },
+        { name: "Tsukuyomi", epithet: "Kami of the Moon",
+          domain: "The moon, night & the passage of months",
+          symbol: "The moon’s pale disk",
+          sacred: "The night sky itself",
+          story: "In the Kojiki’s telling, Tsukuyomi was born when the creator Izanagi washed his right eye, as Amaterasu was born from the left. Sent once to observe the food goddess Ukemochi, he watched her produce a banquet from her own mouth and, revolted, struck her down. Amaterasu was so appalled by the deed that she refused ever to look upon her brother again — and that, the myth says, is why sun and moon never share the sky." },
+        { name: "Inari", epithet: "Kami of Rice & Abundance",
+          domain: "Rice, harvests, prosperity & craft",
+          symbol: "Tunnels of vermilion torii gates",
+          sacred: "White foxes (kitsune), Inari’s messengers",
+          story: "Kami of rice — which in old Japan meant wealth itself — Inari is among the most widely enshrined deities in the country, honored at tens of thousands of shrines, most famously beneath the thousands of vermilion gates of Fushimi Inari in Kyoto. White foxes serve as Inari’s messengers, so stone foxes flank the altars, wearing red votive bibs and receiving offerings of aburaage, the fried tofu foxes are said to love. Inari is pictured as male, female, or beyond either." },
+        { name: "Raijin", epithet: "Drummer of Thunder",
+          domain: "Thunder, lightning & storms",
+          symbol: "A halo of taiko drums",
+          sacred: "The raijū, his thunder-beast companion",
+          story: "Raijin rides the storm clouds hammering a ring of drums, hurling thunder across the islands, while his companion Fūjin carries the winds in a great sack. Farmers both feared and courted him, for lightning was believed to bless the rice fields with fertile rain. Parents still tell children to hide their navels during storms — Raijin is said to snatch them. His snarling statue stands guard beside Fūjin’s at the Kaminarimon, the Thunder Gate of Sensō-ji in Tokyo." },
+        { name: "Benzaiten", epithet: "Goddess of All That Flows",
+          domain: "Water, music, eloquence, art & good fortune",
+          symbol: "The biwa lute",
+          sacred: "White snakes; the dragon of Enoshima",
+          story: "Benzaiten came to Japan with Buddhism as Sarasvati, goddess of rivers and eloquence, and became something wholly her own: patroness of musicians, artists and speakers, and often the only goddess among the Seven Lucky Gods. A deity of all that flows — water, words, music, fortune — she is enshrined on islands: Enoshima, Itsukushima, Chikubushima. At Enoshima, legend says she descended to tame a ravaging five-headed dragon. White snakes are her messengers." }
+      ]
+    }
+  };
+
+  var ORDER = ["greek", "norse", "egyptian", "hindu", "japanese"];
+  var reduce = false;
+  try { reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
+
+  /* ---------------- Build panels ---------------- */
+  var observer = null;
+  if ("IntersectionObserver" in window && !reduce) {
+    observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.remove("pre");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { rootMargin: "0px 0px -5% 0px", threshold: 0.05 });
+  }
+
+  function buildPanel(key) {
+    var data = MYTHS[key];
+    var panel = document.getElementById("panel-" + key);
+    var html = '<p class="pantheon-intro">' + data.intro +
+      (data.living ? '<span class="living">' + data.living + "</span>" : "") +
+      '</p><div class="grid"></div>';
+    panel.innerHTML = html;
+    var grid = panel.querySelector(".grid");
+
+    data.figures.forEach(function (fig, i) {
+      var slug = key + "-" + fig.name.toLowerCase().replace(/[^a-z]/g, "");
+      var card = document.createElement("article");
+      card.className = "fig" + (observer ? " pre" : "");
+      card.innerHTML =
+        '<button class="fig-head" aria-expanded="false" aria-controls="d-' + slug + '">' +
+          '<span class="initial" aria-hidden="true">' + fig.name.charAt(0) + "</span>" +
+          '<span class="fig-name"><h3>' + fig.name + '</h3><span class="epithet">' + fig.epithet + "</span></span>" +
+          '<span class="chev" aria-hidden="true">▼</span>' +
+        "</button>" +
+        '<div class="fig-body" id="d-' + slug + '" hidden>' +
+          '<dl class="attr">' +
+            "<dt>Domain</dt><dd>" + fig.domain + "</dd>" +
+            "<dt>Symbol</dt><dd>" + fig.symbol + "</dd>" +
+            "<dt>Sacred</dt><dd>" + fig.sacred + "</dd>" +
+          "</dl>" +
+          '<p class="story">' + fig.story + "</p>" +
+        "</div>";
+
+      var head = card.querySelector(".fig-head");
+      var body = card.querySelector(".fig-body");
+      head.addEventListener("click", function () {
+        var isOpen = head.getAttribute("aria-expanded") === "true";
+        if (isOpen) {
+          head.setAttribute("aria-expanded", "false");
+          body.classList.remove("open");
+          if (reduce) { body.hidden = true; }
+          else { setTimeout(function () { if (head.getAttribute("aria-expanded") === "false") body.hidden = true; }, 400); }
+        } else {
+          head.setAttribute("aria-expanded", "true");
+          body.hidden = false;
+          if (reduce) { body.classList.add("open"); }
+          else { requestAnimationFrame(function () { requestAnimationFrame(function () { body.classList.add("open"); }); }); }
+        }
+      });
+
+      if (observer) {
+        card.style.transitionDelay = ((i % 3) * 90) + "ms";
+      }
+      grid.appendChild(card);
+    });
+  }
+
+  ORDER.forEach(buildPanel);
+
+  function observePanel(key) {
+    if (!observer) return;
+    var panel = document.getElementById("panel-" + key);
+    Array.prototype.forEach.call(panel.querySelectorAll(".fig.pre"), function (card) {
+      observer.observe(card);
+    });
+  }
+  observePanel("greek");
+
+  /* ---------------- Tabs ---------------- */
+  var tabs = Array.prototype.slice.call(document.querySelectorAll(".tab"));
+
+  function selectTab(tab, focus) {
+    tabs.forEach(function (t) {
+      var on = t === tab;
+      t.setAttribute("aria-selected", on ? "true" : "false");
+      t.tabIndex = on ? 0 : -1;
+      var panel = document.getElementById(t.getAttribute("aria-controls"));
+      if (panel) panel.hidden = !on;
+    });
+    var key = tab.id.replace("tab-", "");
+    observePanel(key);
+    /* reveal instantly any cards already in view after a tab switch */
+    if (focus) tab.focus();
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener("click", function () { selectTab(tab, false); });
+  });
+  document.getElementById("tablist").addEventListener("keydown", function (ev) {
+    var idx = tabs.indexOf(document.activeElement);
+    if (idx === -1) return;
+    var next = null;
+    if (ev.key === "ArrowRight") next = (idx + 1) % tabs.length;
+    else if (ev.key === "ArrowLeft") next = (idx - 1 + tabs.length) % tabs.length;
+    else if (ev.key === "Home") next = 0;
+    else if (ev.key === "End") next = tabs.length - 1;
+    if (next !== null) {
+      ev.preventDefault();
+      selectTab(tabs[next], true);
+    }
+  });
+
+  /* ---------------- Parallax stars ---------------- */
+  var layers = [
+    { el: document.getElementById("stars1"), factor: 0.05, count: 46, size: [1, 2] },
+    { el: document.getElementById("stars2"), factor: 0.11, count: 32, size: [1, 2.6] },
+    { el: document.getElementById("stars3"), factor: 0.19, count: 20, size: [1.6, 3.2] }
+  ];
+
+  layers.forEach(function (layer) {
+    if (!layer.el) return;
+    for (var i = 0; i < layer.count; i++) {
+      var s = document.createElement("div");
+      var tw = Math.random() > 0.45 && !reduce;
+      s.className = "star" + (tw ? " tw" : "");
+      var size = layer.size[0] + Math.random() * (layer.size[1] - layer.size[0]);
+      s.style.width = size + "px";
+      s.style.height = size + "px";
+      s.style.left = (Math.random() * 100) + "%";
+      s.style.top = (Math.random() * 100) + "%";
+      s.style.opacity = (0.25 + Math.random() * 0.6).toFixed(2);
+      if (tw) {
+        s.style.setProperty("--d", (2.5 + Math.random() * 4).toFixed(1) + "s");
+        s.style.setProperty("--dl", (-Math.random() * 5).toFixed(1) + "s");
+      }
+      layer.el.appendChild(s);
+    }
+  });
+
+  if (!reduce) {
+    var ticking = false;
+    var applyParallax = function () {
+      ticking = false;
+      var y = window.scrollY || window.pageYOffset || 0;
+      layers.forEach(function (layer) {
+        if (layer.el) layer.el.style.transform = "translate3d(0," + (-y * layer.factor).toFixed(1) + "px,0)";
+      });
+    };
+    window.addEventListener("scroll", function () {
+      if (!ticking && !document.hidden) {
+        ticking = true;
+        requestAnimationFrame(applyParallax);
+      }
+    }, { passive: true });
+  }
+})();
+</script>
+</body>
+</html>

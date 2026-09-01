@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fit Seven — The 7-Minute Workout Timer</title>
+<meta name="description" content="Fit Seven runs the classic 12-exercise, 7-minute workout: 30 seconds of work, 10 seconds of rest, with a big countdown ring, stick-figure demos, form cues and beeps.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💪</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0d10;
+    --panel:#15161c;
+    --ink:#f5f5f2;
+    --ink-dim:rgba(245,245,242,.65);
+    --coral:#ff4f5e;
+    --lime:#c7f542;
+    --line:rgba(245,245,242,.14);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);
+    min-height:100vh;min-height:100dvh;overflow-x:hidden;
+    display:flex;flex-direction:column;
+  }
+  .hub-link{position:fixed;top:14px;left:14px;z-index:1000;padding:8px 14px;border-radius:999px;font:600 13px/1 Inter,system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(8px);background:rgba(15,15,25,.55);color:#fff;border:1px solid rgba(255,255,255,.25)}
+  .hub-link:hover{background:rgba(50,50,70,.7)}
+  :focus-visible{outline:3px solid var(--lime);outline-offset:3px;border-radius:8px}
+
+  main{flex:1;width:100%;max-width:560px;margin:0 auto;padding:70px 18px 20px;display:flex;flex-direction:column;align-items:center;gap:14px}
+  .brand{font-family:"Archivo Black",Inter,sans-serif;font-size:clamp(1.5rem,5vw,2.1rem);letter-spacing:.06em;text-transform:uppercase}
+  .brand em{font-style:normal;color:var(--coral)}
+  .subtitle{color:var(--ink-dim);font-size:.88rem;text-align:center}
+
+  .phase-tag{
+    font:700 .8rem/1 Inter,sans-serif;letter-spacing:.28em;text-transform:uppercase;
+    padding:8px 16px;border-radius:999px;border:1.5px solid var(--line);color:var(--ink-dim);
+  }
+  .phase-tag.work{color:var(--coral);border-color:var(--coral)}
+  .phase-tag.rest{color:var(--lime);border-color:var(--lime)}
+
+  .stage{position:relative;width:min(74vw,280px);aspect-ratio:1}
+  .ringsvg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+  .ringsvg circle{fill:none;stroke-width:10}
+  .ring-bg{stroke:rgba(245,245,242,.1)}
+  #ringFg{stroke:var(--coral);stroke-linecap:round;stroke-dasharray:653.45;stroke-dashoffset:0;transition:stroke .3s}
+  .stage-mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
+  #bigNum{font-family:"Archivo Black",Inter,sans-serif;font-size:clamp(3.4rem,17vw,5rem);line-height:1;font-variant-numeric:tabular-nums}
+  #exName{font:700 clamp(.95rem,3.6vw,1.15rem)/1.2 Inter,sans-serif;text-align:center;max-width:80%;margin-top:4px}
+
+  .demo{display:flex;flex-direction:column;align-items:center;gap:6px;min-height:150px}
+  .demo svg{width:130px;height:110px;color:var(--ink)}
+  .demo .gnd{stroke:rgba(245,245,242,.25);stroke-width:2.5}
+  .demo .prop{stroke:rgba(245,245,242,.3);stroke-width:3;fill:none}
+  #cueLine{color:var(--ink-dim);font-size:.86rem;text-align:center;max-width:44ch;min-height:2.4em;line-height:1.4}
+  #nextUp{color:var(--lime);font:700 .78rem/1 Inter,sans-serif;letter-spacing:.2em;text-transform:uppercase;min-height:1em}
+
+  .dots{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}
+  .dots span{width:11px;height:11px;border-radius:50%;background:rgba(245,245,242,.16);transition:background .3s,transform .3s}
+  .dots span.done{background:var(--lime)}
+  .dots span.cur{background:var(--coral);transform:scale(1.35)}
+
+  .controls{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+  button{cursor:pointer;font-family:Inter,sans-serif}
+  .btn-go{
+    min-height:52px;padding:14px 40px;border-radius:14px;border:0;
+    font:700 1.05rem/1 Inter,sans-serif;letter-spacing:.04em;color:#141414;
+    background:var(--coral);box-shadow:0 6px 26px rgba(255,79,94,.35);
+    transition:transform .18s,box-shadow .18s;
+  }
+  .btn-go:hover{transform:translateY(-2px)}
+  .btn-sub{
+    min-height:46px;padding:12px 18px;border-radius:12px;
+    font:600 .88rem/1 Inter,sans-serif;color:var(--ink);
+    background:var(--panel);border:1.5px solid var(--line);
+    transition:border-color .2s;
+  }
+  .btn-sub:hover{border-color:var(--ink-dim)}
+  .btn-sub[aria-pressed="true"]{border-color:var(--lime);color:var(--lime)}
+  button[hidden]{display:none}
+
+  .foot{padding:14px 18px 24px;text-align:center;font-size:.76rem;color:var(--ink-dim)}
+
+  .overlay{position:fixed;inset:0;z-index:1200;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(8,8,12,.85);backdrop-filter:blur(8px)}
+  .overlay[hidden]{display:none}
+  .done-card{
+    width:min(92vw,400px);border-radius:24px;padding:38px 28px;text-align:center;
+    background:var(--panel);border:1px solid var(--line);
+  }
+  .badge{
+    width:110px;height:110px;margin:0 auto 16px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:"Archivo Black",sans-serif;font-size:1.5rem;color:#141414;
+    background:radial-gradient(circle at 35% 30%,#e6ff8a,var(--lime));
+    box-shadow:0 0 40px rgba(199,245,66,.5);
+    animation:blast 1s cubic-bezier(.2,1.4,.4,1) both;
+  }
+  @keyframes blast{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+  .done-card h2{font-family:"Archivo Black",sans-serif;font-size:1.6rem;letter-spacing:.04em;text-transform:uppercase}
+  .done-card p{color:var(--ink-dim);margin-top:8px;font-size:.9rem}
+  .done-stats{display:flex;justify-content:center;gap:34px;margin:20px 0 24px}
+  .done-stats b{display:block;font-family:"Archivo Black",sans-serif;font-size:1.7rem;color:var(--lime)}
+  .done-stats span{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-dim)}
+
+  @media (prefers-reduced-motion: reduce){
+    .badge{animation:none}
+    .btn-go,.dots span,#ringFg{transition:none}
+  }
+</style>
+</head>
+<body>
+<a class="hub-link" href="https://thirty-worlds.vercel.app/" aria-label="All thirty sites">← All 30</a>
+
+<main>
+  <h1 class="brand">Fit <em>Seven</em></h1>
+  <p class="subtitle">The classic 12-exercise circuit · 30s work / 10s rest · about 8 minutes, no equipment but a wall and a chair.</p>
+
+  <div class="phase-tag" id="phaseTag">Ready</div>
+
+  <div class="stage">
+    <svg class="ringsvg" viewBox="0 0 240 240" aria-hidden="true">
+      <circle class="ring-bg" cx="120" cy="120" r="104"></circle>
+      <circle id="ringFg" cx="120" cy="120" r="104"></circle>
+    </svg>
+    <div class="stage-mid">
+      <div id="bigNum" role="timer" aria-label="Seconds remaining">30</div>
+      <div id="exName">Press start</div>
+    </div>
+  </div>
+
+  <div class="demo">
+    <div id="figBox" aria-hidden="true"></div>
+    <p id="nextUp" aria-live="polite"></p>
+    <p id="cueLine">Twelve moves, one round. When you are ready, hit start.</p>
+  </div>
+
+  <div class="dots" id="dots" aria-label="Exercise progress"></div>
+
+  <div class="controls">
+    <button type="button" class="btn-go" id="goBtn">Start</button>
+    <button type="button" class="btn-sub" id="skipBtn" hidden>Skip ▸</button>
+    <button type="button" class="btn-sub" id="resetBtn" hidden>Restart</button>
+    <button type="button" class="btn-sub" id="muteBtn" aria-pressed="true" aria-label="Toggle beeps">🔊 Beeps on</button>
+  </div>
+</main>
+
+<div class="overlay" id="doneOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="doneH">
+  <div class="done-card">
+    <div class="badge" aria-hidden="true">7:00</div>
+    <h2 id="doneH">Circuit crushed!</h2>
+    <p>All twelve exercises, done and dusted.</p>
+    <div class="done-stats">
+      <div><b id="statTime">0:00</b><span>total time</span></div>
+      <div><b>12/12</b><span>exercises</span></div>
+    </div>
+    <button type="button" class="btn-go" id="againBtn">Go again</button>
+  </div>
+</div>
+
+<footer class="foot">New to exercise or coming back from injury? Check with a professional before starting a new routine — and listen to your body.</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  var GND = '<line class="gnd" x1="6" y1="92" x2="114" y2="92"></line>';
+
+  var EX = [
+    { name: 'Jumping jacks', cue: 'Land softly with knees slightly bent; keep a steady rhythm.',
+      a: '<circle cx="60" cy="18" r="8"/><polyline points="60,26 60,58"/><polyline points="60,36 42,56"/><polyline points="60,36 78,56"/><polyline points="60,58 52,90"/><polyline points="60,58 68,90"/>',
+      b: '<circle cx="60" cy="18" r="8"/><polyline points="60,26 60,58"/><polyline points="60,36 44,14"/><polyline points="60,36 76,14"/><polyline points="60,58 42,90"/><polyline points="60,58 78,90"/>' },
+    { name: 'Wall sit', cue: 'Back flat on the wall, thighs parallel to the floor, knees over ankles.',
+      prop: '<line class="prop" x1="34" y1="8" x2="34" y2="92"></line>',
+      a: '<circle cx="46" cy="30" r="8"/><polyline points="44,38 42,62"/><polyline points="42,62 68,64"/><polyline points="68,64 68,90"/><polyline points="43,46 58,54"/>',
+      b: '<circle cx="46" cy="31" r="8"/><polyline points="44,39 42,62"/><polyline points="42,62 68,64"/><polyline points="68,64 68,90"/><polyline points="43,47 56,58"/>' },
+    { name: 'Push-ups', cue: 'One straight line from head to heels; lower your chest, not your chin.',
+      a: '<circle cx="28" cy="52" r="7"/><polyline points="36,58 96,74"/><polyline points="40,60 36,90"/><polyline points="96,74 102,90"/>',
+      b: '<circle cx="24" cy="70" r="7"/><polyline points="32,76 96,82"/><polyline points="36,78 26,84 28,90"/><polyline points="96,82 102,90"/>' },
+    { name: 'Abdominal crunches', cue: 'Curl up with your abs, not your neck — chin off your chest.',
+      a: '<circle cx="22" cy="84" r="7"/><polyline points="30,86 62,86"/><polyline points="62,86 76,66"/><polyline points="76,66 90,86"/><polyline points="34,84 46,78"/>',
+      b: '<circle cx="32" cy="68" r="7"/><polyline points="38,72 50,80 62,86"/><polyline points="62,86 76,66"/><polyline points="76,66 90,86"/><polyline points="42,74 52,72"/>' },
+    { name: 'Step-ups', cue: 'Drive through the heel on the chair; alternate the leading leg.',
+      prop: '<rect class="prop" x="68" y="70" width="36" height="22"></rect>',
+      a: '<circle cx="48" cy="26" r="8"/><polyline points="48,34 52,60"/><polyline points="52,60 66,62 74,70"/><polyline points="52,60 50,90"/><polyline points="48,42 60,48"/>',
+      b: '<circle cx="80" cy="10" r="8"/><polyline points="80,18 82,44"/><polyline points="82,44 76,70"/><polyline points="82,44 88,70"/><polyline points="80,26 90,34"/>' },
+    { name: 'Squats', cue: 'Chest up, weight in your heels, knees tracking over your toes.',
+      a: '<circle cx="60" cy="18" r="8"/><polyline points="60,26 60,56"/><polyline points="60,36 76,40"/><polyline points="60,56 54,90"/><polyline points="60,56 66,90"/>',
+      b: '<circle cx="58" cy="40" r="8"/><polyline points="58,48 56,66"/><polyline points="57,54 82,54"/><polyline points="56,66 44,76 46,90"/><polyline points="56,66 68,76 66,90"/>' },
+    { name: 'Triceps dips', cue: 'Elbows point straight back; shoulders down, away from your ears.',
+      prop: '<rect class="prop" x="18" y="62" width="28" height="22"></rect>',
+      a: '<circle cx="56" cy="28" r="8"/><polyline points="56,36 52,62"/><polyline points="55,44 46,62"/><polyline points="52,62 88,88"/>',
+      b: '<circle cx="56" cy="42" r="8"/><polyline points="56,50 52,70"/><polyline points="55,54 44,56 46,64"/><polyline points="52,70 88,88"/>' },
+    { name: 'Plank', cue: 'Squeeze your glutes and keep hips level — no sagging, no pike.',
+      a: '<circle cx="24" cy="60" r="7"/><polyline points="36,64 98,80"/><polyline points="36,64 36,84"/><polyline points="36,84 50,84"/><polyline points="98,80 102,90"/>',
+      b: '<circle cx="24" cy="58" r="7"/><polyline points="36,62 98,80"/><polyline points="36,62 36,84"/><polyline points="36,84 50,84"/><polyline points="98,80 102,90"/>' },
+    { name: 'High knees', cue: 'Run in place, knees to hip height, light on the balls of your feet.',
+      a: '<circle cx="60" cy="16" r="8"/><polyline points="60,24 60,54"/><polyline points="60,34 76,24"/><polyline points="60,34 46,44"/><polyline points="60,54 66,90"/><polyline points="60,54 46,52 50,70"/>',
+      b: '<circle cx="60" cy="16" r="8"/><polyline points="60,24 60,54"/><polyline points="60,34 44,24"/><polyline points="60,34 74,44"/><polyline points="60,54 54,90"/><polyline points="60,54 74,52 70,70"/>' },
+    { name: 'Lunges', cue: 'Front knee over the ankle; back knee dips toward the floor. Alternate legs.',
+      a: '<circle cx="60" cy="18" r="8"/><polyline points="60,26 60,56"/><polyline points="60,36 52,42"/><polyline points="60,36 68,42"/><polyline points="60,56 54,90"/><polyline points="60,56 66,90"/>',
+      b: '<circle cx="54" cy="30" r="8"/><polyline points="54,38 56,62"/><polyline points="55,46 46,50"/><polyline points="55,46 64,50"/><polyline points="56,62 74,66 74,90"/><polyline points="56,62 44,80 32,88"/>' },
+    { name: 'Push-up with rotation', cue: 'Push up, then rotate to a high side reach; alternate sides each rep.',
+      a: '<circle cx="28" cy="52" r="7"/><polyline points="36,58 96,74"/><polyline points="40,60 36,90"/><polyline points="96,74 102,90"/>',
+      b: '<circle cx="34" cy="36" r="7"/><polyline points="40,48 98,78"/><polyline points="40,48 36,90"/><polyline points="40,48 44,18"/><polyline points="98,78 104,90"/>' },
+    { name: 'Side plank', cue: 'Shoulder stacked over elbow, hips lifted high; switch sides halfway.',
+      a: '<circle cx="22" cy="52" r="7"/><polyline points="34,60 98,76"/><polyline points="34,60 32,84"/><polyline points="32,84 48,84"/><polyline points="34,60 40,40"/>',
+      b: '<circle cx="22" cy="50" r="7"/><polyline points="34,58 98,76"/><polyline points="34,58 32,84"/><polyline points="32,84 48,84"/><polyline points="34,58 42,38"/>' }
+  ];
+
+  var WORK = 30, REST = 10, PREP = 5;
+
+  // Build phase list with absolute start times
+  var phases = [];
+  (function build() {
+    var t = 0;
+    phases.push({ type: 'prep', dur: PREP, start: t, ex: 0 }); t += PREP;
+    for (var i = 0; i < EX.length; i++) {
+      phases.push({ type: 'work', dur: WORK, start: t, ex: i }); t += WORK;
+      if (i < EX.length - 1) { phases.push({ type: 'rest', dur: REST, start: t, ex: i + 1 }); t += REST; }
+    }
+    phases.totalDur = t;
+  })();
+
+  var phaseTag = document.getElementById('phaseTag');
+  var bigNum = document.getElementById('bigNum');
+  var exName = document.getElementById('exName');
+  var figBox = document.getElementById('figBox');
+  var cueLine = document.getElementById('cueLine');
+  var nextUp = document.getElementById('nextUp');
+  var dotsBox = document.getElementById('dots');
+  var goBtn = document.getElementById('goBtn');
+  var skipBtn = document.getElementById('skipBtn');
+  var resetBtn = document.getElementById('resetBtn');
+  var muteBtn = document.getElementById('muteBtn');
+  var ringFg = document.getElementById('ringFg');
+  var doneOverlay = document.getElementById('doneOverlay');
+  var statTime = document.getElementById('statTime');
+  var againBtn = document.getElementById('againBtn');
+
+  var RING_C = 2 * Math.PI * 104;
+  ringFg.style.strokeDasharray = String(RING_C);
+
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  // progress dots
+  var dotEls = [];
+  for (var d = 0; d < EX.length; d++) {
+    var s = document.createElement('span');
+    dotsBox.appendChild(s);
+    dotEls.push(s);
+  }
+
+  var st = {
+    running: false,
+    started: false,
+    base: 0,            // banked active seconds
+    stamp: 0,           // performance.now() at resume
+    wallStart: 0,       // Date.now() at first start
+    soundOn: true,
+    lastPhaseIdx: -1,
+    lastBeepSec: -1,
+    suppressBeep: false,
+    frameFlip: false,
+    lastFlip: 0,
+    rafId: 0,
+    bgTimer: 0,
+    currentFig: -1,
+    figShowsNext: false
+  };
+
+  var audioCtx = null;
+  function ensureAudio() {
+    try {
+      if (!audioCtx) {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) audioCtx = new AC();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    } catch (e) { audioCtx = null; }
+  }
+  function beep(freq, dur, vol) {
+    if (!st.soundOn || !audioCtx || audioCtx.state !== 'running') return;
+    try {
+      var t = audioCtx.currentTime;
+      var o = audioCtx.createOscillator();
+      var g = audioCtx.createGain();
+      o.type = 'square';
+      o.frequency.setValueAtTime(freq, t);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g).connect(audioCtx.destination);
+      o.start(t); o.stop(t + dur + 0.03);
+    } catch (e) { /* sound optional */ }
+  }
+
+  function elapsed() {
+    return st.running ? st.base + (performance.now() - st.stamp) / 1000 : st.base;
+  }
+
+  function phaseAt(sec) {
+    for (var i = phases.length - 1; i >= 0; i--) {
+      if (sec >= phases[i].start) return i;
+    }
+    return 0;
+  }
+
+  function drawFigure(exIdx) {
+    var e = EX[exIdx];
+    figBox.innerHTML =
+      '<svg viewBox="0 0 120 100" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">' +
+      GND + (e.prop || '') +
+      '<g id="frA">' + e.a + '</g>' +
+      '<g id="frB" style="display:none">' + e.b + '</g>' +
+      '</svg>';
+    st.currentFig = exIdx;
+  }
+
+  function flipFrames() {
+    if (reduceMotion.matches) return;
+    var fa = document.getElementById('frA');
+    var fb = document.getElementById('frB');
+    if (!fa || !fb) return;
+    st.frameFlip = !st.frameFlip;
+    fa.style.display = st.frameFlip ? 'none' : '';
+    fb.style.display = st.frameFlip ? '' : 'none';
+  }
+
+  function fmt(sec) {
+    sec = Math.max(0, Math.round(sec));
+    return Math.floor(sec / 60) + ':' + ('0' + (sec % 60)).slice(-2);
+  }
+
+  function paintDots(phIdx) {
+    var ph = phases[phIdx];
+    var curEx = ph.type === 'work' ? ph.ex : -1;
+    var doneUpTo = ph.ex; // rest/prep phases point at the upcoming exercise
+    for (var i = 0; i < dotEls.length; i++) {
+      dotEls[i].className = i < doneUpTo ? 'done' : (i === curEx ? 'cur' : '');
+    }
+  }
+
+  function enterPhase(idx) {
+    st.lastPhaseIdx = idx;
+    st.lastBeepSec = -1;
+    var silent = st.suppressBeep;
+    st.suppressBeep = false;
+    var ph = phases[idx];
+    if (ph.type === 'work') {
+      phaseTag.textContent = 'Work';
+      phaseTag.className = 'phase-tag work';
+      ringFg.style.stroke = 'var(--coral)';
+      exName.textContent = EX[ph.ex].name;
+      cueLine.textContent = EX[ph.ex].cue;
+      nextUp.textContent = '';
+      drawFigure(ph.ex);
+      st.figShowsNext = false;
+      if (!silent) beep(880, 0.22, 0.14);
+    } else if (ph.type === 'rest') {
+      phaseTag.textContent = 'Rest';
+      phaseTag.className = 'phase-tag rest';
+      ringFg.style.stroke = 'var(--lime)';
+      exName.textContent = 'Breathe';
+      nextUp.textContent = 'Next up: ' + EX[ph.ex].name;
+      cueLine.textContent = EX[ph.ex].cue;
+      drawFigure(ph.ex);
+      st.figShowsNext = true;
+      if (!silent) beep(660, 0.18, 0.12);
+    } else {
+      phaseTag.textContent = 'Get ready';
+      phaseTag.className = 'phase-tag rest';
+      ringFg.style.stroke = 'var(--lime)';
+      exName.textContent = EX[0].name;
+      nextUp.textContent = 'First up: ' + EX[0].name;
+      cueLine.textContent = EX[0].cue;
+      drawFigure(0);
+    }
+    paintDots(idx);
+  }
+
+  function update() {
+    var sec = elapsed();
+    if (sec >= phases.totalDur) { finish(); return; }
+    var idx = phaseAt(sec);
+    if (idx !== st.lastPhaseIdx) enterPhase(idx);
+    var ph = phases[idx];
+    var remain = ph.start + ph.dur - sec;
+    var shown = Math.ceil(remain);
+    bigNum.textContent = String(shown);
+    ringFg.style.strokeDashoffset = String(RING_C * (1 - remain / ph.dur));
+    if (shown <= 3 && shown >= 1 && shown !== st.lastBeepSec) {
+      st.lastBeepSec = shown;
+      beep(520, 0.1, 0.1);
+    }
+    var now = performance.now();
+    if (now - st.lastFlip > 550) { st.lastFlip = now; flipFrames(); }
+  }
+
+  function loop() {
+    if (!st.running) return;
+    update();
+    if (st.running) st.rafId = requestAnimationFrame(loop);
+  }
+
+  function start() {
+    ensureAudio();
+    if (!st.started) {
+      st.started = true;
+      st.wallStart = Date.now();
+      st.base = 0;
+      st.lastPhaseIdx = -1;
+    }
+    st.running = true;
+    st.stamp = performance.now();
+    if (st.lastPhaseIdx >= 0) {
+      // Resuming: repaint the current phase UI without replaying its beep.
+      st.suppressBeep = true;
+      st.lastPhaseIdx = -1;
+    }
+    goBtn.textContent = 'Pause';
+    skipBtn.hidden = false;
+    resetBtn.hidden = false;
+    cancelAnimationFrame(st.rafId);
+    st.rafId = requestAnimationFrame(loop);
+    if (!st.bgTimer) {
+      st.bgTimer = setInterval(function () {
+        if (st.running && document.hidden) update();
+      }, 500);
+    }
+  }
+
+  function pause() {
+    st.base = elapsed();
+    st.running = false;
+    cancelAnimationFrame(st.rafId);
+    goBtn.textContent = 'Resume';
+    phaseTag.textContent = 'Paused';
+    phaseTag.className = 'phase-tag';
+  }
+
+  function reset(showIdle) {
+    st.running = false;
+    st.started = false;
+    st.base = 0;
+    st.lastPhaseIdx = -1;
+    cancelAnimationFrame(st.rafId);
+    if (st.bgTimer) { clearInterval(st.bgTimer); st.bgTimer = 0; }
+    goBtn.textContent = 'Start';
+    skipBtn.hidden = true;
+    resetBtn.hidden = true;
+    if (showIdle) {
+      phaseTag.textContent = 'Ready';
+      phaseTag.className = 'phase-tag';
+      ringFg.style.stroke = 'var(--coral)';
+      ringFg.style.strokeDashoffset = '0';
+      bigNum.textContent = String(WORK);
+      exName.textContent = 'Press start';
+      cueLine.textContent = 'Twelve moves, one round. When you are ready, hit start.';
+      nextUp.textContent = '';
+      drawFigure(0);
+      for (var i = 0; i < dotEls.length; i++) dotEls[i].className = '';
+    }
+  }
+
+  function finish() {
+    var totalWall = (Date.now() - st.wallStart) / 1000;
+    reset(true);
+    statTime.textContent = fmt(totalWall);
+    doneOverlay.hidden = false;
+    beep(660, 0.15, 0.14);
+    setTimeout(function () { beep(880, 0.15, 0.14); }, 180);
+    setTimeout(function () { beep(1100, 0.3, 0.14); }, 360);
+    againBtn.focus();
+  }
+
+  function skip() {
+    if (!st.started) return;
+    var sec = elapsed();
+    var idx = phaseAt(sec);
+    if (idx + 1 >= phases.length) {
+      st.base = phases.totalDur;
+      if (!st.running) update(); // triggers finish
+      return;
+    }
+    var delta = phases[idx + 1].start - sec;
+    st.base += delta;
+    if (!st.running) update();
+  }
+
+  goBtn.addEventListener('click', function () {
+    if (st.running) pause(); else start();
+  });
+  skipBtn.addEventListener('click', function () { ensureAudio(); skip(); });
+  resetBtn.addEventListener('click', function () { reset(true); });
+  againBtn.addEventListener('click', function () {
+    doneOverlay.hidden = true;
+    reset(true);
+    goBtn.focus();
+  });
+  muteBtn.addEventListener('click', function () {
+    st.soundOn = !st.soundOn;
+    muteBtn.setAttribute('aria-pressed', String(st.soundOn));
+    muteBtn.textContent = st.soundOn ? '🔊 Beeps on' : '🔇 Beeps off';
+    if (st.soundOn) { ensureAudio(); beep(660, 0.1, 0.1); }
+  });
+
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden && st.running) update(); // catch up instantly using true timestamps
+  });
+
+  reset(true);
+})();
+</script>
+</body>
+</html>

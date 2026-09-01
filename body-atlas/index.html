@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Body Atlas — Human Body Systems for Students</title>
+<meta name="description" content="Body Atlas is a clean schematic explorer of five human body systems — skeletal, circulatory, nervous, digestive and respiratory — with tappable organs, real facts and a flashcard quiz.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🫀</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#fbfcfe;
+    --card:#ffffff;
+    --ink:#182230;
+    --ink-soft:#4b5768;
+    --line:#dfe5ec;
+    --sil:#e8edf3;
+    --c-skeletal:#5b6b7f;
+    --c-circulatory:#d5304a;
+    --c-nervous:#7443d6;
+    --c-digestive:#d97706;
+    --c-respiratory:#0284c7;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:Inter,system-ui,sans-serif;color:var(--ink);background:var(--paper);
+    overflow-x:hidden;min-height:100vh;
+  }
+  .hub-link{position:fixed;top:14px;left:14px;z-index:1000;padding:8px 14px;border-radius:999px;font:600 13px/1 Inter,system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(8px);background:rgba(15,15,25,.55);color:#fff;border:1px solid rgba(255,255,255,.25)}
+  .hub-link:hover{background:rgba(15,15,25,.75)}
+  :focus-visible{outline:3px solid #1d4ed8;outline-offset:2px;border-radius:8px}
+
+  header.top{max-width:1060px;margin:0 auto;padding:70px 20px 8px;text-align:center}
+  h1{font-family:Sora,system-ui,sans-serif;font-weight:700;font-size:clamp(1.9rem,5vw,2.7rem);letter-spacing:-.02em}
+  .sub{color:var(--ink-soft);margin-top:6px;font-size:.95rem}
+
+  .chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-width:1060px;margin:18px auto 0;padding:0 16px}
+  .chip{
+    min-height:44px;padding:10px 15px;border-radius:999px;cursor:pointer;
+    font:600 .85rem/1 Inter,system-ui,sans-serif;color:var(--ink-soft);
+    background:var(--card);border:1.5px solid var(--line);
+    display:inline-flex;align-items:center;gap:8px;
+    transition:border-color .2s,color .2s,box-shadow .2s;
+  }
+  .chip .dot{width:10px;height:10px;border-radius:50%;background:var(--sysc,#999);flex:none}
+  .chip[aria-pressed="true"]{border-color:var(--sysc);color:var(--ink);box-shadow:0 2px 10px rgba(20,30,50,.08)}
+  .chip:hover{border-color:var(--sysc)}
+  .chip.quiz-chip{--sysc:#0f766e}
+
+  .layout{max-width:1060px;margin:22px auto 40px;padding:0 16px;display:grid;grid-template-columns:minmax(260px,430px) minmax(300px,1fr);gap:22px;align-items:start}
+  @media (max-width:820px){.layout{grid-template-columns:1fr}}
+
+  .figure-card,.panel{
+    background:var(--card);border:1px solid var(--line);border-radius:20px;
+    box-shadow:0 4px 24px rgba(24,34,48,.06);
+  }
+  .figure-card{padding:14px;display:flex;justify-content:center}
+  .figure-card svg{width:100%;max-width:400px;height:auto;display:block}
+
+  .panel{padding:22px 22px 26px;min-height:320px}
+  .panel h2{font-family:Sora,system-ui,sans-serif;font-size:1.25rem;font-weight:600;display:flex;align-items:center;gap:10px}
+  .panel h2 .dot{width:12px;height:12px;border-radius:50%;background:var(--sysc,#999)}
+  .panel .overview{margin-top:10px;color:var(--ink-soft);font-size:.92rem;line-height:1.55}
+  .parts{list-style:none;margin-top:16px;display:grid;gap:8px}
+  .part-btn{
+    width:100%;min-height:44px;text-align:left;padding:11px 14px;border-radius:12px;cursor:pointer;
+    font:500 .9rem/1.3 Inter,system-ui,sans-serif;color:var(--ink);
+    background:var(--paper);border:1.5px solid var(--line);
+    transition:border-color .2s,background .2s;
+  }
+  .part-btn:hover{border-color:var(--sysc)}
+  .part-btn[aria-pressed="true"]{border-color:var(--sysc);background:#f2f5f9;background:color-mix(in srgb,var(--sysc) 8%,white)}
+  .fact{
+    margin-top:14px;padding:13px 15px;border-radius:12px;font-size:.88rem;line-height:1.5;
+    background:#f2f5f9;
+    background:color-mix(in srgb,var(--sysc,#888) 9%,white);
+    border-left:4px solid var(--sysc,#888);color:var(--ink);
+  }
+  .fact[hidden]{display:none}
+  .hint{margin-top:14px;color:var(--ink-soft);font-size:.85rem}
+
+  /* SVG system styling */
+  .sys-g{opacity:0;transition:opacity .35s;pointer-events:none}
+  .sys-g.on{opacity:1;pointer-events:auto}
+  .sys-g .part{cursor:pointer}
+  .sys-g text{font:600 10px Inter,system-ui,sans-serif;pointer-events:none;opacity:0;transition:opacity .3s}
+  .sys-g.active text{opacity:1}
+  .part.lit{animation:pulse 1.4s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+  @media (prefers-reduced-motion: reduce){
+    .part.lit{animation:none;opacity:1}
+    .sys-g,.chip,.part-btn{transition:none}
+  }
+
+  /* quiz */
+  .quiz-q{font-family:Sora,system-ui,sans-serif;font-size:1.15rem;font-weight:600;margin-top:12px;line-height:1.4}
+  .quiz-opts{display:grid;gap:8px;margin-top:16px}
+  .quiz-opts .part-btn{display:flex;align-items:center;gap:10px}
+  .quiz-opts .dot{width:10px;height:10px;border-radius:50%}
+  .quiz-meta{display:flex;justify-content:space-between;color:var(--ink-soft);font-size:.82rem;margin-top:4px}
+  .quiz-fb{margin-top:14px;padding:13px 15px;border-radius:12px;font-size:.88rem;line-height:1.5}
+  .quiz-fb.ok{background:#e8f7ef;border-left:4px solid #16a34a}
+  .quiz-fb.no{background:#fdeeee;border-left:4px solid #d5304a}
+  .quiz-next{margin-top:14px}
+  .btn-solid{
+    min-height:46px;padding:12px 22px;border-radius:12px;border:0;cursor:pointer;
+    font:600 .92rem/1 Inter,system-ui,sans-serif;color:#fff;background:var(--ink);
+    transition:transform .15s;
+  }
+  .btn-solid:hover{transform:translateY(-1px)}
+  .score-big{font-family:Sora,system-ui,sans-serif;font-size:2.6rem;font-weight:700;margin:14px 0 4px}
+
+  footer{padding:14px 20px 26px;text-align:center;font-size:.78rem;color:var(--ink-soft)}
+</style>
+</head>
+<body>
+<a class="hub-link" href="https://thirty-worlds.vercel.app/" aria-label="All thirty sites">← All 30</a>
+
+<header class="top">
+  <h1>Body Atlas</h1>
+  <p class="sub">Toggle a system, tap its parts, and see how you fit together.</p>
+</header>
+
+<nav class="chips" aria-label="Body systems">
+  <button type="button" class="chip" data-sys="skeletal" aria-pressed="false" style="--sysc:var(--c-skeletal)"><span class="dot"></span>Skeletal</button>
+  <button type="button" class="chip" data-sys="circulatory" aria-pressed="false" style="--sysc:var(--c-circulatory)"><span class="dot"></span>Circulatory</button>
+  <button type="button" class="chip" data-sys="nervous" aria-pressed="false" style="--sysc:var(--c-nervous)"><span class="dot"></span>Nervous</button>
+  <button type="button" class="chip" data-sys="digestive" aria-pressed="false" style="--sysc:var(--c-digestive)"><span class="dot"></span>Digestive</button>
+  <button type="button" class="chip" data-sys="respiratory" aria-pressed="false" style="--sysc:var(--c-respiratory)"><span class="dot"></span>Respiratory</button>
+  <button type="button" class="chip quiz-chip" id="quizChip" aria-pressed="false"><span class="dot"></span>Quiz me</button>
+</nav>
+
+<div class="layout">
+  <section class="figure-card" aria-label="Schematic human figure">
+    <svg viewBox="0 0 300 640" role="img" aria-label="Front-view schematic human silhouette with body system overlays">
+      <!-- silhouette -->
+      <g fill="var(--sil)">
+        <circle cx="150" cy="58" r="36"></circle>
+        <rect x="136" y="86" width="28" height="30" rx="9"></rect>
+        <rect x="78" y="110" width="144" height="70" rx="34"></rect>
+        <rect x="95" y="112" width="110" height="212" rx="36"></rect>
+        <rect x="60" y="122" width="26" height="196" rx="13"></rect>
+        <rect x="214" y="122" width="26" height="196" rx="13"></rect>
+        <circle cx="73" cy="328" r="12"></circle>
+        <circle cx="227" cy="328" r="12"></circle>
+        <rect x="98" y="295" width="104" height="62" rx="26"></rect>
+        <rect x="103" y="345" width="42" height="235" rx="19"></rect>
+        <rect x="155" y="345" width="42" height="235" rx="19"></rect>
+        <ellipse cx="122" cy="590" rx="21" ry="11"></ellipse>
+        <ellipse cx="178" cy="590" rx="21" ry="11"></ellipse>
+      </g>
+
+      <!-- SKELETAL -->
+      <g id="g-skeletal" class="sys-g" stroke="var(--c-skeletal)" fill="none" stroke-width="4" stroke-linecap="round">
+        <g id="part-skull" class="part">
+          <circle cx="150" cy="54" r="23"></circle>
+          <path d="M138,72 Q150,80 162,72"></path>
+        </g>
+        <g id="part-spine" class="part">
+          <line x1="150" y1="92" x2="150" y2="298" stroke-width="7" stroke-dasharray="6 5"></line>
+        </g>
+        <g id="part-ribs" class="part">
+          <path d="M118,138 Q150,154 182,138"></path>
+          <path d="M116,152 Q150,170 184,152"></path>
+          <path d="M118,166 Q150,184 182,166"></path>
+          <path d="M122,180 Q150,196 178,180"></path>
+        </g>
+        <g id="part-pelvis" class="part">
+          <path d="M114,300 Q150,328 186,300 L180,336 Q150,352 120,336 Z"></path>
+        </g>
+        <g id="part-femur" class="part">
+          <line x1="124" y1="352" x2="120" y2="468"></line>
+          <line x1="176" y1="352" x2="180" y2="468"></line>
+          <circle cx="120" cy="472" r="6"></circle>
+          <circle cx="180" cy="472" r="6"></circle>
+        </g>
+        <g stroke-width="3" opacity=".7">
+          <line x1="73" y1="138" x2="71" y2="228"></line>
+          <line x1="227" y1="138" x2="229" y2="228"></line>
+          <line x1="71" y1="236" x2="73" y2="312"></line>
+          <line x1="229" y1="236" x2="227" y2="312"></line>
+          <line x1="120" y1="482" x2="118" y2="572"></line>
+          <line x1="180" y1="482" x2="182" y2="572"></line>
+        </g>
+        <text x="8" y="58" fill="var(--c-skeletal)" stroke="none">skull</text>
+        <text x="240" y="200" fill="var(--c-skeletal)" stroke="none">ribs</text>
+        <text x="8" y="330" fill="var(--c-skeletal)" stroke="none">pelvis</text>
+        <text x="216" y="420" fill="var(--c-skeletal)" stroke="none">femur</text>
+      </g>
+
+      <!-- CIRCULATORY -->
+      <g id="g-circulatory" class="sys-g" stroke="var(--c-circulatory)" fill="none" stroke-width="3.5" stroke-linecap="round">
+        <g id="part-heart" class="part">
+          <path d="M160,152 C150,138 128,144 130,160 C131,172 144,180 160,194 C176,180 189,172 190,160 C192,144 170,138 160,152 Z" fill="var(--c-circulatory)" fill-opacity=".85" stroke="none"></path>
+        </g>
+        <g id="part-aorta" class="part" stroke-width="5">
+          <path d="M164,148 C164,132 148,128 146,140"></path>
+          <line x1="152" y1="150" x2="150" y2="298"></line>
+        </g>
+        <g id="part-carotid" class="part">
+          <line x1="144" y1="132" x2="142" y2="66"></line>
+          <line x1="158" y1="132" x2="160" y2="66"></line>
+        </g>
+        <g id="part-veins" class="part" stroke="#2563eb">
+          <line x1="172" y1="148" x2="172" y2="112"></line>
+          <path d="M160,300 L164,470 L166,566"></path>
+          <path d="M80,152 L78,312"></path>
+        </g>
+        <g id="part-femoral" class="part">
+          <path d="M138,306 L126,470 L122,566"></path>
+          <path d="M162,306 L174,470 L178,566"></path>
+        </g>
+        <g opacity=".7">
+          <path d="M138,148 L74,168 L70,310"></path>
+          <path d="M170,152 L226,168 L230,310"></path>
+        </g>
+        <text x="196" y="150" fill="var(--c-circulatory)" stroke="none">heart</text>
+        <text x="112" y="256" fill="var(--c-circulatory)" stroke="none">aorta</text>
+        <text x="196" y="470" fill="var(--c-circulatory)" stroke="none">femoral</text>
+      </g>
+
+      <!-- NERVOUS -->
+      <g id="g-nervous" class="sys-g" stroke="var(--c-nervous)" fill="none" stroke-width="3" stroke-linecap="round">
+        <g id="part-brain" class="part">
+          <ellipse cx="150" cy="52" rx="24" ry="19" fill="var(--c-nervous)" fill-opacity=".2"></ellipse>
+          <path d="M132,50 Q140,42 148,50 Q156,58 164,50"></path>
+        </g>
+        <g id="part-brainstem" class="part" stroke-width="4">
+          <line x1="150" y1="70" x2="150" y2="94"></line>
+        </g>
+        <g id="part-cord" class="part" stroke-width="4">
+          <line x1="150" y1="94" x2="150" y2="308"></line>
+        </g>
+        <g id="part-sciatic" class="part">
+          <path d="M150,304 L132,336 L126,470 L122,568"></path>
+          <path d="M150,304 L168,336 L174,470 L178,568"></path>
+        </g>
+        <g id="part-median" class="part">
+          <path d="M148,124 L76,150 L72,316"></path>
+          <path d="M152,124 L224,150 L228,316"></path>
+        </g>
+        <g opacity=".6" stroke-width="2">
+          <line x1="150" y1="150" x2="120" y2="160"></line>
+          <line x1="150" y1="150" x2="180" y2="160"></line>
+          <line x1="150" y1="190" x2="122" y2="200"></line>
+          <line x1="150" y1="190" x2="178" y2="200"></line>
+          <line x1="150" y1="230" x2="124" y2="240"></line>
+          <line x1="150" y1="230" x2="176" y2="240"></line>
+        </g>
+        <text x="188" y="46" fill="var(--c-nervous)" stroke="none">brain</text>
+        <text x="160" y="260" fill="var(--c-nervous)" stroke="none">spinal cord</text>
+        <text x="192" y="510" fill="var(--c-nervous)" stroke="none">sciatic</text>
+      </g>
+
+      <!-- DIGESTIVE -->
+      <g id="g-digestive" class="sys-g" stroke="var(--c-digestive)" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+        <g id="part-esoph" class="part">
+          <line x1="150" y1="92" x2="152" y2="196"></line>
+        </g>
+        <g id="part-liver" class="part">
+          <path d="M110,196 C134,188 148,196 148,208 L143,222 C124,226 110,214 110,196 Z" fill="var(--c-digestive)" fill-opacity=".18"></path>
+        </g>
+        <g id="part-stomach" class="part">
+          <path d="M152,196 C178,196 190,210 185,228 C180,244 160,250 150,241 C142,234 143,220 150,214" fill="var(--c-digestive)" fill-opacity=".18"></path>
+        </g>
+        <g id="part-smallint" class="part" stroke-width="5">
+          <path d="M150,248 C128,250 128,262 150,262 C172,262 172,274 150,274 C130,276 130,288 150,288 C170,288 170,298 152,298"></path>
+        </g>
+        <g id="part-largeint" class="part" stroke-width="7">
+          <path d="M126,302 L126,240 Q126,230 136,230 L164,230 Q174,230 174,240 L174,296 Q174,310 160,310 L148,310"></path>
+        </g>
+        <text x="180" y="120" fill="var(--c-digestive)" stroke="none">esophagus</text>
+        <text x="60" y="196" fill="var(--c-digestive)" stroke="none">liver</text>
+        <text x="196" y="222" fill="var(--c-digestive)" stroke="none">stomach</text>
+        <text x="190" y="300" fill="var(--c-digestive)" stroke="none">colon</text>
+      </g>
+
+      <!-- RESPIRATORY -->
+      <g id="g-respiratory" class="sys-g" stroke="var(--c-respiratory)" fill="none" stroke-width="3.5" stroke-linecap="round">
+        <g id="part-nasal" class="part">
+          <path d="M150,48 L150,68 Q150,76 158,76"></path>
+        </g>
+        <g id="part-trachea" class="part" stroke-width="5">
+          <line x1="150" y1="94" x2="150" y2="148" stroke-dasharray="7 4"></line>
+        </g>
+        <g id="part-bronchi" class="part" stroke-width="4">
+          <path d="M150,148 L134,164"></path>
+          <path d="M150,148 L166,164"></path>
+        </g>
+        <g id="part-lungs" class="part">
+          <path d="M130,152 C106,158 100,192 105,224 C109,246 124,252 133,245 C141,238 142,168 130,152 Z" fill="var(--c-respiratory)" fill-opacity=".16"></path>
+          <path d="M170,152 C194,158 200,192 195,224 C191,246 176,252 167,245 C159,238 158,168 170,152 Z" fill="var(--c-respiratory)" fill-opacity=".16"></path>
+        </g>
+        <g id="part-diaphragm" class="part" stroke-width="4">
+          <path d="M104,254 Q150,274 196,254"></path>
+        </g>
+        <text x="196" y="90" fill="var(--c-respiratory)" stroke="none">trachea</text>
+        <text x="36" y="200" fill="var(--c-respiratory)" stroke="none">lung</text>
+        <text x="204" y="276" fill="var(--c-respiratory)" stroke="none">diaphragm</text>
+      </g>
+    </svg>
+  </section>
+
+  <aside class="panel" id="panel" aria-live="polite">
+    <!-- filled by JS -->
+  </aside>
+</div>
+
+<footer>Made for curious students · schematic diagrams, not medical drawings · Body Atlas</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  var SYSTEMS = {
+    skeletal: {
+      name: 'Skeletal system',
+      color: 'var(--c-skeletal)',
+      overview: 'The skeleton is the body’s living framework — an adult has 206 bones. It protects soft organs (the skull shields the brain, the rib cage guards the heart and lungs), anchors muscles so we can move, and stores minerals like calcium. Deep inside many bones, marrow makes billions of new blood cells every day.',
+      parts: [
+        { id: 'part-skull', label: 'Skull', fact: 'The skull is made of 22 bones, and all but the jaw are fused solid to protect the brain.' },
+        { id: 'part-spine', label: 'Spine (vertebral column)', fact: 'The spine stacks 33 vertebrae; cushioning discs between them make you a little shorter by evening than in the morning.' },
+        { id: 'part-ribs', label: 'Rib cage', fact: 'You have 12 pairs of ribs forming a flexible cage that expands with every breath.' },
+        { id: 'part-pelvis', label: 'Pelvis', fact: 'The pelvis links your spine to your legs and supports the weight of your whole upper body.' },
+        { id: 'part-femur', label: 'Femur (thigh bone)', fact: 'The femur is the longest and strongest bone in the body — about a quarter of your height.' }
+      ]
+    },
+    circulatory: {
+      name: 'Circulatory system',
+      color: 'var(--c-circulatory)',
+      overview: 'The circulatory system is the body’s delivery network: the heart pumps blood through roughly 100,000 km of vessels. Arteries carry oxygen-rich blood away from the heart, veins bring it back, and tiny capillaries reach almost every cell. Along the way, blood delivers oxygen and nutrients and hauls away waste.',
+      parts: [
+        { id: 'part-heart', label: 'Heart', fact: 'Your heart beats about 100,000 times a day, pumping roughly 7,500 litres of blood.' },
+        { id: 'part-aorta', label: 'Aorta', fact: 'The aorta is the body’s largest artery — in adults it is about as wide as a garden hose.' },
+        { id: 'part-carotid', label: 'Carotid arteries', fact: 'The carotid arteries feed the brain — you can feel their pulse on either side of your neck.' },
+        { id: 'part-veins', label: 'Veins', fact: 'Veins return blood to the heart and contain one-way valves so blood can climb against gravity.' },
+        { id: 'part-femoral', label: 'Femoral arteries', fact: 'The femoral arteries are the main blood supply to the legs — major highways for sprinting muscles.' }
+      ]
+    },
+    nervous: {
+      name: 'Nervous system',
+      color: 'var(--c-nervous)',
+      overview: 'The nervous system is the body’s command and communication network. The brain and spinal cord form the central system, while nerves branch out to every muscle, organ and sense. Electrical signals race along neurons at speeds of up to 120 metres per second.',
+      parts: [
+        { id: 'part-brain', label: 'Brain', fact: 'The brain contains about 86 billion neurons — more processing cells than there are stars visible to the naked eye, many times over.' },
+        { id: 'part-brainstem', label: 'Brainstem', fact: 'The brainstem quietly runs life support — breathing, heart rate and swallowing — without you thinking about it.' },
+        { id: 'part-cord', label: 'Spinal cord', fact: 'The spinal cord is only about 45 cm long yet carries nearly all traffic between brain and body.' },
+        { id: 'part-sciatic', label: 'Sciatic nerves', fact: 'The sciatic nerve is the longest and widest nerve in the body, running from the lower back to the foot.' },
+        { id: 'part-median', label: 'Median nerves (arms)', fact: 'The median nerve travels through the wrist’s carpal tunnel — the one that "falls asleep" when you lean on your arm.' }
+      ]
+    },
+    digestive: {
+      name: 'Digestive system',
+      color: 'var(--c-digestive)',
+      overview: 'The digestive system turns food into fuel along a tube roughly nine metres long, from mouth to gut’s end. Food is broken down mechanically and chemically, nutrients are absorbed into the blood, and the leftovers are packed up for disposal. A full journey through takes about 24 to 72 hours.',
+      parts: [
+        { id: 'part-esoph', label: 'Esophagus', fact: 'The esophagus pushes food along with muscle waves (peristalsis) — it works even if you eat upside down.' },
+        { id: 'part-stomach', label: 'Stomach', fact: 'Stomach acid is around pH 1.5–3.5 — strong enough to corrode metal; a mucus lining protects the stomach itself.' },
+        { id: 'part-liver', label: 'Liver', fact: 'The liver is the largest internal organ (about 1.4 kg) and handles more than 500 different jobs.' },
+        { id: 'part-smallint', label: 'Small intestine', fact: 'The small intestine is about 6 metres long — the longest stretch of the gut, where most nutrients are absorbed.' },
+        { id: 'part-largeint', label: 'Large intestine', fact: 'The large intestine is about 1.5 metres long; it absorbs water and hosts trillions of helpful bacteria.' }
+      ]
+    },
+    respiratory: {
+      name: 'Respiratory system',
+      color: 'var(--c-respiratory)',
+      overview: 'The respiratory system brings oxygen in and moves carbon dioxide out — about 20,000 breaths every day. Air flows through the nose and trachea into branching bronchi and millions of tiny air sacs called alveoli. There, gases swap with the blood in a fraction of a second.',
+      parts: [
+        { id: 'part-nasal', label: 'Nasal cavity', fact: 'The nasal cavity warms, filters and moistens air before it ever reaches the lungs.' },
+        { id: 'part-trachea', label: 'Trachea (windpipe)', fact: 'The trachea is about 10–12 cm long and held open by C-shaped rings of cartilage.' },
+        { id: 'part-bronchi', label: 'Bronchi', fact: 'The bronchi keep branching — about 23 generations of splits — into ever-smaller airways.' },
+        { id: 'part-lungs', label: 'Lungs', fact: 'Your lungs hold 300–500 million alveoli; spread flat, they would roughly cover a tennis court. The left lung is a bit smaller to make room for the heart.' },
+        { id: 'part-diaphragm', label: 'Diaphragm', fact: 'The dome-shaped diaphragm does most of the work of quiet breathing — it flattens to pull air in.' }
+      ]
+    }
+  };
+
+  var QUIZ = [
+    { q: 'Femur', a: 'skeletal', why: 'The femur — your thigh bone — is the longest bone in the skeleton.' },
+    { q: 'Aorta', a: 'circulatory', why: 'The aorta is the largest artery, carrying blood straight out of the heart.' },
+    { q: 'Cerebellum', a: 'nervous', why: 'The cerebellum is the brain’s balance-and-coordination centre.' },
+    { q: 'Trachea', a: 'respiratory', why: 'The trachea, or windpipe, carries air from the throat toward the lungs.' },
+    { q: 'Esophagus', a: 'digestive', why: 'The esophagus pipes food from the mouth down to the stomach.' },
+    { q: 'Rib cage', a: 'skeletal', why: 'The rib cage is bone — 12 pairs of ribs protecting the heart and lungs.' },
+    { q: 'Alveoli', a: 'respiratory', why: 'Alveoli are the millions of tiny air sacs where oxygen enters the blood.' },
+    { q: 'Sciatic nerve', a: 'nervous', why: 'The sciatic nerve is the body’s longest nerve, running down each leg.' },
+    { q: 'Stomach', a: 'digestive', why: 'The stomach churns food with acid as an early step of digestion.' },
+    { q: 'Capillaries', a: 'circulatory', why: 'Capillaries are the tiniest blood vessels, reaching nearly every cell.' }
+  ];
+
+  var SYS_KEYS = ['skeletal', 'circulatory', 'nervous', 'digestive', 'respiratory'];
+
+  var panel = document.getElementById('panel');
+  var quizChip = document.getElementById('quizChip');
+  var chips = Array.prototype.slice.call(document.querySelectorAll('.chip[data-sys]'));
+
+  var visible = {};       // sysKey -> bool
+  var activeSys = null;   // system shown in panel
+  var litPart = null;     // currently highlighted part id
+  var mode = 'explore';   // 'explore' | 'quiz'
+  var quiz = { i: 0, score: 0, answered: false };
+
+  function clearLit() {
+    if (litPart) {
+      var el = document.getElementById(litPart);
+      if (el) el.classList.remove('lit');
+      litPart = null;
+    }
+  }
+
+  function setLit(id) {
+    clearLit();
+    var el = document.getElementById(id);
+    if (el) { el.classList.add('lit'); litPart = id; }
+  }
+
+  function syncSvg() {
+    SYS_KEYS.forEach(function (k) {
+      var g = document.getElementById('g-' + k);
+      if (!g) return;
+      g.classList.toggle('on', !!visible[k]);
+      g.classList.toggle('active', activeSys === k && mode === 'explore');
+    });
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function renderIntro() {
+    panel.style.setProperty('--sysc', 'var(--ink)');
+    panel.innerHTML =
+      '<h2><span class="dot" style="background:var(--ink)"></span>Welcome to the atlas</h2>' +
+      '<p class="overview">Five systems keep this body running. Toggle any of them above to draw its schematic over the figure — you can stack several at once. Then tap a part in this panel to light it up and learn one real fact about it.</p>' +
+      '<p class="hint">Ready to test yourself? Hit <strong>Quiz me</strong> for ten quick flashcards.</p>';
+  }
+
+  function renderSystem(key) {
+    var sys = SYSTEMS[key];
+    panel.style.setProperty('--sysc', sys.color);
+    var html =
+      '<h2><span class="dot"></span>' + esc(sys.name) + '</h2>' +
+      '<p class="overview">' + sys.overview + '</p>' +
+      '<ul class="parts">';
+    sys.parts.forEach(function (p) {
+      html += '<li><button type="button" class="part-btn" data-part="' + p.id + '" aria-pressed="false">' + esc(p.label) + '</button></li>';
+    });
+    html += '</ul><div class="fact" id="factBox" hidden></div>';
+    panel.innerHTML = html;
+
+    var factBox = document.getElementById('factBox');
+    Array.prototype.forEach.call(panel.querySelectorAll('.part-btn'), function (btn) {
+      btn.addEventListener('click', function () {
+        Array.prototype.forEach.call(panel.querySelectorAll('.part-btn'), function (b) { b.setAttribute('aria-pressed', 'false'); });
+        btn.setAttribute('aria-pressed', 'true');
+        var pid = btn.getAttribute('data-part');
+        var part = null;
+        for (var i = 0; i < sys.parts.length; i++) if (sys.parts[i].id === pid) part = sys.parts[i];
+        setLit(pid);
+        if (part && factBox) {
+          factBox.hidden = false;
+          factBox.textContent = part.fact;
+        }
+      });
+    });
+  }
+
+  function renderQuizQuestion() {
+    var item = QUIZ[quiz.i];
+    panel.style.setProperty('--sysc', '#0f766e');
+    var html =
+      '<h2><span class="dot" style="background:#0f766e"></span>Flashcard quiz</h2>' +
+      '<div class="quiz-meta"><span>Question ' + (quiz.i + 1) + ' of ' + QUIZ.length + '</span><span>Score: ' + quiz.score + '</span></div>' +
+      '<p class="quiz-q">Which system does the <em>' + esc(item.q) + '</em> belong to?</p>' +
+      '<div class="quiz-opts">';
+    SYS_KEYS.forEach(function (k) {
+      html += '<button type="button" class="part-btn" data-ans="' + k + '"><span class="dot" style="background:var(--c-' + k + ')"></span>' + esc(SYSTEMS[k].name.replace(' system', '')) + '</button>';
+    });
+    html += '</div><div class="quiz-fb" id="quizFb" hidden></div>' +
+      '<button type="button" class="btn-solid quiz-next" id="quizNext" hidden>Next question</button>';
+    panel.innerHTML = html;
+    quiz.answered = false;
+
+    var fb = document.getElementById('quizFb');
+    var nextBtn = document.getElementById('quizNext');
+    Array.prototype.forEach.call(panel.querySelectorAll('[data-ans]'), function (btn) {
+      btn.addEventListener('click', function () {
+        if (quiz.answered) return;
+        quiz.answered = true;
+        var picked = btn.getAttribute('data-ans');
+        var right = picked === item.a;
+        if (right) quiz.score++;
+        fb.hidden = false;
+        fb.className = 'quiz-fb ' + (right ? 'ok' : 'no');
+        fb.textContent = (right ? 'Correct! ' : 'Not quite — it belongs to the ' + SYSTEMS[item.a].name.toLowerCase() + '. ') + item.why;
+        nextBtn.hidden = false;
+        nextBtn.textContent = quiz.i + 1 < QUIZ.length ? 'Next question' : 'See my score';
+        nextBtn.focus();
+      });
+    });
+    nextBtn.addEventListener('click', function () {
+      quiz.i++;
+      if (quiz.i < QUIZ.length) renderQuizQuestion();
+      else renderQuizDone();
+    });
+  }
+
+  function renderQuizDone() {
+    panel.style.setProperty('--sysc', '#0f766e');
+    var msg = quiz.score >= 9 ? 'Outstanding — practically a physiologist!'
+      : quiz.score >= 7 ? 'Great work — your body knowledge is solid.'
+      : quiz.score >= 5 ? 'Nice — a couple more explorations and you’ll ace it.'
+      : 'Good start — explore the systems and try again!';
+    panel.innerHTML =
+      '<h2><span class="dot" style="background:#0f766e"></span>Quiz complete</h2>' +
+      '<p class="score-big">' + quiz.score + ' / ' + QUIZ.length + '</p>' +
+      '<p class="overview">' + msg + '</p>' +
+      '<button type="button" class="btn-solid quiz-next" id="quizRestart">Try again</button>';
+    document.getElementById('quizRestart').addEventListener('click', function () {
+      quiz = { i: 0, score: 0, answered: false };
+      renderQuizQuestion();
+    });
+  }
+
+  function enterQuiz() {
+    mode = 'quiz';
+    quizChip.setAttribute('aria-pressed', 'true');
+    clearLit();
+    quiz = { i: 0, score: 0, answered: false };
+    renderQuizQuestion();
+    syncSvg();
+  }
+
+  function exitQuiz() {
+    mode = 'explore';
+    quizChip.setAttribute('aria-pressed', 'false');
+    if (activeSys) renderSystem(activeSys); else renderIntro();
+    syncSvg();
+  }
+
+  chips.forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      var key = chip.getAttribute('data-sys');
+      if (mode === 'quiz') exitQuiz();
+      var nowOn = !visible[key];
+      visible[key] = nowOn;
+      chip.setAttribute('aria-pressed', String(nowOn));
+      if (nowOn) {
+        activeSys = key;
+        renderSystem(key);
+      } else {
+        if (activeSys === key) {
+          clearLit();
+          activeSys = null;
+          for (var i = 0; i < SYS_KEYS.length; i++) {
+            if (visible[SYS_KEYS[i]]) { activeSys = SYS_KEYS[i]; break; }
+          }
+          if (activeSys) renderSystem(activeSys); else renderIntro();
+        }
+      }
+      syncSvg();
+    });
+  });
+
+  quizChip.addEventListener('click', function () {
+    if (mode === 'quiz') exitQuiz(); else enterQuiz();
+  });
+
+  // Tapping a part directly on the figure also selects it in the panel.
+  SYS_KEYS.forEach(function (k) {
+    SYSTEMS[k].parts.forEach(function (p) {
+      var el = document.getElementById(p.id);
+      if (!el) return;
+      el.addEventListener('click', function () {
+        if (mode === 'quiz') return;
+        if (activeSys !== k) { activeSys = k; renderSystem(k); syncSvg(); }
+        var btn = panel.querySelector('[data-part="' + p.id + '"]');
+        if (btn) btn.click();
+      });
+    });
+  });
+
+  renderIntro();
+  syncSvg();
+})();
+</script>
+</body>
+</html>

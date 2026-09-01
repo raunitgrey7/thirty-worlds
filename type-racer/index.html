@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Typing Velocity — Terminal Typing Speed Trainer</title>
+<meta name="description" content="Typing Velocity: a dark terminal-style typing speed trainer. Race 30 or 60 seconds through real literature, science quotes and proverbs. Live WPM, accuracy and a sparkline of your run.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⌨️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0e12;
+  --panel:#10161d;
+  --panel2:#0d1319;
+  --line:#1f2b36;
+  --ink:#d7e2ea;
+  --dim:#6b7f8f;
+  --green:#3ddc84;
+  --green-dim:#1c5c3c;
+  --red:#ff5d6c;
+  --amber:#ffc857;
+  --cyan:#5ad1e6;
+  --mono:'JetBrains Mono',ui-monospace,Consolas,monospace;
+  --sans:'Inter',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  min-height:100vh;
+  overflow-x:hidden;
+  background-image:
+    radial-gradient(1200px 600px at 70% -10%, rgba(61,220,132,.06), transparent 60%),
+    radial-gradient(900px 500px at 10% 110%, rgba(90,209,230,.05), transparent 60%);
+}
+.hub-link{position:fixed;top:14px;left:14px;z-index:1000;padding:8px 14px;border-radius:999px;font:600 13px/1 Inter,system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(8px);background:rgba(15,15,25,.55);color:#fff;border:1px solid rgba(255,255,255,.25)}
+.hub-link:hover{background:rgba(40,50,60,.7)}
+.wrap{max-width:880px;margin:0 auto;padding:64px 16px 48px}
+header.masthead{text-align:center;margin-bottom:26px}
+.term-title{
+  font-family:var(--mono);
+  font-weight:700;
+  font-size:clamp(1.5rem,5vw,2.6rem);
+  letter-spacing:-.02em;
+  color:var(--green);
+  text-shadow:0 0 24px rgba(61,220,132,.35);
+}
+.term-title .prompt{color:var(--dim)}
+.cursor-blink{display:inline-block;width:.55em;height:1em;background:var(--green);vertical-align:-.12em;margin-left:2px;animation:blink 1.06s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.tagline{color:var(--dim);font-size:.9rem;margin-top:8px}
+.controls{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:20px}
+.seg{display:flex;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
+.seg button{
+  appearance:none;border:0;background:transparent;color:var(--dim);
+  font:600 .85rem var(--sans);padding:10px 16px;min-height:44px;min-width:44px;
+  border-radius:9px;cursor:pointer;transition:background .15s,color .15s,transform .1s;
+}
+.seg button:active{transform:scale(.96)}
+.seg button[aria-pressed="true"]{background:var(--green-dim);color:var(--green)}
+.seg button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.statbar{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  background:var(--panel2);border:1px solid var(--line);border-bottom:0;
+  border-radius:14px 14px 0 0;padding:12px 18px;font-family:var(--mono);
+}
+.statbar .cell{display:flex;flex-direction:column;align-items:center;min-width:60px}
+.statbar .lbl{font-size:.6rem;letter-spacing:.14em;color:var(--dim);text-transform:uppercase}
+.statbar .val{font-size:1.25rem;font-weight:700;color:var(--green);font-variant-numeric:tabular-nums}
+.statbar .val.time{color:var(--amber)}
+.statbar .val.acc{color:var(--cyan)}
+.term{
+  position:relative;
+  background:var(--panel);border:1px solid var(--line);
+  border-radius:0 0 14px 14px;
+  padding:26px 22px 30px;
+  cursor:text;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+}
+.term::before{
+  content:"$ type --pack " attr(data-pack) " --" attr(data-mode) "s";
+  display:block;font:400 .72rem var(--mono);color:var(--dim);margin-bottom:16px;
+  overflow-wrap:anywhere;
+}
+#passage{
+  font:400 clamp(1.02rem,2.6vw,1.35rem)/1.9 var(--mono);
+  white-space:pre-wrap;word-break:break-word;
+  user-select:none;-webkit-user-select:none;
+  min-height:5.7em;
+}
+#passage span{border-radius:3px;transition:none}
+#passage span.ok{color:var(--green)}
+#passage span.bad{color:#fff;background:rgba(255,93,108,.35);text-decoration:underline;text-decoration-color:var(--red)}
+#passage span.cur{background:rgba(61,220,132,.28);box-shadow:0 2px 0 var(--green)}
+#passage span.pending{color:var(--dim)}
+#attribution{margin-top:14px;font:400 .78rem var(--mono);color:var(--dim);font-style:italic}
+#hint{margin-top:18px;text-align:center;font-size:.82rem;color:var(--dim)}
+#hint kbd{font-family:var(--mono);background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:2px 7px;font-size:.75rem}
+#ghost-input{
+  position:absolute;top:0;left:0;width:1px;height:1px;
+  opacity:.01;border:0;padding:0;background:transparent;color:transparent;
+  caret-color:transparent;pointer-events:none;
+  font-size:16px; /* prevents iOS focus zoom */
+}
+.paused-veil{
+  position:absolute;inset:0;border-radius:inherit;z-index:5;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(10,14,18,.82);backdrop-filter:blur(3px);
+  font:700 1.1rem var(--mono);color:var(--amber);
+}
+.shake{animation:shake .3s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.pop{animation:pop .25s}
+@keyframes pop{50%{transform:scale(1.25)}}
+/* Results */
+#results{
+  margin-top:26px;background:var(--panel);border:1px solid var(--line);
+  border-radius:14px;padding:28px 22px;text-align:center;
+  animation:rise .4s ease-out;
+}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+#results h2{font:800 .8rem var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+.big-wpm{font:700 clamp(3rem,12vw,5rem)/1 var(--mono);color:var(--green);text-shadow:0 0 32px rgba(61,220,132,.4)}
+.big-wpm small{font-size:.28em;color:var(--dim);font-weight:400;letter-spacing:.1em}
+.res-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin:22px 0 18px}
+.res-cell{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px 8px}
+.res-cell .lbl{font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.res-cell .val{font:700 1.35rem var(--mono);margin-top:4px;font-variant-numeric:tabular-nums}
+.res-cell .val.c-cyan{color:var(--cyan)}
+.res-cell .val.c-amber{color:var(--amber)}
+.res-cell .val.c-green{color:var(--green)}
+#spark{width:100%;max-width:520px;height:90px;margin:6px auto 4px;display:block}
+.spark-cap{font-size:.68rem;color:var(--dim);letter-spacing:.1em;text-transform:uppercase}
+#pb-line{margin-top:14px;font:600 .85rem var(--sans);color:var(--amber)}
+#pb-line.new-pb{animation:pop .4s}
+.btn{
+  appearance:none;cursor:pointer;margin-top:18px;
+  font:700 .9rem var(--sans);letter-spacing:.05em;
+  background:var(--green);color:#04140b;border:0;border-radius:12px;
+  padding:14px 34px;min-height:48px;
+  transition:transform .12s,box-shadow .15s;
+  box-shadow:0 6px 24px rgba(61,220,132,.35);
+}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:scale(.96)}
+.btn:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+footer{margin-top:34px;text-align:center;font-size:.72rem;color:var(--dim);font-family:var(--mono)}
+[hidden]{display:none !important}
+@media (max-width:420px){
+  .statbar{padding:10px 10px}
+  .statbar .val{font-size:1.05rem}
+  .term{padding:20px 14px 24px}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001s !important;animation-iteration-count:1 !important;transition-duration:.001s !important}
+  .cursor-blink{animation:none}
+}
+</style>
+</head>
+<body>
+<a class="hub-link" href="https://thirty-worlds.vercel.app/" aria-label="All thirty sites">← All 30</a>
+<div class="wrap">
+<header class="masthead">
+  <h1 class="term-title"><span class="prompt">~/</span>typing_velocity<span class="cursor-blink" aria-hidden="true"></span></h1>
+  <p class="tagline">Type real words from real minds. The clock starts on your first keystroke.</p>
+</header>
+
+<main>
+  <section class="controls" aria-label="Race settings">
+    <div class="seg" role="group" aria-label="Race duration">
+      <button type="button" data-mode="30" aria-pressed="false">30s</button>
+      <button type="button" data-mode="60" aria-pressed="true">60s</button>
+    </div>
+    <div class="seg" role="group" aria-label="Quote pack">
+      <button type="button" data-pack="literature" aria-pressed="true">Literature</button>
+      <button type="button" data-pack="science" aria-pressed="false">Science</button>
+      <button type="button" data-pack="proverbs" aria-pressed="false">Proverbs</button>
+    </div>
+  </section>
+
+  <section aria-label="Typing arena">
+    <div class="statbar" aria-live="off">
+      <div class="cell"><span class="lbl">wpm</span><span class="val" id="live-wpm">0</span></div>
+      <div class="cell"><span class="lbl">accuracy</span><span class="val acc" id="live-acc">100%</span></div>
+      <div class="cell"><span class="lbl">time</span><span class="val time" id="live-time">60</span></div>
+    </div>
+    <div class="term" id="term" data-mode="60" data-pack="literature">
+      <div id="passage" aria-hidden="true"></div>
+      <p id="attribution"></p>
+      <label for="ghost-input" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Type the passage shown above</label>
+      <input id="ghost-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Type the passage shown above">
+      <div class="paused-veil" id="paused-veil" hidden>|| paused — tap or press any key</div>
+    </div>
+    <p id="hint">Tap the terminal or press any key to begin · <kbd>Esc</kbd> restarts</p>
+  </section>
+
+  <section id="results" hidden aria-label="Race results">
+    <h2>Run complete</h2>
+    <div class="big-wpm"><span id="res-wpm">0</span> <small>WPM</small></div>
+    <div class="res-grid">
+      <div class="res-cell"><div class="lbl">Raw WPM</div><div class="val c-amber" id="res-raw">0</div></div>
+      <div class="res-cell"><div class="lbl">Accurate WPM</div><div class="val c-green" id="res-net">0</div></div>
+      <div class="res-cell"><div class="lbl">Accuracy</div><div class="val c-cyan" id="res-acc">0%</div></div>
+      <div class="res-cell"><div class="lbl">Characters</div><div class="val" id="res-chars">0</div></div>
+    </div>
+    <canvas id="spark" width="520" height="90" aria-label="WPM over time sparkline" role="img"></canvas>
+    <div class="spark-cap">wpm over the run</div>
+    <p id="pb-line"></p>
+    <button type="button" class="btn" id="btn-again">Run it again</button>
+  </section>
+</main>
+<footer>est. 2026 · quotes are public-domain or widely attributed · wpm = chars/5 per minute</footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+var PACKS = {
+  literature: [
+    ["It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness, it was the epoch of belief, it was the epoch of incredulity.", "Charles Dickens, A Tale of Two Cities"],
+    ["Emma Woodhouse, handsome, clever, and rich, with a comfortable home and happy disposition, seemed to unite some of the best blessings of existence.", "Jane Austen, Emma"],
+    ["Happy families are all alike; every unhappy family is unhappy in its own way. Everything was in confusion in the Oblonskys' house.", "Leo Tolstoy, Anna Karenina"],
+    ["Whatever our souls are made of, his and mine are the same; and Linton's is as different as a moonbeam from lightning, or frost from fire.", "Emily Bronte, Wuthering Heights"],
+    ["I went to the woods because I wished to live deliberately, to front only the essential facts of life, and see if I could not learn what it had to teach, and not, when I came to die, discover that I had not lived.", "Henry David Thoreau, Walden"],
+    ["There is no such thing as a moral or an immoral book. Books are well written, or badly written. That is all. The nineteenth century dislike of realism is the rage of Caliban seeing his own face in a glass.", "Oscar Wilde, The Picture of Dorian Gray"],
+    ["In my younger and more vulnerable years my father gave me some advice that I've been turning over in my mind ever since.", "F. Scott Fitzgerald, The Great Gatsby"],
+    ["It is a capital mistake to theorize before one has data. Insensibly one begins to twist facts to suit theories, instead of theories to suit facts.", "Arthur Conan Doyle, A Scandal in Bohemia"],
+    ["Would you tell me, please, which way I ought to go from here? That depends a good deal on where you want to get to, said the Cat.", "Lewis Carroll, Alice's Adventures in Wonderland"],
+    ["Call me Ishmael. Some years ago, never mind how long precisely, having little or no money in my purse, I thought I would sail about a little and see the watery part of the world.", "Herman Melville, Moby-Dick"]
+  ],
+  science: [
+    ["There is grandeur in this view of life, with its several powers, having been originally breathed into a few forms or into one.", "Charles Darwin, On the Origin of Species"],
+    ["I am among those who think that science has great beauty. A scientist in his laboratory is not only a technician: he is also a child placed before natural phenomena which impress him like a fairy tale.", "Marie Curie"],
+    ["The important thing is not to stop questioning. Curiosity has its own reason for existence. One cannot help but be in awe when he contemplates the mysteries of eternity, of life, of the marvelous structure of reality.", "Albert Einstein"],
+    ["I do not know what I may appear to the world, but to myself I seem to have been only like a boy playing on the seashore, and diverting myself in now and then finding a smoother pebble than ordinary.", "Isaac Newton"],
+    ["The nitrogen in our DNA, the calcium in our teeth, the iron in our blood, the carbon in our apple pies were made in the interiors of collapsing stars. We are made of starstuff.", "Carl Sagan, Cosmos"],
+    ["The first principle is that you must not fool yourself, and you are the easiest person to fool. So you have to be very careful about that.", "Richard Feynman"],
+    ["Philosophy is written in this grand book, the universe, which stands continually open to our gaze. But it cannot be understood unless one first learns to comprehend the language in which it is written.", "Galileo Galilei, The Assayer"],
+    ["Those who contemplate the beauty of the earth find reserves of strength that will endure as long as life lasts. There is something infinitely healing in the repeated refrains of nature.", "Rachel Carson, The Sense of Wonder"],
+    ["The Analytical Engine has no pretensions whatever to originate anything. It can do whatever we know how to order it to perform.", "Ada Lovelace, Notes on the Analytical Engine"],
+    ["Remember to look up at the stars and not down at your feet. Try to make sense of what you see, and wonder about what makes the universe exist. Be curious.", "Stephen Hawking"]
+  ],
+  proverbs: [
+    ["A journey of a thousand miles begins with a single step. The best time to plant a tree was twenty years ago. The second best time is now.", "Chinese proverbs"],
+    ["Fall down seven times, stand up eight. The bamboo that bends is stronger than the oak that resists. Vision without action is a daydream.", "Japanese proverbs"],
+    ["If you want to go fast, go alone. If you want to go far, go together. However long the night, the dawn will break. Smooth seas do not make skillful sailors.", "African proverbs"],
+    ["Don't count your chickens before they hatch. A bird in the hand is worth two in the bush. The early bird catches the worm. Look before you leap.", "English proverbs"],
+    ["Rome was not built in a day. When in Rome, do as the Romans do. Fortune favors the bold. While there is life, there is hope.", "Latin sayings"],
+    ["The apple does not fall far from the tree. Make hay while the sun shines. A chain is only as strong as its weakest link. Actions speak louder than words.", "English proverbs"],
+    ["Measure twice, cut once. Necessity is the mother of invention. Practice makes perfect. A stitch in time saves nine. Haste makes waste.", "English proverbs"],
+    ["He who asks a question is a fool for five minutes; he who does not ask remains a fool forever. Teach a man to fish and you feed him for a lifetime.", "Chinese proverbs"],
+    ["Trust in God, but tie your camel. Sunshine all the time makes a desert. Ask the experienced rather than the learned. What is learned in youth is carved in stone.", "Arabic proverbs"],
+    ["Better late than never. The grass is always greener on the other side. Every cloud has a silver lining. When the going gets tough, the tough get going.", "English proverbs"]
+  ]
+};
+
+var els = {
+  term: document.getElementById('term'),
+  passage: document.getElementById('passage'),
+  attribution: document.getElementById('attribution'),
+  input: document.getElementById('ghost-input'),
+  liveWpm: document.getElementById('live-wpm'),
+  liveAcc: document.getElementById('live-acc'),
+  liveTime: document.getElementById('live-time'),
+  results: document.getElementById('results'),
+  resWpm: document.getElementById('res-wpm'),
+  resRaw: document.getElementById('res-raw'),
+  resNet: document.getElementById('res-net'),
+  resAcc: document.getElementById('res-acc'),
+  resChars: document.getElementById('res-chars'),
+  spark: document.getElementById('spark'),
+  pbLine: document.getElementById('pb-line'),
+  btnAgain: document.getElementById('btn-again'),
+  hint: document.getElementById('hint'),
+  pausedVeil: document.getElementById('paused-veil')
+};
+
+var S = {
+  mode: 60,
+  pack: 'literature',
+  queue: [],
+  qIndex: 0,
+  spans: [],
+  target: '',
+  prevLen: 0,
+  running: false,
+  paused: false,
+  finished: false,
+  elapsed: 0,
+  lastT: null,
+  timerId: null,
+  keystrokes: 0,
+  errors: 0,
+  correctChars: 0,
+  rawChars: 0,
+  samples: [],
+  lastSampleSec: 0
+};
+
+function shuffle(arr){
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+function pbKey(){ return 'tv-pb-' + S.mode + '-' + S.pack; }
+function getPB(){
+  try { var v = localStorage.getItem(pbKey()); return v ? parseFloat(v) : 0; }
+  catch(e){ return 0; }
+}
+function setPB(v){
+  try { localStorage.setItem(pbKey(), String(v)); } catch(e){}
+}
+
+function loadPassage(){
+  if (S.qIndex >= S.queue.length) { S.queue = S.queue.concat(shuffle(PACKS[S.pack])); }
+  var item = S.queue[S.qIndex];
+  S.target = item[0];
+  els.attribution.textContent = '— ' + item[1];
+  els.passage.textContent = '';
+  S.spans = [];
+  var frag = document.createDocumentFragment();
+  for (var i = 0; i < S.target.length; i++) {
+    var sp = document.createElement('span');
+    sp.textContent = S.target[i];
+    sp.className = 'pending';
+    frag.appendChild(sp);
+    S.spans.push(sp);
+  }
+  els.passage.appendChild(frag);
+  if (S.spans[0]) S.spans[0].classList.add('cur');
+  els.input.value = '';
+  S.prevLen = 0;
+}
+
+function resetRun(){
+  stopTimer();
+  S.running = false; S.paused = false; S.finished = false;
+  S.elapsed = 0; S.lastT = null;
+  S.keystrokes = 0; S.errors = 0; S.correctChars = 0; S.rawChars = 0;
+  S.samples = []; S.lastSampleSec = 0;
+  S.queue = shuffle(PACKS[S.pack]);
+  S.qIndex = 0;
+  els.results.hidden = true;
+  els.pausedVeil.hidden = true;
+  els.hint.hidden = false;
+  els.liveWpm.textContent = '0';
+  els.liveAcc.textContent = '100%';
+  els.liveTime.textContent = String(S.mode);
+  els.term.setAttribute('data-mode', String(S.mode));
+  els.term.setAttribute('data-pack', S.pack);
+  loadPassage();
+}
+
+function startTimer(){
+  if (S.timerId) return;
+  S.lastT = performance.now();
+  S.timerId = setInterval(tick, 100);
+}
+function stopTimer(){
+  if (S.timerId) { clearInterval(S.timerId); S.timerId = null; }
+  S.lastT = null;
+}
+
+function elapsedMin(){ return Math.max(S.elapsed, 500) / 60000; }
+function netWpm(){ return (S.correctChars / 5) / elapsedMin(); }
+function rawWpm(){ return (S.rawChars / 5) / elapsedMin(); }
+function accuracy(){
+  if (S.keystrokes === 0) return 100;
+  return Math.max(0, 100 * (S.keystrokes - S.errors) / S.keystrokes);
+}
+
+function tick(){
+  var now = performance.now();
+  S.elapsed += now - S.lastT;
+  S.lastT = now;
+  var totalMs = S.mode * 1000;
+  var leftMs = Math.max(0, totalMs - S.elapsed);
+  els.liveTime.textContent = String(Math.ceil(leftMs / 1000));
+  els.liveWpm.textContent = String(Math.round(netWpm()));
+  els.liveAcc.textContent = Math.round(accuracy()) + '%';
+  var sec = Math.floor(S.elapsed / 1000);
+  if (sec > S.lastSampleSec) {
+    S.lastSampleSec = sec;
+    S.samples.push(netWpm());
+  }
+  if (leftMs <= 0) finishRun();
+}
+
+function beginIfNeeded(){
+  if (!S.running && !S.finished) {
+    S.running = true;
+    els.hint.hidden = true;
+    startTimer();
+  } else if (S.paused) {
+    resumeRun();
+  }
+}
+
+function pauseRun(){
+  if (!S.running || S.finished || S.paused) return;
+  S.paused = true;
+  stopTimer();
+  els.pausedVeil.hidden = false;
+}
+function resumeRun(){
+  if (!S.paused) return;
+  S.paused = false;
+  els.pausedVeil.hidden = true;
+  startTimer();
+}
+
+function onInput(){
+  if (S.finished) { els.input.value = ''; return; }
+  beginIfNeeded();
+  var v = els.input.value;
+  if (v.length > S.target.length) {
+    v = v.slice(0, S.target.length);
+    els.input.value = v;
+  }
+  var i;
+  if (v.length > S.prevLen) {
+    for (i = S.prevLen; i < v.length; i++) {
+      S.keystrokes++;
+      S.rawChars++;
+      if (v[i] === S.target[i]) S.correctChars++;
+      else S.errors++;
+    }
+  } else if (v.length < S.prevLen) {
+    for (i = v.length; i < S.prevLen; i++) {
+      var sp0 = S.spans[i];
+      if (sp0 && sp0.classList.contains('ok')) S.correctChars = Math.max(0, S.correctChars - 1);
+      S.rawChars = Math.max(0, S.rawChars - 1);
+    }
+  }
+  S.prevLen = v.length;
+  for (i = 0; i < S.spans.length; i++) {
+    var sp = S.spans[i];
+    if (i < v.length) {
+      sp.className = (v[i] === S.target[i]) ? 'ok' : 'bad';
+    } else if (i === v.length) {
+      sp.className = 'cur';
+    } else {
+      sp.className = 'pending';
+    }
+  }
+  els.liveWpm.textContent = String(S.running ? Math.round(netWpm()) : 0);
+  els.liveAcc.textContent = Math.round(accuracy()) + '%';
+  if (v.length === S.target.length) {
+    S.qIndex++;
+    loadPassage();
+  }
+}
+
+function drawSpark(){
+  var c = els.spark;
+  var dpr = window.devicePixelRatio || 1;
+  var cssW = Math.min(520, c.parentElement ? c.parentElement.clientWidth - 20 : 520);
+  if (cssW < 200) cssW = 200;
+  var cssH = 90;
+  c.style.width = cssW + 'px';
+  c.style.height = cssH + 'px';
+  c.width = Math.round(cssW * dpr);
+  c.height = Math.round(cssH * dpr);
+  var ctx = c.getContext('2d');
+  if (!ctx) return;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, cssW, cssH);
+  var data = S.samples.length ? S.samples.slice() : [netWpm()];
+  if (data.length === 1) data.push(data[0]);
+  var max = Math.max.apply(null, data.concat([10]));
+  var pad = 8;
+  var xAt = function(i){ return pad + (cssW - pad * 2) * (i / (data.length - 1)); };
+  var yAt = function(v){ return cssH - pad - (cssH - pad * 2) * (v / max); };
+  ctx.beginPath();
+  ctx.moveTo(xAt(0), cssH - pad);
+  for (var i = 0; i < data.length; i++) ctx.lineTo(xAt(i), yAt(data[i]));
+  ctx.lineTo(xAt(data.length - 1), cssH - pad);
+  ctx.closePath();
+  var grad = ctx.createLinearGradient(0, 0, 0, cssH);
+  grad.addColorStop(0, 'rgba(61,220,132,.35)');
+  grad.addColorStop(1, 'rgba(61,220,132,0)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.beginPath();
+  for (var j = 0; j < data.length; j++) {
+    if (j === 0) ctx.moveTo(xAt(j), yAt(data[j]));
+    else ctx.lineTo(xAt(j), yAt(data[j]));
+  }
+  ctx.strokeStyle = '#3ddc84';
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+  var last = data[data.length - 1];
+  ctx.beginPath();
+  ctx.arc(xAt(data.length - 1), yAt(last), 3.5, 0, Math.PI * 2);
+  ctx.fillStyle = '#5ad1e6';
+  ctx.fill();
+}
+
+function finishRun(){
+  if (S.finished) return;
+  S.finished = true;
+  S.running = false;
+  stopTimer();
+  els.pausedVeil.hidden = true;
+  var net = Math.round(netWpm());
+  var raw = Math.round(rawWpm());
+  var acc = Math.round(accuracy());
+  els.resWpm.textContent = String(net);
+  els.resRaw.textContent = String(raw);
+  els.resNet.textContent = String(net);
+  els.resAcc.textContent = acc + '%';
+  els.resChars.textContent = String(S.rawChars);
+  var pb = getPB();
+  if (net > pb) {
+    setPB(net);
+    els.pbLine.textContent = '★ New personal best for ' + S.mode + 's / ' + S.pack + ': ' + net + ' WPM';
+    els.pbLine.classList.add('new-pb');
+  } else {
+    els.pbLine.textContent = 'Personal best (' + S.mode + 's / ' + S.pack + '): ' + Math.round(pb) + ' WPM';
+    els.pbLine.classList.remove('new-pb');
+  }
+  els.results.hidden = false;
+  drawSpark();
+  els.results.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' });
+  els.btnAgain.focus();
+}
+
+/* wiring */
+els.input.addEventListener('input', onInput);
+els.input.addEventListener('keydown', function(e){
+  if (e.key === 'Escape') { e.preventDefault(); resetRun(); }
+});
+function focusInput(){
+  els.input.focus({ preventScroll: true });
+  if (S.paused) resumeRun();
+}
+els.term.addEventListener('click', focusInput);
+els.term.addEventListener('touchend', function(e){ e.preventDefault(); focusInput(); });
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape') { resetRun(); return; }
+  if (S.finished) return;
+  var tag = document.activeElement ? document.activeElement.tagName : '';
+  if (tag !== 'INPUT' && tag !== 'BUTTON' && tag !== 'A' && e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    focusInput();
+  }
+});
+
+var modeBtns = document.querySelectorAll('[data-mode]');
+var packBtns = document.querySelectorAll('[data-pack]');
+modeBtns.forEach(function(b){
+  if (b.tagName !== 'BUTTON') return;
+  b.addEventListener('click', function(){
+    modeBtns.forEach(function(x){ if (x.tagName === 'BUTTON') x.setAttribute('aria-pressed', 'false'); });
+    b.setAttribute('aria-pressed', 'true');
+    S.mode = parseInt(b.getAttribute('data-mode'), 10);
+    resetRun();
+  });
+});
+packBtns.forEach(function(b){
+  if (b.tagName !== 'BUTTON') return;
+  b.addEventListener('click', function(){
+    packBtns.forEach(function(x){ if (x.tagName === 'BUTTON') x.setAttribute('aria-pressed', 'false'); });
+    b.setAttribute('aria-pressed', 'true');
+    S.pack = b.getAttribute('data-pack');
+    resetRun();
+  });
+});
+
+els.btnAgain.addEventListener('click', function(){ resetRun(); focusInput(); });
+
+document.addEventListener('visibilitychange', function(){
+  if (document.hidden) pauseRun();
+});
+window.addEventListener('resize', function(){
+  if (S.finished && !els.results.hidden) drawSpark();
+});
+
+resetRun();
+})();
+</script>
+</body>
+</html>

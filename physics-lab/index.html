@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Physics Playground — Gravity &amp; Bounce Sandbox</title>
+<meta name="description" content="A hands-on physics sandbox: spawn bouncing balls, then bend the rules — tune gravity from Moon to Jupiter, change bounciness, add wind and air drag, flip gravity's direction, and watch real mechanics play out.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#07090f;
+    --panel:#0d1119;
+    --edge:#1c2536;
+    --ink:#e8eefc;
+    --dim:#8b96ad;
+    --cyan:#22d3ee;
+    --violet:#a78bfa;
+    --pink:#f472b6;
+    --green:#34d399;
+    --amber:#fbbf24;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:Inter,system-ui,sans-serif;
+    overflow:hidden;
+    display:flex;flex-direction:column;
+  }
+  .hub-link{position:fixed;top:14px;left:14px;z-index:1000;padding:8px 14px;border-radius:999px;font:600 13px/1 Inter,system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(8px);background:rgba(15,15,25,.55);color:#fff;border:1px solid rgba(255,255,255,.25)}
+  .hub-link:hover{border-color:var(--cyan)}
+
+  header{
+    padding:12px 16px 8px 118px;
+    display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+  }
+  header h1{
+    font:700 clamp(17px,3vw,24px)/1.1 "JetBrains Mono",monospace;
+    color:var(--cyan);text-shadow:0 0 18px rgba(34,211,238,.5);
+    letter-spacing:-.02em;
+  }
+  header h1::before{content:"> ";color:var(--pink)}
+  header p{font:500 clamp(11px,1.6vw,13px)/1.3 Inter,sans-serif;color:var(--dim)}
+
+  #stage-wrap{position:relative;flex:1;min-height:0}
+  canvas#stage{
+    position:absolute;inset:0;width:100%;height:100%;display:block;
+    touch-action:none;cursor:crosshair;outline:none;
+  }
+  canvas#stage:focus-visible{box-shadow:inset 0 0 0 3px var(--violet)}
+
+  #hudCount{
+    position:absolute;top:10px;right:12px;pointer-events:none;
+    font:600 12px/1.4 "JetBrains Mono",monospace;color:var(--green);
+    background:rgba(7,9,15,.7);border:1px solid var(--edge);border-radius:8px;
+    padding:6px 10px;text-align:right;
+  }
+  #hudCount .g{color:var(--amber)}
+
+  /* ---------- control deck ---------- */
+  #deck{
+    background:linear-gradient(180deg,var(--panel),#0a0d15);
+    border-top:1px solid var(--edge);
+    padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));
+    display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:center;
+    max-height:44vh;overflow-y:auto;
+  }
+  .ctl{display:flex;flex-direction:column;gap:2px;min-width:130px;flex:0 1 auto}
+  .ctl label{
+    display:flex;justify-content:space-between;gap:8px;
+    font:600 10px/1.4 "JetBrains Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);
+  }
+  .ctl output{color:var(--cyan);font:700 10px/1.4 "JetBrains Mono",monospace}
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;width:100%;height:34px;background:transparent;cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:#233049}
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:22px;height:22px;margin-top:-9px;border-radius:50%;
+    background:var(--cyan);border:2px solid #04141c;box-shadow:0 0 12px rgba(34,211,238,.7);
+  }
+  input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:#233049}
+  input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--cyan);border:2px solid #04141c}
+  input[type=range]:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
+
+  .group{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:center}
+  .group-label{font:600 10px/1 "JetBrains Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);width:100%;text-align:center}
+  .btn{
+    min-height:44px;min-width:44px;padding:0 14px;border-radius:10px;cursor:pointer;
+    background:#131a28;border:1px solid var(--edge);color:var(--ink);
+    font:600 12px/1.2 "JetBrains Mono",monospace;
+    transition:transform .12s ease,border-color .12s ease,background .12s ease;
+  }
+  .btn:hover{border-color:var(--cyan);background:#182236}
+  .btn:active{transform:scale(.94)}
+  .btn:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
+  .btn[aria-pressed="true"]{background:var(--cyan);color:#04141c;border-color:var(--cyan);box-shadow:0 0 16px rgba(34,211,238,.5)}
+  .btn.preset{color:var(--amber)}
+  .btn.preset:hover{border-color:var(--amber)}
+  .btn.danger{color:var(--pink)}
+  .btn.danger:hover{border-color:var(--pink)}
+  .btn.spawn{color:var(--green)}
+  .btn.spawn:hover{border-color:var(--green)}
+
+  @media (max-width:700px){
+    header{padding-left:104px}
+    .ctl{min-width:118px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{transition-duration:.001s!important;animation:none!important}
+  }
+</style>
+</head>
+<body>
+<a class="hub-link" href="https://thirty-worlds.vercel.app/" aria-label="All thirty sites">← All 30</a>
+
+<header>
+  <h1>physics_playground</h1>
+  <p>Click, tap or drag on the dark area to spawn balls — then bend the laws of nature below.</p>
+</header>
+
+<div id="stage-wrap">
+  <canvas id="stage" tabindex="0" aria-label="Physics sandbox. Click or drag to spawn bouncing balls; press Space or Enter to drop a ball."></canvas>
+  <div id="hudCount" aria-hidden="true">balls 0/300<br><span class="g">g 9.8 m/s² ↓</span></div>
+</div>
+
+<div id="deck" role="group" aria-label="Physics controls">
+  <div class="ctl">
+    <label for="gravity">gravity <output id="gravityOut">9.8</output></label>
+    <input type="range" id="gravity" min="0" max="30" step="0.1" value="9.8" aria-label="Gravity strength, metres per second squared">
+  </div>
+  <div class="ctl">
+    <label for="bounce">bounciness <output id="bounceOut">0.80</output></label>
+    <input type="range" id="bounce" min="0" max="1" step="0.01" value="0.8" aria-label="Bounciness (coefficient of restitution)">
+  </div>
+  <div class="ctl">
+    <label for="drag">air&nbsp;drag <output id="dragOut">0.10</output></label>
+    <input type="range" id="drag" min="0" max="2" step="0.05" value="0.1" aria-label="Air drag">
+  </div>
+  <div class="ctl">
+    <label for="wind">wind <output id="windOut">0.0</output></label>
+    <input type="range" id="wind" min="-15" max="15" step="0.5" value="0" aria-label="Wind, metres per second squared (negative blows left)">
+  </div>
+
+  <div class="group" role="group" aria-label="Gravity direction">
+    <span class="group-label">gravity dir</span>
+    <button class="btn dir" data-dir="down" aria-pressed="true" aria-label="Gravity pulls down">↓</button>
+    <button class="btn dir" data-dir="left" aria-pressed="false" aria-label="Gravity pulls left">←</button>
+    <button class="btn dir" data-dir="up" aria-pressed="false" aria-label="Gravity pulls up">↑</button>
+    <button class="btn dir" data-dir="right" aria-pressed="false" aria-label="Gravity pulls right">→</button>
+  </div>
+
+  <div class="group" role="group" aria-label="Gravity presets">
+    <span class="group-label">presets</span>
+    <button class="btn preset" id="presetMoon">☾ Moon 1.6</button>
+    <button class="btn preset" id="presetEarth">⊕ Earth 9.8</button>
+    <button class="btn preset" id="presetJupiter">♃ Jupiter 24.8</button>
+  </div>
+
+  <div class="group" role="group" aria-label="Actions">
+    <span class="group-label">actions</span>
+    <button class="btn spawn" id="dropBtn">+ drop ball</button>
+    <button class="btn" id="trailsBtn" aria-pressed="false">trails</button>
+    <button class="btn" id="pauseBtn" aria-pressed="false">pause</button>
+    <button class="btn danger" id="clearBtn">clear</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var canvas = document.getElementById('stage');
+  var ctx = canvas.getContext('2d');
+  var wrap = document.getElementById('stage-wrap');
+
+  var PPM = 60;               // pixels per metre
+  var MAX_BALLS = 300;
+  var COLORS = ['#22d3ee','#a78bfa','#f472b6','#34d399','#fbbf24','#60a5fa','#fb7185','#a3e635'];
+
+  var W = 0, H = 0, DPR = 1;
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = wrap.clientWidth; H = wrap.clientHeight;
+    canvas.width = Math.round(W * DPR);
+    canvas.height = Math.round(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    paintBackdrop();
+  }
+  window.addEventListener('resize', resize);
+
+  /* ---------- state ---------- */
+  var balls = [];
+  var params = {
+    g: 9.8,
+    dir: 'down',           // down | up | left | right
+    restitution: 0.8,
+    drag: 0.1,
+    wind: 0,
+    trails: false,
+    paused: false
+  };
+
+  /* ---------- controls ---------- */
+  function bindSlider(id, outId, key, fmt){
+    var el = document.getElementById(id);
+    var out = document.getElementById(outId);
+    el.addEventListener('input', function(){
+      params[key] = parseFloat(el.value);
+      out.textContent = fmt(params[key]);
+      updateHud();
+    });
+    out.textContent = fmt(parseFloat(el.value));
+  }
+  bindSlider('gravity', 'gravityOut', 'g', function(v){ return v.toFixed(1); });
+  bindSlider('bounce', 'bounceOut', 'restitution', function(v){ return v.toFixed(2); });
+  bindSlider('drag', 'dragOut', 'drag', function(v){ return v.toFixed(2); });
+  bindSlider('wind', 'windOut', 'wind', function(v){ return (v > 0 ? '+' : '') + v.toFixed(1); });
+
+  var dirButtons = Array.prototype.slice.call(document.querySelectorAll('.btn.dir'));
+  var DIR_ARROW = { down:'↓', up:'↑', left:'←', right:'→' };
+  dirButtons.forEach(function(b){
+    b.addEventListener('click', function(){
+      params.dir = b.dataset.dir;
+      dirButtons.forEach(function(o){ o.setAttribute('aria-pressed', String(o === b)); });
+      updateHud();
+    });
+  });
+
+  function setGravity(v){
+    params.g = v;
+    var slider = document.getElementById('gravity');
+    slider.value = String(v);
+    document.getElementById('gravityOut').textContent = v.toFixed(1);
+    updateHud();
+  }
+  document.getElementById('presetMoon').addEventListener('click', function(){ setGravity(1.6); });
+  document.getElementById('presetEarth').addEventListener('click', function(){ setGravity(9.8); });
+  document.getElementById('presetJupiter').addEventListener('click', function(){ setGravity(24.8); });
+
+  var trailsBtn = document.getElementById('trailsBtn');
+  trailsBtn.addEventListener('click', function(){
+    params.trails = !params.trails;
+    trailsBtn.setAttribute('aria-pressed', String(params.trails));
+    if (!params.trails) paintBackdrop();
+  });
+  var pauseBtn = document.getElementById('pauseBtn');
+  pauseBtn.addEventListener('click', function(){
+    params.paused = !params.paused;
+    pauseBtn.setAttribute('aria-pressed', String(params.paused));
+    pauseBtn.textContent = params.paused ? 'resume' : 'pause';
+  });
+  document.getElementById('clearBtn').addEventListener('click', function(){
+    balls.length = 0;
+    paintBackdrop();
+    updateHud();
+  });
+  document.getElementById('dropBtn').addEventListener('click', function(){
+    spawn(W * (0.2 + Math.random() * 0.6), H * 0.15, (Math.random() - 0.5) * 3, 0);
+  });
+
+  var hud = document.getElementById('hudCount');
+  function updateHud(){
+    hud.innerHTML = 'balls ' + balls.length + '/' + MAX_BALLS +
+      '<br><span class="g">g ' + params.g.toFixed(1) + ' m/s² ' + DIR_ARROW[params.dir] + '</span>';
+  }
+
+  /* ---------- spawning ---------- */
+  function spawn(x, y, vx, vy){
+    if (balls.length >= MAX_BALLS) balls.shift();
+    var r = 6 + Math.random() * 18;
+    balls.push({
+      x: x, y: y,
+      vx: vx || 0, vy: vy || 0,          // m/s
+      r: r,
+      m: r * r,                           // mass ∝ area
+      color: COLORS[Math.floor(Math.random() * COLORS.length)]
+    });
+    updateHud();
+  }
+
+  var spawning = false, lastSpawn = 0, lastPX = 0, lastPY = 0, lastPT = 0;
+  function pointerPos(e){
+    var rect = canvas.getBoundingClientRect();
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  }
+  canvas.addEventListener('pointerdown', function(e){
+    canvas.setPointerCapture(e.pointerId);
+    spawning = true;
+    var p = pointerPos(e);
+    lastPX = p.x; lastPY = p.y; lastPT = performance.now();
+    spawn(p.x, p.y, 0, 0);
+    lastSpawn = performance.now();
+  });
+  canvas.addEventListener('pointermove', function(e){
+    if (!spawning) return;
+    var now = performance.now();
+    var p = pointerPos(e);
+    if (now - lastSpawn > 55){
+      var dtp = Math.max(16, now - lastPT) / 1000;
+      var vx = (p.x - lastPX) / dtp / PPM * 0.6;
+      var vy = (p.y - lastPY) / dtp / PPM * 0.6;
+      spawn(p.x, p.y, vx, vy);
+      lastSpawn = now;
+    }
+    lastPX = p.x; lastPY = p.y; lastPT = now;
+  });
+  function stopSpawn(){ spawning = false; }
+  canvas.addEventListener('pointerup', stopSpawn);
+  canvas.addEventListener('pointercancel', stopSpawn);
+  canvas.addEventListener('keydown', function(e){
+    if (e.key === ' ' || e.key === 'Enter'){
+      e.preventDefault();
+      spawn(W * (0.2 + Math.random() * 0.6), H * 0.15, (Math.random() - 0.5) * 3, 0);
+    }
+  });
+
+  /* ---------- physics ---------- */
+  function step(dt){
+    var gx = 0, gy = 0;
+    if (params.dir === 'down') gy = params.g;
+    else if (params.dir === 'up') gy = -params.g;
+    else if (params.dir === 'left') gx = -params.g;
+    else gx = params.g;
+    gx += params.wind;
+
+    var damp = Math.max(0, 1 - params.drag * dt);
+    var e = params.restitution;
+    var i, b;
+
+    for (i = 0; i < balls.length; i++){
+      b = balls[i];
+      b.vx = (b.vx + gx * dt) * damp;
+      b.vy = (b.vy + gy * dt) * damp;
+      b.x += b.vx * PPM * dt;
+      b.y += b.vy * PPM * dt;
+
+      // walls
+      if (b.x - b.r < 0){ b.x = b.r; b.vx = Math.abs(b.vx) * e; }
+      else if (b.x + b.r > W){ b.x = W - b.r; b.vx = -Math.abs(b.vx) * e; }
+      if (b.y - b.r < 0){ b.y = b.r; b.vy = Math.abs(b.vy) * e; }
+      else if (b.y + b.r > H){
+        b.y = H - b.r;
+        b.vy = -Math.abs(b.vy) * e;
+        // settle jitter on the floor under downward gravity
+        if (params.dir === 'down' && Math.abs(b.vy) < 0.35) b.vy = 0;
+      }
+    }
+
+    // simple pairwise impulse collisions
+    for (i = 0; i < balls.length; i++){
+      for (var j = i + 1; j < balls.length; j++){
+        var a = balls[i], c = balls[j];
+        var dx = c.x - a.x, dy = c.y - a.y;
+        var minD = a.r + c.r;
+        var d2 = dx * dx + dy * dy;
+        if (d2 >= minD * minD || d2 === 0) continue;
+        var d = Math.sqrt(d2);
+        var nx = dx / d, ny = dy / d;
+        // separate
+        var overlap = (minD - d) / 2;
+        a.x -= nx * overlap; a.y -= ny * overlap;
+        c.x += nx * overlap; c.y += ny * overlap;
+        // impulse along normal
+        var rvx = c.vx - a.vx, rvy = c.vy - a.vy;
+        var vn = rvx * nx + rvy * ny;
+        if (vn > 0) continue;
+        var imp = -(1 + e) * vn / (1 / a.m + 1 / c.m);
+        a.vx -= imp * nx / a.m; a.vy -= imp * ny / a.m;
+        c.vx += imp * nx / c.m; c.vy += imp * ny / c.m;
+      }
+    }
+  }
+
+  /* ---------- drawing ---------- */
+  function paintBackdrop(){
+    ctx.fillStyle = '#07090f';
+    ctx.fillRect(0, 0, W, H);
+    drawGrid(1);
+  }
+  function drawGrid(alpha){
+    ctx.save();
+    ctx.globalAlpha = 0.5 * alpha;
+    ctx.strokeStyle = '#101828';
+    ctx.lineWidth = 1;
+    var stepPx = PPM;   // 1 metre
+    ctx.beginPath();
+    for (var x = stepPx; x < W; x += stepPx){ ctx.moveTo(x, 0); ctx.lineTo(x, H); }
+    for (var y = stepPx; y < H; y += stepPx){ ctx.moveTo(0, y); ctx.lineTo(W, y); }
+    ctx.stroke();
+    ctx.globalAlpha = 0.7 * alpha;
+    ctx.fillStyle = '#22303f';
+    ctx.font = '10px "JetBrains Mono", monospace';
+    ctx.fillText('1 square = 1 m', 8, H - 8);
+    ctx.restore();
+  }
+  function draw(){
+    if (params.trails){
+      ctx.fillStyle = 'rgba(7,9,15,0.16)';
+      ctx.fillRect(0, 0, W, H);
+    } else {
+      paintBackdrop();
+    }
+    for (var i = 0; i < balls.length; i++){
+      var b = balls[i];
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, b.r, 0, 6.2832);
+      ctx.fillStyle = b.color;
+      ctx.fill();
+      // specular highlight
+      ctx.beginPath();
+      ctx.arc(b.x - b.r * 0.3, b.y - b.r * 0.3, b.r * 0.32, 0, 6.2832);
+      ctx.fillStyle = 'rgba(255,255,255,0.35)';
+      ctx.fill();
+    }
+  }
+
+  /* ---------- loop (paused when tab hidden) ---------- */
+  var rafId = 0, lastT = 0;
+  function frame(now){
+    rafId = requestAnimationFrame(frame);
+    if (!lastT) lastT = now;
+    var dt = Math.min(0.033, (now - lastT) / 1000);
+    lastT = now;
+    if (!params.paused) step(dt);
+    draw();
+  }
+  function start(){
+    if (!rafId){ lastT = 0; rafId = requestAnimationFrame(frame); }
+  }
+  function stop(){
+    if (rafId){ cancelAnimationFrame(rafId); rafId = 0; }
+  }
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden) stop(); else start();
+  });
+
+  /* ---------- boot ---------- */
+  resize();
+  if (!reducedMotion){
+    // a friendly opening demo: three balls of different sizes
+    spawn(W * 0.3, H * 0.2, 1.5, 0);
+    spawn(W * 0.5, H * 0.12, 0, 0);
+    spawn(W * 0.7, H * 0.25, -1.5, 0);
+  }
+  updateHud();
+  start();
+})();
+</script>
+</body>
+</html>

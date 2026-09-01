@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cloud Atlas — Learn to Read the Sky</title>
+<meta name="description" content="A field guide to the ten main cloud types: what each looks like, how high it lives, and the weather it brings — with an altitude filter and a name-that-cloud quiz.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☁️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#23384a;
+  --dim:#5b7183;
+  --line:#d3e2ee;
+  --card:#ffffff;
+  --page:#eaf4fc;
+  --sky-hi:#dff0fd;
+  --sky-lo:#b9dcf6;
+  --accent:#2d7fc1;
+  --ok:#0a7d43;
+  --bad:#b3261e;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--page);
+  color:var(--ink);
+  font-family:Inter,system-ui,sans-serif;
+  line-height:1.6;
+  overflow-x:hidden;
+}
+.hub-link{position:fixed;top:14px;left:14px;z-index:1000;padding:8px 14px;border-radius:999px;font:600 13px/1 Inter,system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(8px);background:rgba(15,15,25,.55);color:#fff;border:1px solid rgba(255,255,255,.25)}
+/* Header sky */
+.sky-header{
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(180deg,#ffd9b3 0%, #f9c9a6 12%, #a8d4f2 55%, #8ec9f0 100%);
+  padding:96px 20px 64px;
+  text-align:center;
+}
+.sky-header h1{
+  font-family:Quicksand,sans-serif;
+  font-weight:700;
+  font-size:clamp(2.2rem,6vw,3.6rem);
+  margin:0 0 8px;
+  color:#1d3d5c;
+  position:relative;z-index:2;
+}
+.sky-header p{
+  margin:0 auto;max-width:52ch;color:#2c4a66;font-size:1rem;position:relative;z-index:2;
+}
+.drift{
+  position:absolute;
+  border-radius:50%;
+  background:rgba(255,255,255,.85);
+  filter:blur(14px);
+  z-index:1;
+  animation:drift linear infinite;
+}
+.drift.d1{width:180px;height:52px;top:18%;animation-duration:52s}
+.drift.d2{width:260px;height:70px;top:44%;animation-duration:74s;animation-delay:-30s;opacity:.75}
+.drift.d3{width:120px;height:38px;top:66%;animation-duration:40s;animation-delay:-12s;opacity:.9}
+@keyframes drift{
+  from{transform:translateX(-340px)}
+  to{transform:translateX(calc(100vw + 340px))}
+}
+.wrap{max-width:1120px;margin:0 auto;padding:36px 18px 60px}
+h2{
+  font-family:Quicksand,sans-serif;
+  font-weight:700;
+  font-size:1.6rem;
+  margin:0 0 6px;
+  color:#1d3d5c;
+}
+.section-lede{color:var(--dim);margin:0 0 22px;max-width:60ch;font-size:.95rem}
+/* Layout: diagram + cards */
+.atlas{display:flex;gap:22px;align-items:flex-start}
+@media (max-width:840px){.atlas{flex-direction:column}}
+.alt-diagram{
+  flex:0 0 230px;
+  position:sticky;top:16px;
+  display:flex;flex-direction:column;gap:8px;
+  width:100%;
+}
+@media (max-width:840px){.alt-diagram{position:static;flex:1 1 auto}}
+button{font-family:inherit;cursor:pointer}
+.band-btn{
+  text-align:left;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:12px 14px;
+  min-height:44px;
+  color:var(--ink);
+  font-size:.9rem;
+  font-weight:600;
+  transition:transform .14s ease, box-shadow .14s ease;
+}
+.band-btn small{display:block;font-weight:400;color:var(--dim);font-size:.75rem;margin-top:2px}
+.band-btn:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(35,56,74,.12)}
+.band-btn[aria-pressed="true"]{
+  border-color:var(--accent);
+  box-shadow:0 0 0 2px var(--accent) inset;
+}
+.band-btn.high{background:linear-gradient(180deg,#f2f9ff,#e2f1fd);min-height:88px}
+.band-btn.mid{background:linear-gradient(180deg,#dcedfb,#cbe3f7);min-height:74px}
+.band-btn.low{background:linear-gradient(180deg,#c8e1f6,#b5d6f1);min-height:60px}
+.band-btn.all{background:var(--card)}
+.band-btn:focus-visible, .choice:focus-visible, .cta:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* Cards */
+.cards{
+  flex:1;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+  gap:16px;
+}
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:16px;
+  overflow:hidden;
+  display:flex;flex-direction:column;
+  transition:transform .16s ease, box-shadow .16s ease;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 28px rgba(35,56,74,.14)}
+.card.hidden{display:none}
+.card .pic{
+  background:linear-gradient(180deg,var(--sky-hi),var(--sky-lo));
+  line-height:0;
+}
+.card .pic svg{width:100%;height:auto;display:block}
+.card .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+.card h3{
+  font-family:Quicksand,sans-serif;font-weight:700;font-size:1.15rem;margin:0;
+  display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;
+}
+.card h3 .latin{font-family:Inter,sans-serif;font-weight:400;font-size:.72rem;color:var(--dim);font-style:italic}
+.chip{
+  align-self:flex-start;
+  font-size:.7rem;font-weight:600;letter-spacing:.05em;
+  padding:4px 10px;border-radius:999px;
+  background:#e3f0fb;color:#215e91;border:1px solid #c2ddf2;
+}
+.card p{margin:0;font-size:.83rem;color:#39505f}
+.card p b{color:var(--ink)}
+/* Quiz */
+.quiz{
+  margin-top:56px;
+  background:linear-gradient(180deg,#ffffff,#f2f8fd);
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:26px 22px 30px;
+}
+.cta{
+  min-height:48px;
+  padding:12px 26px;
+  border-radius:999px;
+  border:none;
+  background:var(--accent);
+  color:#fff;
+  font-weight:600;
+  font-size:.95rem;
+  transition:transform .14s ease, box-shadow .14s ease;
+}
+.cta:hover{transform:translateY(-2px);box-shadow:0 10px 20px rgba(45,127,193,.35)}
+.cta:active{transform:translateY(0)}
+.cta.ghost{background:#e3f0fb;color:#215e91}
+.quiz-live{min-height:30px;font-weight:600;margin:14px 0 4px}
+.quiz-live.good{color:var(--ok)}
+.quiz-live.bad{color:var(--bad)}
+.quiz-progress{color:var(--dim);font-size:.8rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.quiz-clue{
+  font-size:1.05rem;
+  max-width:60ch;
+  margin:10px 0 18px;
+  color:var(--ink);
+}
+.choices{display:flex;flex-direction:column;gap:10px;max-width:440px}
+.choice{
+  min-height:48px;
+  text-align:left;
+  padding:12px 18px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background:var(--card);
+  font-size:.95rem;
+  font-weight:500;
+  color:var(--ink);
+  transition:transform .12s ease, background .12s ease;
+}
+.choice:hover:not(:disabled){transform:translateX(4px);background:#f0f7fd}
+.choice:disabled{cursor:default;opacity:.75}
+.choice.correct{border-color:var(--ok);background:#e8f5ee;color:var(--ok);font-weight:600;opacity:1}
+.choice.wrong{border-color:var(--bad);background:#fbeeed;color:var(--bad)}
+.quiz-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+footer{
+  text-align:center;color:var(--dim);font-size:.78rem;
+  padding:10px 20px 40px;max-width:70ch;margin:0 auto;
+}
+@media (prefers-reduced-motion: reduce){
+  .drift{animation:none !important;transform:translateX(20vw)}
+  .drift.d2{transform:translateX(55vw)}
+  .drift.d3{transform:translateX(75vw)}
+  *,*::before,*::after{transition-duration:.001s !important}
+}
+</style>
+</head>
+<body>
+<a class="hub-link" href="https://thirty-worlds.vercel.app/" aria-label="All thirty sites">← All 30</a>
+
+<header class="sky-header">
+  <div class="drift d1" aria-hidden="true"></div>
+  <div class="drift d2" aria-hidden="true"></div>
+  <div class="drift d3" aria-hidden="true"></div>
+  <h1>Cloud Atlas</h1>
+  <p>Every cloud in the sky belongs to one of ten families, and each one is a weather forecast written in water. Learn the ten, and you can read tomorrow overhead.</p>
+</header>
+
+<div class="wrap">
+  <main>
+    <section aria-labelledby="atlas-title">
+      <h2 id="atlas-title">The ten cloud types</h2>
+      <p class="section-lede">Tap an altitude band to see only the clouds that live there. Heights are for the mid-latitudes; clouds fly lower near the poles and higher in the tropics.</p>
+      <div class="atlas">
+        <div class="alt-diagram" role="group" aria-label="Filter clouds by altitude band">
+          <button class="band-btn high" type="button" data-band="high" aria-pressed="false">High · 6–13 km<small>ice-crystal clouds: the cirro- family</small></button>
+          <button class="band-btn mid" type="button" data-band="mid" aria-pressed="false">Mid · 2–7 km<small>the alto- clouds and nimbostratus</small></button>
+          <button class="band-btn low" type="button" data-band="low" aria-pressed="false">Low · 0–2 km<small>stratus, cumulus &amp; the storm towers</small></button>
+          <button class="band-btn all" type="button" data-band="all" aria-pressed="true">All levels<small>show every cloud</small></button>
+        </div>
+        <div class="cards" id="cards"></div>
+      </div>
+    </section>
+
+    <section class="quiz" aria-labelledby="quiz-title">
+      <h2 id="quiz-title">Quiz — which cloud is this?</h2>
+      <p class="section-lede">Eight rounds. Read the sky report, pick the cloud it describes.</p>
+      <div id="quiz-body">
+        <button class="cta" id="quiz-start" type="button">Start the quiz</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer>
+  Altitude bands follow the World Meteorological Organization's International Cloud Atlas convention. Weather notes describe typical mid-latitude behavior — mountains and coastlines love exceptions.
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---------- SVG illustrations (each hand-built, 220×130) ----------
+  function svgWrap(id, inner) {
+    return '<svg viewBox="0 0 220 130" role="img" aria-label="Illustration of ' + id + ' cloud" xmlns="http://www.w3.org/2000/svg">' +
+      '<defs>' +
+      '<filter id="soft-' + id + '" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="3"/></filter>' +
+      '<filter id="haze-' + id + '" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="7"/></filter>' +
+      '</defs>' + inner + '</svg>';
+  }
+
+  var ART = {
+    cirrus: function () {
+      return svgWrap('cirrus',
+        '<g stroke="#ffffff" fill="none" stroke-linecap="round" filter="url(#soft-cirrus)">' +
+        '<path d="M20 45 C 70 32, 120 40, 195 26" stroke-width="6" opacity=".95"/>' +
+        '<path d="M35 68 C 90 56, 140 66, 200 50" stroke-width="4.5" opacity=".7"/>' +
+        '<path d="M15 90 C 60 82, 110 90, 165 76" stroke-width="3.5" opacity=".55"/>' +
+        '<path d="M120 34 C 140 40, 150 52, 148 64" stroke-width="2.5" opacity=".5"/>' +
+        '</g>');
+    },
+    cirrocumulus: function () {
+      var dots = '';
+      for (var row = 0; row < 3; row++) {
+        var y = 42 + row * 16;
+        for (var i = 0; i < 12; i++) {
+          var x = 22 + i * 16 + (row % 2 ? 8 : 0);
+          dots += '<circle cx="' + x + '" cy="' + y + '" r="4.6" fill="#ffffff" opacity="' + (0.95 - row * 0.18).toFixed(2) + '"/>';
+        }
+      }
+      return svgWrap('cirrocumulus', '<g filter="url(#soft-cirrocumulus)">' + dots + '</g>');
+    },
+    cirrostratus: function () {
+      return svgWrap('cirrostratus',
+        '<circle cx="110" cy="62" r="15" fill="#ffdf94"/>' +
+        '<circle cx="110" cy="62" r="34" fill="none" stroke="#ffffff" stroke-width="4" opacity=".85" filter="url(#soft-cirrostratus)"/>' +
+        '<rect x="-10" y="8" width="240" height="114" fill="#ffffff" opacity=".38" filter="url(#haze-cirrostratus)"/>');
+    },
+    altocumulus: function () {
+      var lumps = '';
+      var xs = [38, 76, 114, 152, 186];
+      xs.forEach(function (x, i) {
+        lumps += '<ellipse cx="' + x + '" cy="52" rx="21" ry="12" fill="#c6d3de" opacity=".8"/>' +
+                 '<ellipse cx="' + (x - 2) + '" cy="49" rx="20" ry="11" fill="#ffffff" opacity="' + (0.9 - i * 0.04).toFixed(2) + '"/>';
+      });
+      var xs2 = [56, 96, 136, 172];
+      xs2.forEach(function (x) {
+        lumps += '<ellipse cx="' + x + '" cy="84" rx="18" ry="10" fill="#cdd9e3" opacity=".7"/>' +
+                 '<ellipse cx="' + (x - 2) + '" cy="81" rx="17" ry="9" fill="#ffffff" opacity=".8"/>';
+      });
+      return svgWrap('altocumulus', '<g filter="url(#soft-altocumulus)">' + lumps + '</g>');
+    },
+    altostratus: function () {
+      return svgWrap('altostratus',
+        '<circle cx="110" cy="52" r="17" fill="#ffffff" opacity=".3"/>' +
+        '<g filter="url(#haze-altostratus)">' +
+        '<ellipse cx="110" cy="60" rx="130" ry="26" fill="#aeb9c6" opacity=".85"/>' +
+        '<ellipse cx="80" cy="82" rx="120" ry="22" fill="#bcc7d2" opacity=".8"/>' +
+        '<ellipse cx="150" cy="44" rx="110" ry="18" fill="#c3cdd8" opacity=".7"/>' +
+        '</g>');
+    },
+    nimbostratus: function () {
+      var rain = '';
+      for (var i = 0; i < 7; i++) {
+        var x = 40 + i * 24;
+        rain += '<line x1="' + x + '" y1="88" x2="' + (x - 7) + '" y2="118" stroke="#7d9ab5" stroke-width="2.5" stroke-linecap="round" opacity=".8"/>';
+      }
+      return svgWrap('nimbostratus',
+        '<g filter="url(#haze-nimbostratus)">' +
+        '<ellipse cx="110" cy="45" rx="130" ry="26" fill="#5c6a78"/>' +
+        '<ellipse cx="70" cy="66" rx="110" ry="22" fill="#6b7987"/>' +
+        '<ellipse cx="160" cy="64" rx="100" ry="20" fill="#75828f"/>' +
+        '</g>' + rain);
+    },
+    stratocumulus: function () {
+      var lumps = '';
+      var xs = [30, 72, 118, 164, 198];
+      xs.forEach(function (x) {
+        lumps += '<ellipse cx="' + x + '" cy="72" rx="26" ry="15" fill="#9fb0bf" opacity=".85"/>' +
+                 '<ellipse cx="' + (x - 3) + '" cy="66" rx="25" ry="14" fill="#e8eef3" opacity=".95"/>';
+      });
+      return svgWrap('stratocumulus',
+        '<g filter="url(#soft-stratocumulus)">' + lumps +
+        '<ellipse cx="96" cy="82" rx="90" ry="10" fill="#8b9dad" opacity=".55"/></g>');
+    },
+    stratus: function () {
+      return svgWrap('stratus',
+        '<g filter="url(#haze-stratus)">' +
+        '<rect x="-10" y="52" width="240" height="24" fill="#c2ccd6" opacity=".9"/>' +
+        '<rect x="-10" y="72" width="240" height="20" fill="#b3bfca" opacity=".85"/>' +
+        '<rect x="-10" y="38" width="240" height="16" fill="#d0d9e1" opacity=".7"/>' +
+        '</g>');
+    },
+    cumulus: function () {
+      return svgWrap('cumulus',
+        '<g filter="url(#soft-cumulus)">' +
+        '<ellipse cx="110" cy="88" rx="46" ry="11" fill="#93a7b8" opacity=".8"/>' +
+        '<circle cx="86" cy="70" r="22" fill="#ffffff"/>' +
+        '<circle cx="112" cy="56" r="27" fill="#ffffff"/>' +
+        '<circle cx="138" cy="70" r="21" fill="#ffffff"/>' +
+        '<circle cx="112" cy="74" r="24" fill="#ffffff"/>' +
+        '<circle cx="128" cy="62" r="14" fill="#f2f6f9" opacity=".9"/>' +
+        '</g>');
+    },
+    cumulonimbus: function () {
+      var rain = '';
+      for (var i = 0; i < 4; i++) {
+        var x = 76 + i * 18;
+        rain += '<line x1="' + x + '" y1="106" x2="' + (x - 6) + '" y2="126" stroke="#7d9ab5" stroke-width="2.5" stroke-linecap="round" opacity=".8"/>';
+      }
+      return svgWrap('cumulonimbus',
+        '<g filter="url(#soft-cumulonimbus)">' +
+        '<ellipse cx="112" cy="22" rx="62" ry="11" fill="#ffffff"/>' +
+        '<ellipse cx="106" cy="38" rx="38" ry="16" fill="#f2f6f9"/>' +
+        '<ellipse cx="102" cy="60" rx="32" ry="18" fill="#dde6ec"/>' +
+        '<ellipse cx="104" cy="84" rx="36" ry="16" fill="#8d9dab"/>' +
+        '<ellipse cx="104" cy="98" rx="40" ry="10" fill="#5c6a78"/>' +
+        '</g>' + rain +
+        '<polygon points="128,90 116,108 124,108 114,126 132,104 124,104 134,90" fill="#ffd23e" stroke="#e8a90c" stroke-width="1"/>');
+    }
+  };
+
+  // ---------- Cloud data ----------
+  var CLOUDS = [
+    {
+      id: 'cirrus', name: 'Cirrus', latin: '“curl of hair”', band: 'high',
+      alt: 'High · 6–13 km (20,000–43,000 ft)',
+      look: 'Delicate white wisps swept into strands and hooks — “mares’ tails” — so thin the blue shows through. Pure ice crystals, painted by winds aloft.',
+      weather: 'Fair for now — but thickening, spreading cirrus is often the first messenger of an approaching warm front, with change inside about 24 hours.',
+      clue: 'Thin, icy white wisps like mares’ tails, very high up. The day is fine, but more and more of them keep arriving from the west.'
+    },
+    {
+      id: 'cirrocumulus', name: 'Cirrocumulus', latin: '“curl + heap”', band: 'high',
+      alt: 'High · 6–13 km (20,000–43,000 ft)',
+      look: 'Tiny white grains rippled into rows — the classic “mackerel sky.” The cloudlets are too small and too high to show any gray shading.',
+      weather: 'Usually fair but unsettled, and rarely lasts long. In the tropics, a widespread mackerel sky can run ahead of an approaching tropical storm.',
+      clue: 'A “mackerel sky”: countless tiny rippled grains very high up, none of them big enough to cast a shadow of gray.'
+    },
+    {
+      id: 'cirrostratus', name: 'Cirrostratus', latin: '“curl + layer”', band: 'high',
+      alt: 'High · 6–13 km (20,000–43,000 ft)',
+      look: 'A milky, transparent veil across the whole sky that dims the sun without hiding it — and bends its light into a bright halo ring.',
+      weather: 'One of the most reliable front-runners of a warm front: steady rain or snow often arrives within 12–24 hours of the halo.',
+      clue: 'The whole sky has turned milky, and a bright halo ring has appeared around the sun.'
+    },
+    {
+      id: 'altocumulus', name: 'Altocumulus', latin: '“high + heap”', band: 'mid',
+      alt: 'Mid · 2–7 km (6,500–23,000 ft)',
+      look: 'White-and-gray patches, rolls or rounded masses in clumps. Bigger than cirrocumulus grains — each lump is about the width of your thumb at arm’s length.',
+      weather: 'Often harmless. But on a warm, humid morning, altocumulus is a classic warning that thunderstorms may fire by late afternoon.',
+      clue: 'Mid-level clumps and rolls on a warm, sticky morning — sailors’ folklore says to expect a rumble by afternoon.'
+    },
+    {
+      id: 'altostratus', name: 'Altostratus', latin: '“high + layer”', band: 'mid',
+      alt: 'Mid · 2–7 km (6,500–23,000 ft)',
+      look: 'A featureless gray or blue-gray sheet over the whole sky. The sun shrinks to a dim disc, as if seen through frosted glass — and casts no halo.',
+      weather: 'Usually spreads ahead of a warm front; as it thickens and lowers into nimbostratus, widespread rain or snow follows.',
+      clue: 'A gray mid-level sheet covers everything; the sun is only a dim disc behind frosted glass, with no halo at all.'
+    },
+    {
+      id: 'nimbostratus', name: 'Nimbostratus', latin: '“rain + layer”', band: 'mid',
+      alt: 'Mid · base 0.5–5 km, thick enough to blot out the sun',
+      look: 'A dark, thick, ragged blanket with no shape and no gaps. The sun disappears completely, and rain seems to fall from everywhere at once.',
+      weather: 'Steady, prolonged rain or snow — hours of it. The classic gray soaking day, without the drama of thunder.',
+      clue: 'A shapeless dark blanket has swallowed the sun, and gentle, steady rain has been falling for hours with no thunder.'
+    },
+    {
+      id: 'stratocumulus', name: 'Stratocumulus', latin: '“layer + heap”', band: 'low',
+      alt: 'Low · 0.3–2 km (1,000–6,500 ft)',
+      look: 'Lumpy gray-and-white rolls or patches with slices of blue between them — the most common cloud on Earth.',
+      weather: 'Mostly dry; light drizzle at worst. Often marks settled weather or the untidy tail end of a front that has already passed.',
+      clue: 'Low, lumpy gray-white rolls with strips of blue sky between — plenty of cloud, but barely a drop falls.'
+    },
+    {
+      id: 'stratus', name: 'Stratus', latin: '“layer”', band: 'low',
+      alt: 'Low · 0–2 km, sometimes touching hilltops',
+      look: 'A flat, uniform gray layer like fog that never quite reached the ground. Hides hilltops, towers and the tops of tall buildings.',
+      weather: 'Gloomy but gentle: mist or drizzle at most, and it often burns off by afternoon.',
+      clue: 'A featureless low gray ceiling, like fog that floated up — the hilltops have vanished and a fine drizzle hangs in the air.'
+    },
+    {
+      id: 'cumulus', name: 'Cumulus', latin: '“heap”', band: 'low',
+      alt: 'Low base · 0.5–2 km; puffs a few hundred meters tall',
+      look: 'Puffy cauliflower heaps with crisp white tops and flat gray bases, drifting on sunny days and fed by rising thermals.',
+      weather: 'The fair-weather cloud. Given enough heat and moisture, though, small heaps can grow into towering cumulonimbus by evening.',
+      clue: 'Bright puffy heaps with flat bases, popping up over the fields on a warm sunny afternoon.'
+    },
+    {
+      id: 'cumulonimbus', name: 'Cumulonimbus', latin: '“heap + rain”', band: 'low',
+      alt: 'Low base · tower climbs through all levels to 12 km+',
+      look: 'A mountain of cloud boiling upward through every level, its top spreading flat into an anvil of ice.',
+      weather: 'The thunderstorm factory: heavy rain, lightning, hail and violent gusts — and, in the worst cases, tornadoes.',
+      clue: 'A single giant tower climbing through the whole sky, its top flattened into an anvil, with rumbles underneath.'
+    }
+  ];
+
+  // ---------- Render cards ----------
+  var cardsEl = document.getElementById('cards');
+  var cardNodes = {};
+
+  CLOUDS.forEach(function (c) {
+    var card = document.createElement('article');
+    card.className = 'card';
+    card.dataset.band = c.band;
+
+    var pic = document.createElement('div');
+    pic.className = 'pic';
+    pic.innerHTML = ART[c.id]();
+
+    var body = document.createElement('div');
+    body.className = 'body';
+
+    var h3 = document.createElement('h3');
+    h3.textContent = c.name + ' ';
+    var latin = document.createElement('span');
+    latin.className = 'latin';
+    latin.textContent = c.latin;
+    h3.appendChild(latin);
+
+    var chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.textContent = c.alt;
+
+    var pLook = document.createElement('p');
+    pLook.innerHTML = '<b>Look for:</b> ';
+    pLook.appendChild(document.createTextNode(c.look));
+
+    var pWx = document.createElement('p');
+    pWx.innerHTML = '<b>Weather it brings:</b> ';
+    pWx.appendChild(document.createTextNode(c.weather));
+
+    body.appendChild(h3);
+    body.appendChild(chip);
+    body.appendChild(pLook);
+    body.appendChild(pWx);
+    card.appendChild(pic);
+    card.appendChild(body);
+    cardsEl.appendChild(card);
+    cardNodes[c.id] = card;
+  });
+
+  // ---------- Altitude filter ----------
+  var bandButtons = Array.prototype.slice.call(document.querySelectorAll('.band-btn'));
+  function setFilter(band) {
+    bandButtons.forEach(function (b) {
+      b.setAttribute('aria-pressed', b.dataset.band === band ? 'true' : 'false');
+    });
+    CLOUDS.forEach(function (c) {
+      var show = (band === 'all') || (c.band === band);
+      cardNodes[c.id].classList.toggle('hidden', !show);
+    });
+  }
+  bandButtons.forEach(function (b) {
+    b.addEventListener('click', function () { setFilter(b.dataset.band); });
+  });
+
+  // ---------- Quiz ----------
+  var quizBody = document.getElementById('quiz-body');
+  var ROUNDS = 8;
+  var quiz = null;
+
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function startQuiz() {
+    quiz = {
+      order: shuffle(CLOUDS).slice(0, ROUNDS),
+      round: 0,
+      score: 0
+    };
+    showRound();
+  }
+
+  function showRound() {
+    var c = quiz.order[quiz.round];
+    var others = shuffle(CLOUDS.filter(function (x) { return x.id !== c.id; })).slice(0, 2);
+    var options = shuffle([c, others[0], others[1]]);
+
+    quizBody.textContent = '';
+
+    var prog = document.createElement('p');
+    prog.className = 'quiz-progress';
+    prog.textContent = 'Round ' + (quiz.round + 1) + ' of ' + ROUNDS + ' · score ' + quiz.score;
+    quizBody.appendChild(prog);
+
+    var clue = document.createElement('p');
+    clue.className = 'quiz-clue';
+    clue.textContent = '“' + c.clue + '”';
+    quizBody.appendChild(clue);
+
+    var choicesEl = document.createElement('div');
+    choicesEl.className = 'choices';
+    var live = document.createElement('p');
+    live.className = 'quiz-live';
+    live.setAttribute('aria-live', 'polite');
+
+    var answered = false;
+    var choiceBtns = [];
+
+    options.forEach(function (opt) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'choice';
+      b.textContent = opt.name;
+      b.addEventListener('click', function () {
+        if (answered) return;
+        answered = true;
+        choiceBtns.forEach(function (cb) { cb.disabled = true; });
+        if (opt.id === c.id) {
+          b.classList.add('correct');
+          quiz.score++;
+          live.textContent = 'Correct — ' + c.name + '. ' + c.weather;
+          live.className = 'quiz-live good';
+        } else {
+          b.classList.add('wrong');
+          choiceBtns.forEach(function (cb) {
+            if (cb.dataset.id === c.id) cb.classList.add('correct');
+          });
+          live.textContent = 'Not quite — that was ' + c.name + '. ' + c.look;
+          live.className = 'quiz-live bad';
+        }
+        var row = document.createElement('div');
+        row.className = 'quiz-row';
+        var next = document.createElement('button');
+        next.className = 'cta';
+        next.type = 'button';
+        next.textContent = (quiz.round + 1 < ROUNDS) ? 'Next round' : 'See my score';
+        next.addEventListener('click', function () {
+          quiz.round++;
+          if (quiz.round < ROUNDS) showRound();
+          else showResult();
+        });
+        row.appendChild(next);
+        quizBody.appendChild(row);
+        next.focus();
+      });
+      b.dataset.id = opt.id;
+      choicesEl.appendChild(b);
+      choiceBtns.push(b);
+    });
+
+    quizBody.appendChild(choicesEl);
+    quizBody.appendChild(live);
+  }
+
+  function showResult() {
+    quizBody.textContent = '';
+    var head = document.createElement('p');
+    head.className = 'quiz-clue';
+    var s = quiz.score;
+    var verdict;
+    if (s === ROUNDS) verdict = 'A perfect read of the sky — the WMO would be proud.';
+    else if (s >= 6) verdict = 'Sharp eyes. You would have seen that front coming.';
+    else if (s >= 4) verdict = 'A solid start — the cirro- family fools everyone at first.';
+    else verdict = 'The sky keeps its secrets a little longer. Scroll up and study the cards.';
+    head.textContent = 'You scored ' + s + ' out of ' + ROUNDS + '. ' + verdict;
+    quizBody.appendChild(head);
+
+    var row = document.createElement('div');
+    row.className = 'quiz-row';
+    var again = document.createElement('button');
+    again.className = 'cta';
+    again.type = 'button';
+    again.textContent = 'Play again';
+    again.addEventListener('click', startQuiz);
+    var back = document.createElement('button');
+    back.className = 'cta ghost';
+    back.type = 'button';
+    back.textContent = 'Back to the atlas';
+    back.addEventListener('click', function () {
+      quizBody.textContent = '';
+      var startBtn = document.createElement('button');
+      startBtn.className = 'cta';
+      startBtn.type = 'button';
+      startBtn.id = 'quiz-start';
+      startBtn.textContent = 'Start the quiz';
+      startBtn.addEventListener('click', startQuiz);
+      quizBody.appendChild(startBtn);
+      var smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      document.getElementById('atlas-title').scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
+    });
+    row.appendChild(again);
+    row.appendChild(back);
+    quizBody.appendChild(row);
+  }
+
+  document.getElementById('quiz-start').addEventListener('click', startQuiz);
+})();
+</script>
+</body>
+</html>

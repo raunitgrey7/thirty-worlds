@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alphabet Safari — Learn Letters A to Z</title>
+<meta name="description" content="A joyful alphabet adventure for toddlers: tap 26 big animal cards from Alligator to Zebra, hear every letter spoken aloud, and celebrate with confetti.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦁</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#3a2b45;
+    --paper:#fff8ec;
+    --sun:#ffd166;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{max-width:100%;overflow-x:hidden}
+  body{
+    font-family:"Nunito",system-ui,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 500px at 50% -200px, #ffe9b8 0%, rgba(255,233,184,0) 70%),
+      linear-gradient(180deg,#fff8ec 0%, #fdeffb 50%, #e8f7ff 100%);
+    min-height:100vh;
+  }
+  .hub-link{position:fixed;top:14px;left:14px;z-index:1000;padding:8px 14px;border-radius:999px;font:600 13px/1 Inter,system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(8px);background:rgba(15,15,25,.55);color:#fff;border:1px solid rgba(255,255,255,.25)}
+  .hub-link:focus-visible{outline:4px solid #3a2b45;outline-offset:3px}
+
+  header{
+    text-align:center;
+    padding:clamp(64px,10vh,96px) 16px 8px;
+  }
+  h1{
+    font-family:"Fredoka",sans-serif;
+    font-weight:700;
+    font-size:clamp(2.2rem,6.5vw,4.2rem);
+    line-height:1.05;
+    letter-spacing:.5px;
+  }
+  h1 .rainbow{
+    background:linear-gradient(90deg,#ef476f,#f78c1f,#e8b800,#26a96c,#118ab2,#8557d3);
+    -webkit-background-clip:text;background-clip:text;
+    color:transparent;
+  }
+  .tagline{
+    font-size:clamp(1.05rem,2.5vw,1.4rem);
+    font-weight:800;
+    margin-top:10px;
+    color:#6d5a7e;
+  }
+  .controls{
+    display:flex;flex-wrap:wrap;justify-content:center;align-items:center;
+    gap:14px;
+    padding:22px 16px 6px;
+  }
+  .seg{
+    display:inline-flex;
+    background:#fff;
+    border-radius:999px;
+    padding:5px;
+    box-shadow:0 4px 0 rgba(58,43,69,.16);
+    border:2px solid #efe2d2;
+  }
+  .seg button{
+    font-family:"Fredoka",sans-serif;
+    font-size:1.25rem;
+    font-weight:600;
+    min-width:72px;min-height:48px;
+    border:none;border-radius:999px;
+    background:transparent;color:#8a7a99;
+    cursor:pointer;
+    transition:transform .15s ease;
+  }
+  .seg button[aria-pressed="true"]{
+    background:linear-gradient(135deg,#8557d3,#b07ce8);
+    color:#fff;
+  }
+  .seg button:active{transform:scale(.94)}
+  .btn-play{
+    font-family:"Fredoka",sans-serif;
+    font-size:clamp(1.1rem,2.5vw,1.35rem);
+    font-weight:600;
+    min-height:56px;
+    padding:12px 26px;
+    border:none;border-radius:999px;
+    color:#4a2c00;
+    background:linear-gradient(135deg,#ffd166,#ffb347);
+    box-shadow:0 6px 0 #e09b2d;
+    cursor:pointer;
+    transition:transform .15s ease;
+  }
+  .btn-play:hover{transform:translateY(-2px)}
+  .btn-play:active{transform:translateY(2px)}
+  .btn-play.playing{
+    background:linear-gradient(135deg,#ef476f,#f2699b);
+    color:#fff;
+    box-shadow:0 6px 0 #b52c50;
+  }
+  .seg button:focus-visible,.btn-play:focus-visible,.card:focus-visible{
+    outline:4px solid #3a2b45;outline-offset:3px;
+  }
+
+  main{
+    max-width:1500px;
+    margin:0 auto;
+    padding:clamp(16px,3vw,36px);
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(clamp(120px,26vw,170px),1fr));
+    gap:clamp(10px,2vw,20px);
+  }
+  .card{
+    --h:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:2px;
+    min-height:clamp(140px,20vw,190px);
+    padding:12px 6px;
+    border-radius:26px;
+    border:4px solid hsl(var(--h) 65% 72%);
+    background:linear-gradient(160deg,hsl(var(--h) 95% 92%),hsl(var(--h) 85% 82%));
+    box-shadow:0 6px 0 hsl(var(--h) 55% 62%);
+    cursor:pointer;
+    font-family:"Fredoka",sans-serif;
+    color:hsl(var(--h) 60% 30%);
+    animation:card-in .5s ease both;
+    animation-delay:calc(var(--i)*28ms);
+    transition:transform .18s ease;
+  }
+  @keyframes card-in{
+    from{opacity:0;transform:translateY(14px) scale(.88)}
+    to{opacity:1;transform:translateY(0) scale(1)}
+  }
+  @media(hover:hover){
+    .card:hover{animation:wobble .5s ease infinite}
+  }
+  @keyframes wobble{
+    0%,100%{transform:rotate(0) scale(1.04)}
+    25%{transform:rotate(-2.5deg) scale(1.04)}
+    75%{transform:rotate(2.5deg) scale(1.04)}
+  }
+  .card.pop{animation:pop .55s ease}
+  @keyframes pop{
+    0%{transform:scale(1)}
+    35%{transform:scale(1.22) rotate(-3deg)}
+    65%{transform:scale(.94) rotate(2deg)}
+    100%{transform:scale(1)}
+  }
+  .card.active{
+    transform:scale(1.12);
+    border-color:hsl(var(--h) 70% 45%);
+    box-shadow:0 0 0 6px rgba(255,255,255,.9),0 0 0 11px hsl(var(--h) 70% 60%);
+    z-index:5;
+  }
+  .card .letter{
+    font-size:clamp(2.6rem,7vw,4rem);
+    font-weight:700;
+    line-height:1;
+  }
+  .card .animal{
+    font-size:clamp(2.2rem,6vw,3.4rem);
+    line-height:1.15;
+  }
+  .card .word{
+    font-family:"Nunito",sans-serif;
+    font-weight:900;
+    font-size:clamp(.85rem,2vw,1.1rem);
+    letter-spacing:.3px;
+  }
+  footer{
+    text-align:center;
+    padding:18px 16px 40px;
+    font-weight:800;
+    color:#8a7a99;
+    font-size:1rem;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important}
+    .card.active{transform:none}
+  }
+</style>
+</head>
+<body>
+<a class="hub-link" href="https://thirty-worlds.vercel.app/" aria-label="All thirty sites">← All 30</a>
+
+<header>
+  <h1>🦁 <span class="rainbow">Alphabet Safari</span></h1>
+  <p class="tagline">Tap a card to meet an animal and hear its letter!</p>
+</header>
+
+<div class="controls">
+  <div class="seg" role="group" aria-label="Letter case">
+    <button type="button" id="btnUpper" aria-pressed="true">ABC</button>
+    <button type="button" id="btnLower" aria-pressed="false">abc</button>
+  </div>
+  <button type="button" class="btn-play" id="playBtn">▶ Play the whole alphabet</button>
+</div>
+
+<main>
+  <div class="grid" id="grid" aria-label="Alphabet animal cards"></div>
+</main>
+
+<footer>Made with love for little explorers everywhere 🧡</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.9.3/confetti.browser.min.js"></script>
+<script>
+(function(){
+  "use strict";
+  var REDUCED = false;
+  try { REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch(e){}
+
+  var ANIMALS = [
+    ["A","Alligator","🐊"], ["B","Bear","🐻"], ["C","Cat","🐱"], ["D","Dolphin","🐬"],
+    ["E","Elephant","🐘"], ["F","Fox","🦊"], ["G","Giraffe","🦒"], ["H","Hippo","🦛"],
+    ["I","Iguana","🦎"], ["J","Jaguar","🐆"], ["K","Koala","🐨"], ["L","Lion","🦁"],
+    ["M","Monkey","🐵"], ["N","Nightingale","🐦"], ["O","Octopus","🐙"], ["P","Penguin","🐧"],
+    ["Q","Quail","🐥"], ["R","Rabbit","🐰"], ["S","Snake","🐍"], ["T","Tiger","🐯"],
+    ["U","Uakari","🐒"], ["V","Vampire Bat","🦇"], ["W","Wolf","🐺"], ["X","X-ray Fish","🐠"],
+    ["Y","Yak","🐂"], ["Z","Zebra","🦓"]
+  ];
+
+  var grid = document.getElementById("grid");
+  var playBtn = document.getElementById("playBtn");
+  var btnUpper = document.getElementById("btnUpper");
+  var btnLower = document.getElementById("btnLower");
+
+  var mode = "upper";
+  var cards = [];
+  var playing = false;
+  var playIdx = 0;
+  var playTimer = null;
+
+  function speak(text){
+    try {
+      if ("speechSynthesis" in window && typeof SpeechSynthesisUtterance !== "undefined") {
+        window.speechSynthesis.cancel();
+        var u = new SpeechSynthesisUtterance(text);
+        u.lang = "en-US";
+        u.rate = 0.85;
+        u.pitch = 1.15;
+        window.speechSynthesis.speak(u);
+      }
+    } catch(e){}
+  }
+
+  function stopSpeech(){
+    try {
+      if ("speechSynthesis" in window) { window.speechSynthesis.cancel(); }
+    } catch(e){}
+  }
+
+  function burst(card, hue){
+    if (REDUCED) { return; }
+    if (typeof confetti === "undefined") { return; }
+    var r = card.getBoundingClientRect();
+    var x = (r.left + r.width / 2) / window.innerWidth;
+    var y = (r.top + r.height / 2) / window.innerHeight;
+    confetti({
+      particleCount: 45,
+      spread: 75,
+      startVelocity: 28,
+      origin: { x: x, y: y },
+      colors: [
+        "hsl(" + hue + ", 90%, 60%)",
+        "hsl(" + ((hue + 40) % 360) + ", 90%, 65%)",
+        "hsl(" + ((hue + 320) % 360) + ", 90%, 70%)",
+        "#ffffff"
+      ]
+    });
+  }
+
+  function bigCelebration(){
+    if (REDUCED) { return; }
+    if (typeof confetti === "undefined") { return; }
+    confetti({ particleCount: 90, spread: 100, origin: { x: 0.3, y: 0.4 } });
+    confetti({ particleCount: 90, spread: 100, origin: { x: 0.7, y: 0.4 } });
+  }
+
+  function celebrate(card, hue, letter, word){
+    card.classList.remove("pop");
+    void card.offsetWidth;
+    card.classList.add("pop");
+    burst(card, hue);
+    speak(letter + "! " + word + "!");
+  }
+
+  // Build the 26 cards
+  ANIMALS.forEach(function(item, i){
+    var letter = item[0], word = item[1], emoji = item[2];
+    var hue = Math.round(i * (360 / 26));
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "card";
+    btn.style.setProperty("--h", hue);
+    btn.style.setProperty("--i", i);
+    btn.setAttribute("aria-label", letter + ", " + word);
+
+    var l = document.createElement("span");
+    l.className = "letter";
+    l.textContent = letter;
+    var a = document.createElement("span");
+    a.className = "animal";
+    a.setAttribute("aria-hidden", "true");
+    a.textContent = emoji;
+    var w = document.createElement("span");
+    w.className = "word";
+    w.textContent = word;
+
+    btn.appendChild(l);
+    btn.appendChild(a);
+    btn.appendChild(w);
+
+    btn.addEventListener("click", function(){
+      if (playing) { stopPlay(false); }
+      celebrate(btn, hue, letter, word);
+    });
+
+    grid.appendChild(btn);
+    cards.push({ el: btn, letterEl: l, letter: letter, word: word, hue: hue });
+  });
+
+  // Uppercase / lowercase toggle
+  function setMode(next){
+    mode = next;
+    btnUpper.setAttribute("aria-pressed", mode === "upper" ? "true" : "false");
+    btnLower.setAttribute("aria-pressed", mode === "lower" ? "true" : "false");
+    cards.forEach(function(c){
+      c.letterEl.textContent = mode === "upper" ? c.letter : c.letter.toLowerCase();
+    });
+  }
+  btnUpper.addEventListener("click", function(){ setMode("upper"); });
+  btnLower.addEventListener("click", function(){ setMode("lower"); });
+
+  // Play the whole alphabet
+  function clearHighlights(){
+    cards.forEach(function(c){ c.el.classList.remove("active"); });
+  }
+
+  function stopPlay(finished){
+    playing = false;
+    if (playTimer) { clearTimeout(playTimer); playTimer = null; }
+    clearHighlights();
+    stopSpeech();
+    playBtn.classList.remove("playing");
+    playBtn.textContent = "▶ Play the whole alphabet";
+    playBtn.setAttribute("aria-pressed", "false");
+    if (finished) { bigCelebration(); speak("Hooray! You know the whole alphabet!"); }
+  }
+
+  function step(){
+    if (!playing) { return; }
+    clearHighlights();
+    if (playIdx >= cards.length) { stopPlay(true); return; }
+    var c = cards[playIdx];
+    c.el.classList.add("active");
+    try {
+      c.el.scrollIntoView({ block: "center", behavior: REDUCED ? "auto" : "smooth" });
+    } catch(e){}
+    speak(c.letter + "! " + c.word + "!");
+    playTimer = setTimeout(function(){
+      playIdx += 1;
+      step();
+    }, 1600);
+  }
+
+  function startPlay(){
+    playing = true;
+    playIdx = 0;
+    playBtn.classList.add("playing");
+    playBtn.textContent = "⏹ Stop";
+    playBtn.setAttribute("aria-pressed", "true");
+    step();
+  }
+
+  playBtn.setAttribute("aria-pressed", "false");
+  playBtn.addEventListener("click", function(){
+    if (playing) { stopPlay(false); } else { startPlay(); }
+  });
+
+  // Pause the walk politely if the tab is hidden
+  document.addEventListener("visibilitychange", function(){
+    if (document.hidden && playing) { stopPlay(false); }
+  });
+})();
+</script>
+</body>
+</html>

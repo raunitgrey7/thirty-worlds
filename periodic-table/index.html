@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Element Lab — Interactive Periodic Table</title>
+<meta name="description" content="All 118 elements in a fully interactive periodic table: search by name, symbol or number, filter by category, and tap any element for its mass, period, group and a real-world use.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧪</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0e17;
+    --panel:#111624;
+    --edge:#232c42;
+    --ink:#e9edfb;
+    --dim:#8e99b8;
+    --c-alkali:#ff6b6b;
+    --c-alkaline:#ffa94d;
+    --c-transition:#ffd43b;
+    --c-post:#20c997;
+    --c-metalloid:#66d9e8;
+    --c-nonmetal:#8ce99a;
+    --c-halogen:#4dabf7;
+    --c-noble:#b197fc;
+    --c-lanth:#f783ac;
+    --c-act:#e599f7;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(ellipse at 15% -10%, #17203a 0%, transparent 55%),
+      radial-gradient(ellipse at 110% 110%, #131b31 0%, transparent 50%),
+      var(--bg);
+    color:var(--ink);
+    font-family:Inter,system-ui,sans-serif;
+    min-height:100vh;
+    overflow-x:hidden;
+    padding-bottom:190px;
+  }
+  .hub-link{position:fixed;top:14px;left:14px;z-index:1000;padding:8px 14px;border-radius:999px;font:600 13px/1 Inter,system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(8px);background:rgba(15,15,25,.55);color:#fff;border:1px solid rgba(255,255,255,.25)}
+  .hub-link:hover{border-color:var(--c-transition)}
+
+  header{
+    padding:20px clamp(16px,4vw,40px) 4px;
+    display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between;
+  }
+  .title-block{padding-left:96px}
+  header h1{
+    font:700 clamp(22px,4.5vw,36px)/1.05 "Space Grotesk",sans-serif;letter-spacing:-.01em;
+    background:linear-gradient(100deg,#fff,#ffd43b 55%,#f783ac);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  header .sub{font:500 clamp(11px,1.7vw,13px)/1.4 Inter,sans-serif;color:var(--dim);margin-top:2px}
+  .search-wrap{display:flex;align-items:center;gap:10px;flex:1 1 260px;max-width:420px;min-width:200px}
+  #search{
+    flex:1;min-height:46px;padding:0 16px;border-radius:12px;
+    background:var(--panel);border:1px solid var(--edge);color:var(--ink);
+    font:500 15px/1 Inter,sans-serif;
+  }
+  #search::placeholder{color:#5c688a}
+  #search:focus-visible{outline:2px solid var(--c-transition);outline-offset:1px}
+  #matchCount{font:600 11px/1.3 "Space Grotesk",sans-serif;color:var(--dim);white-space:nowrap}
+
+  nav.chips{
+    display:flex;gap:8px;overflow-x:auto;padding:12px clamp(16px,4vw,40px);
+    -webkit-overflow-scrolling:touch;scrollbar-width:thin;
+  }
+  .chip{
+    flex:0 0 auto;min-height:44px;padding:0 14px;border-radius:999px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--panel);border:1px solid var(--edge);color:var(--dim);
+    font:600 12px/1 Inter,sans-serif;
+    transition:transform .15s ease,border-color .15s ease,color .15s ease;
+  }
+  .chip .dot{width:10px;height:10px;border-radius:50%;background:var(--dot,#666)}
+  .chip:hover{transform:translateY(-2px);color:var(--ink)}
+  .chip:focus-visible{outline:2px solid var(--c-transition);outline-offset:2px}
+  .chip[aria-pressed="true"]{color:#0b0e17;background:var(--dot,#fff);border-color:var(--dot,#fff)}
+  .chip[aria-pressed="true"] .dot{background:#0b0e17}
+
+  .table-scroll{
+    overflow-x:auto;padding:8px clamp(16px,4vw,40px) 20px;
+    -webkit-overflow-scrolling:touch;
+  }
+  #ptable{
+    display:grid;
+    grid-template-columns:repeat(18,minmax(52px,1fr));
+    grid-template-rows:repeat(7,auto) 16px auto auto;
+    gap:4px;
+    min-width:1060px;
+  }
+  button.el{
+    position:relative;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    min-height:56px;padding:4px 2px;border-radius:8px;cursor:pointer;
+    background:#0d1120;
+    background:color-mix(in srgb, var(--c) 13%, #0d1120);
+    border:1px solid #2b3554;
+    border:1px solid color-mix(in srgb, var(--c) 45%, transparent);
+    color:var(--c);
+    font-family:"Space Grotesk",sans-serif;
+    transition:transform .14s ease,opacity .25s ease,box-shadow .14s ease;
+    animation:cellIn .45s ease backwards;
+    animation-delay:calc(var(--i) * 5ms);
+  }
+  @keyframes cellIn{from{opacity:0;transform:translateY(8px)}}
+  button.el .num{position:absolute;top:3px;left:5px;font:600 9px/1 Inter,sans-serif;color:var(--dim)}
+  button.el .sym{font:700 clamp(15px,1.4vw,19px)/1.1 "Space Grotesk",sans-serif}
+  button.el .mass{font:500 8.5px/1.2 Inter,sans-serif;color:var(--dim);margin-top:2px}
+  button.el:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 6px 18px rgba(0,0,0,.5),0 0 14px color-mix(in srgb, var(--c) 35%, transparent);z-index:2}
+  button.el:focus-visible{outline:2px solid #fff;outline-offset:1px;z-index:2}
+  button.el.dimmed{opacity:.12;pointer-events:auto}
+  button.el.selected{background:var(--c);color:#0b0e17;box-shadow:0 0 20px color-mix(in srgb, var(--c) 60%, transparent)}
+  button.el.selected .num,button.el.selected .mass{color:rgba(10,12,20,.75)}
+  .marker{
+    display:flex;align-items:center;justify-content:center;border-radius:8px;
+    border:1px dashed var(--edge);color:var(--dim);
+    font:600 10px/1 "Space Grotesk",sans-serif;min-height:56px;
+  }
+
+  /* ---------- detail card ---------- */
+  #detail{
+    position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:900;
+    width:min(94vw,700px);
+    background:rgba(15,20,36,.92);backdrop-filter:blur(12px);
+    border:1px solid var(--edge);border-radius:18px;
+    padding:16px 18px;
+    display:flex;gap:16px;align-items:center;
+    box-shadow:0 14px 50px rgba(0,0,0,.55);
+  }
+  #dTile{
+    flex:0 0 auto;width:74px;height:74px;border-radius:14px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:#0d1120;
+    background:color-mix(in srgb, var(--c,#8e99b8) 16%, #0d1120);
+    border:1px solid #2b3554;
+    border:1px solid color-mix(in srgb, var(--c,#8e99b8) 55%, transparent);
+    color:var(--c,#8e99b8);
+  }
+  #dTile .sym{font:700 26px/1 "Space Grotesk",sans-serif}
+  #dTile .num{font:600 11px/1.4 Inter,sans-serif;color:var(--dim)}
+  #dBody{min-width:0;flex:1}
+  #dName{font:700 clamp(17px,3vw,22px)/1.15 "Space Grotesk",sans-serif;color:#fff}
+  #dMeta{font:600 11px/1.5 Inter,sans-serif;color:var(--dim);margin:2px 0 6px}
+  #dMeta .cat{color:var(--c,#fff)}
+  #dUse{font:400 13px/1.55 Inter,sans-serif;color:#cdd6ee;max-height:88px;overflow-y:auto}
+  @media (max-width:560px){
+    .title-block{padding-left:88px}
+    #detail{padding:12px;gap:12px;bottom:8px}
+    #dTile{width:60px;height:60px}
+    #dTile .sym{font-size:21px}
+    body{padding-bottom:170px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none!important;transition-duration:.001s!important}
+  }
+</style>
+</head>
+<body>
+<a class="hub-link" href="https://thirty-worlds.vercel.app/" aria-label="All thirty sites">← All 30</a>
+
+<header>
+  <div class="title-block">
+    <h1>Element Lab</h1>
+    <p class="sub">All 118 elements · hover, tap or search to explore</p>
+  </div>
+  <div class="search-wrap">
+    <input id="search" type="search" placeholder="Search name, symbol or number…" aria-label="Search elements by name, symbol or atomic number">
+    <span id="matchCount" aria-live="polite">118 / 118</span>
+  </div>
+</header>
+
+<nav class="chips" aria-label="Filter by category"></nav>
+
+<main>
+  <div class="table-scroll" aria-label="Periodic table (scrolls sideways on small screens)">
+    <div id="ptable" role="group" aria-label="Periodic table of the elements"></div>
+  </div>
+</main>
+
+<aside id="detail" aria-live="polite" aria-label="Element details">
+  <div id="dTile"><span class="sym" id="dSym">?</span><span class="num" id="dNum">—</span></div>
+  <div id="dBody">
+    <p id="dName">Pick an element</p>
+    <p id="dMeta">Hover, tap, or Tab through the table — every square has a story.</p>
+    <p id="dUse">Colours group the elements into ten chemical families. Search and filters live above the table.</p>
+  </div>
+</aside>
+
+<script>
+(function(){
+  'use strict';
+
+  /* category id → [label, css var] */
+  var CATS = [
+    ['Alkali metal', '--c-alkali'],
+    ['Alkaline earth metal', '--c-alkaline'],
+    ['Transition metal', '--c-transition'],
+    ['Post-transition metal', '--c-post'],
+    ['Metalloid', '--c-metalloid'],
+    ['Reactive nonmetal', '--c-nonmetal'],
+    ['Halogen', '--c-halogen'],
+    ['Noble gas', '--c-noble'],
+    ['Lanthanide', '--c-lanth'],
+    ['Actinide', '--c-act']
+  ];
+
+  /* [number, symbol, name, mass, cat, period, group(0 = f-block), use] */
+  var E = [
+  [1,'H','Hydrogen','1.008',5,1,1,'Fuel of the stars — and of rockets: liquid hydrogen lifted the Saturn V. On Earth it makes the ammonia in fertiliser that feeds half the world.'],
+  [2,'He','Helium','4.0026',7,1,18,'Fills party balloons and airships, and cools MRI-scanner magnets to −269 °C. The only element that never freezes solid at normal pressure.'],
+  [3,'Li','Lithium','6.94',0,2,1,'The heart of the rechargeable batteries in phones, laptops and electric cars — and a mood-stabilising medicine since the 1950s.'],
+  [4,'Be','Beryllium','9.0122',1,2,2,'Stiff, feather-light and transparent to X-rays: X-ray machine windows, and the mirror substrate of the James Webb Space Telescope.'],
+  [5,'B','Boron','10.81',4,2,13,'Heat-proof borosilicate glass in lab beakers and oven dishes, fibreglass insulation, and doping agent in silicon chips.'],
+  [6,'C','Carbon','12.011',5,2,14,'The backbone of every known living thing — and of diamond, graphite, graphene, carbon fibre and all plastics.'],
+  [7,'N','Nitrogen','14.007',5,2,15,'78% of every breath you take. Liquid nitrogen flash-freezes food at −196 °C, and nitrogen fertilisers feed billions.'],
+  [8,'O','Oxygen','15.999',5,2,16,'Keeps every cell in your body alive; also blown through molten iron to make steel, and bottled for hospitals and divers.'],
+  [9,'F','Fluorine','18.998',6,2,17,'The most reactive element of all. Tamed, it gives us toothpaste fluoride and the non-stick coating on frying pans.'],
+  [10,'Ne','Neon','20.180',7,2,18,'Glows a pure orange-red when electrified — the original glow of “neon” signs since 1912.'],
+  [11,'Na','Sodium','22.990',0,3,1,'Half of table salt. Sodium-vapour lamps give older streetlights their amber colour, and sodium ions fire your nerves.'],
+  [12,'Mg','Magnesium','24.305',1,3,2,'Burns blinding white in fireworks and flares; its lightweight alloys form laptop shells, wheels and aircraft parts.'],
+  [13,'Al','Aluminium','26.982',3,3,13,'Drink cans, foil, window frames and aircraft skins — the most-used metal after iron, and endlessly recyclable.'],
+  [14,'Si','Silicon','28.085',4,3,14,'The element computer chips and solar cells are carved from. An entire valley is named after it.'],
+  [15,'P','Phosphorus','30.974',5,3,15,'Strikes matches, grows crops as fertiliser, and forms the backbone of DNA and of ATP — life’s energy currency.'],
+  [16,'S','Sulfur','32.06',5,3,16,'Vulcanises rubber for tyres and makes sulfuric acid, the world’s most-produced industrial chemical.'],
+  [17,'Cl','Chlorine','35.45',6,3,17,'Disinfects drinking water and pools worldwide; also half of PVC, the pipe-and-window plastic.'],
+  [18,'Ar','Argon','39.948',7,3,18,'Totally inert: shields welding arcs, fills double-glazed windows and preserved the original Declaration of Independence case.'],
+  [19,'K','Potassium','39.098',0,4,1,'Potash fertiliser keeps world agriculture running; potassium ions trigger every heartbeat.'],
+  [20,'Ca','Calcium','40.078',1,4,2,'Your bones and teeth; also limestone, chalk, cement and concrete — civilisation is built on it.'],
+  [21,'Sc','Scandium','44.956',2,4,3,'A pinch strengthens aluminium in aerospace parts, high-end bike frames and baseball bats.'],
+  [22,'Ti','Titanium','47.867',2,4,4,'Strong as steel at barely half the weight, and body-friendly: jet engines, hip implants and premium watches.'],
+  [23,'V','Vanadium','50.942',2,4,5,'A dash makes steel springy and tough — tool steels, axles and armour plate. Flow batteries store grid power with it.'],
+  [24,'Cr','Chromium','51.996',2,4,6,'The mirror shine of chrome plating and the “stainless” in stainless steel (which is ~18% chromium).'],
+  [25,'Mn','Manganese','54.938',2,4,7,'Essential to nearly all steel; manganese oxides pigmented some of the oldest cave paintings on Earth.'],
+  [26,'Fe','Iron','55.845',2,4,8,'About 95% of all metal produced: buildings, rails, ships, cars. It also carries oxygen in your blood as haemoglobin.'],
+  [27,'Co','Cobalt','58.933',2,4,9,'Painted pottery deep blue for centuries; today it is a key ingredient of lithium-ion battery cathodes.'],
+  [28,'Ni','Nickel','58.693',2,4,10,'Coins, stainless steel, and superalloys that survive the white-hot spin of jet-engine turbine blades.'],
+  [29,'Cu','Copper','63.546',2,4,11,'The world’s electrical wiring and motor windings; kills microbes on contact — and its slow oxidation turned the Statue of Liberty green.'],
+  [30,'Zn','Zinc','65.38',2,4,12,'Galvanises steel against rust, forms brass with copper, and blocks sunburn as zinc-oxide sunscreen.'],
+  [31,'Ga','Gallium','69.723',3,4,13,'A metal that melts in your hand (29.8 °C). Gallium nitride drives bright LEDs and fast phone chargers.'],
+  [32,'Ge','Germanium','72.630',4,4,14,'Infrared night-vision optics, fibre-optic cores, and the material of the very first transistor in 1947.'],
+  [33,'As','Arsenic','74.922',4,4,15,'History’s most notorious poison — yet gallium-arsenide chips power lasers and satellite electronics.'],
+  [34,'Se','Selenium','78.971',5,4,16,'Once ran photocopiers, tints glass red, and is an essential trace nutrient your body needs in micrograms.'],
+  [35,'Br','Bromine','79.904',6,4,17,'One of only two elements liquid at room temperature; used in flame retardants and, historically, photographic film.'],
+  [36,'Kr','Krypton','83.798',7,4,18,'High-power photographic flash lamps — and from 1960 to 1983 the metre itself was defined by krypton-86 light.'],
+  [37,'Rb','Rubidium','85.468',0,5,1,'Rubidium atomic clocks — accurate to a second in centuries — ride inside GPS satellites.'],
+  [38,'Sr','Strontium','87.62',1,5,2,'The brilliant crimson of fireworks and emergency flares; strontium ranelate has treated bone disease.'],
+  [39,'Y','Yttrium','88.906',2,5,3,'Made the red phosphor dots of colour TV screens; YAG crystals power surgical and industrial lasers.'],
+  [40,'Zr','Zirconium','91.224',2,5,4,'Corrosion-proof cladding around nuclear fuel rods; cubic zirconia is the classic diamond stand-in.'],
+  [41,'Nb','Niobium','92.906',2,5,5,'Superconducting niobium magnets steer particles at CERN and image patients in MRI scanners.'],
+  [42,'Mo','Molybdenum','95.95',2,5,6,'Toughens high-strength steel; enzymes in soil bacteria use it to pull nitrogen from the air.'],
+  [43,'Tc','Technetium','[98]',2,5,7,'The first human-made element (1937). Technetium-99m is injected for tens of millions of medical scans every year.'],
+  [44,'Ru','Ruthenium','101.07',2,5,8,'Hardens platinum electrical contacts; a catalyst in cleaner ammonia and solar-fuel research.'],
+  [45,'Rh','Rhodium','102.91',2,5,9,'Often the most expensive metal on Earth — it scrubs exhaust gases inside car catalytic converters.'],
+  [46,'Pd','Palladium','106.42',2,5,10,'Catalytic converters again — plus membranes that purify hydrogen and white-gold jewellery alloys.'],
+  [47,'Ag','Silver','107.87',2,5,11,'The best electrical and thermal conductor of any element: electronics, solar cells, mirrors and antimicrobial dressings.'],
+  [48,'Cd','Cadmium','112.41',2,5,12,'Rechargeable Ni-Cd cells and reactor control rods; its bright yellow once coloured Van Gogh’s paints.'],
+  [49,'In','Indium','114.82',3,5,13,'Indium tin oxide is the invisible, conductive layer that makes every touchscreen work.'],
+  [50,'Sn','Tin','118.71',3,5,14,'With copper it made bronze — and an entire age. Today it is the solder holding every circuit board together.'],
+  [51,'Sb','Antimony','121.76',4,5,15,'Flame-retardant plastics, lead-acid battery grids, and ancient Egyptian eye kohl.'],
+  [52,'Te','Tellurium','127.60',4,5,16,'Cadmium-telluride thin films make some of the cheapest solar panels; also rewritable DVDs.'],
+  [53,'I','Iodine','126.90',6,5,17,'Hospital antiseptic; your thyroid cannot make its hormones without it — the reason salt is iodised.'],
+  [54,'Xe','Xenon','131.29',7,5,18,'Blazing car headlights, hospital anaesthesia, and the gentle push of ion engines on deep-space probes.'],
+  [55,'Cs','Caesium','132.91',0,6,1,'Defines time itself: one second is exactly 9,192,631,770 vibrations of a caesium-133 atom.'],
+  [56,'Ba','Barium','137.33',1,6,2,'The “barium meal” that makes the gut visible on X-rays, and the green in fireworks.'],
+  [57,'La','Lanthanum','138.91',8,6,0,'High-index camera and telescope lenses, and the alloy in nickel-metal-hydride hybrid-car batteries.'],
+  [58,'Ce','Cerium','140.12',8,6,0,'Lighter “flints”, self-cleaning oven walls and glass polish — the most abundant rare earth.'],
+  [59,'Pr','Praseodymium','140.91',8,6,0,'Tints welders’ goggles yellow to block glare, and strengthens aircraft engine alloys.'],
+  [60,'Nd','Neodymium','144.24',8,6,0,'The super-magnets inside earbuds, hard drives, wind turbines and electric-car motors.'],
+  [61,'Pm','Promethium','[145]',8,6,0,'Radioactive and vanishingly rare; once painted luminous watch dials and powered pacemaker batteries.'],
+  [62,'Sm','Samarium','150.36',8,6,0,'Samarium-cobalt magnets keep working at 300 °C — vital in jet engines and precision motors.'],
+  [63,'Eu','Europium','151.96',8,6,0,'Gave old TV screens their red glow; today its fluorescence guards euro banknotes against forgery.'],
+  [64,'Gd','Gadolinium','157.25',8,6,0,'Injected as the contrast agent that lights up MRI scans; also an excellent neutron absorber.'],
+  [65,'Tb','Terbium','158.93',8,6,0,'Green phosphors in efficient lighting and displays; terfenol-D alloy turns electricity into sound in sonar.'],
+  [66,'Dy','Dysprosium','162.50',8,6,0,'Added to neodymium magnets so electric-vehicle motors keep their pull when they run hot.'],
+  [67,'Ho','Holmium','164.93',8,6,0,'The most magnetic element known; holmium lasers perform kidney-stone and prostate surgery.'],
+  [68,'Er','Erbium','167.26',8,6,0,'Amplifies light pulses inside the undersea fibre-optic cables that carry the internet between continents.'],
+  [69,'Tm','Thulium','168.93',8,6,0,'One of the rarest rare earths; thulium-170 powers portable X-ray units in remote clinics.'],
+  [70,'Yb','Ytterbium','173.05',8,6,0,'Ytterbium optical-lattice clocks are among the most precise instruments humanity has ever built.'],
+  [71,'Lu','Lutetium','174.97',8,6,0,'Lutetium crystals detect gamma rays in PET scanners; lutetium-177 treats certain cancers.'],
+  [72,'Hf','Hafnium','178.49',2,6,4,'Swallows neutrons in submarine reactor control rods, and insulates transistors in modern microchips.'],
+  [73,'Ta','Tantalum','180.95',2,6,5,'Tiny tantalum capacitors store charge in every smartphone; so body-inert it is used for skull plates.'],
+  [74,'W','Tungsten','183.84',2,6,6,'The highest melting point of any metal (3,422 °C): old bulb filaments, rocket nozzles and carbide drill tips.'],
+  [75,'Re','Rhenium','186.21',2,6,7,'One of the rarest metals in the crust; superalloy jet-turbine blades depend on it to run hotter.'],
+  [76,'Os','Osmium','190.23',2,6,8,'The densest naturally occurring element — a litre would weigh 22.6 kg. Used in fountain-pen tips and instrument pivots.'],
+  [77,'Ir','Iridium','192.22',2,6,9,'Ultra-durable spark-plug tips; a worldwide clay layer rich in iridium marks the asteroid that ended the dinosaurs.'],
+  [78,'Pt','Platinum','195.08',2,6,10,'Catalytic converters, the anticancer drug cisplatin, lab crucibles — and, for a century, the standard kilogram.'],
+  [79,'Au','Gold','196.97',2,6,11,'Never tarnishes: jewellery and money for 6,000 years, connector coatings in electronics, and the golden mirror coating of JWST.'],
+  [80,'Hg','Mercury','200.59',2,6,12,'The only metal liquid at room temperature. Once filled thermometers and barometers; now carefully phased out.'],
+  [81,'Tl','Thallium','204.38',3,6,13,'Infamous as “the poisoner’s poison”; safely used today in heart-imaging scans and infrared detectors.'],
+  [82,'Pb','Lead','207.2',3,6,14,'Car batteries and radiation shielding. Roman water pipes of lead — plumbum — gave us the word “plumbing”.'],
+  [83,'Bi','Bismuth','208.98',3,6,15,'The active ingredient in pink stomach remedies; its low-melting alloys trigger fire-sprinkler heads.'],
+  [84,'Po','Polonium','[209]',3,6,16,'Discovered by Marie Curie and named for Poland. Its intense heat warmed Soviet Lunokhod rovers through lunar nights.'],
+  [85,'At','Astatine','[210]',6,6,17,'The rarest natural element — less than 30 grams exists in Earth’s entire crust at any moment.'],
+  [86,'Rn','Radon','[222]',7,6,18,'A radioactive gas that seeps from bedrock into basements — the second-leading cause of lung cancer.'],
+  [87,'Fr','Francium','[223]',0,7,1,'So unstable that no weighable amount has ever existed; made atom-by-atom to test fundamental physics.'],
+  [88,'Ra','Radium','[226]',1,7,2,'Once painted glow-in-the-dark watch dials — until its dangers became tragically clear; an early cancer therapy.'],
+  [89,'Ac','Actinium','[227]',9,7,0,'Actinium-225 is being trialled in targeted alpha therapy, delivering radiation to single cancer cells.'],
+  [90,'Th','Thorium','232.04',9,7,0,'Once glowed in gas-lantern mantles; often discussed as a safer, more abundant future nuclear fuel.'],
+  [91,'Pa','Protactinium','231.04',9,7,0,'Exceedingly rare and radioactive; ratios of protactinium help scientists date ocean sediments.'],
+  [92,'U','Uranium','238.03',9,7,0,'Fuels the nuclear plants that generate about 9% of the world’s electricity — and powered the atomic age.'],
+  [93,'Np','Neptunium','[237]',9,7,0,'The first element beyond uranium, named for the next planet out; a step in plutonium production.'],
+  [94,'Pu','Plutonium','[244]',9,7,0,'Plutonium-238 heat has powered Voyager, Cassini, Curiosity and New Horizons across the solar system.'],
+  [95,'Am','Americium','[243]',9,7,0,'Probably in your home right now: a speck of americium-241 makes smoke detectors work.'],
+  [96,'Cm','Curium','[247]',9,7,0,'Named for Marie and Pierre Curie; curium alpha sources analysed rocks aboard the Mars rovers.'],
+  [97,'Bk','Berkelium','[247]',9,7,0,'Only about a gram is made per year; a berkelium target was used to discover element 117, tennessine.'],
+  [98,'Cf','Californium','[251]',9,7,0,'A portable neutron source: kick-starts reactors, scans luggage, and prospects for gold and oil.'],
+  [99,'Es','Einsteinium','[252]',9,7,0,'Named for Einstein; first found in the debris of the 1952 hydrogen-bomb test. Research quantities only.'],
+  [100,'Fm','Fermium','[257]',9,7,0,'Named for Enrico Fermi; made only in specialised reactors, never in visible amounts.'],
+  [101,'Md','Mendelevium','[258]',9,7,0,'Honours Dmitri Mendeleev, creator of the periodic table itself. Made one atom at a time.'],
+  [102,'No','Nobelium','[259]',9,7,0,'Named for Alfred Nobel; exists for minutes at most, in accelerator laboratories.'],
+  [103,'Lr','Lawrencium','[266]',9,7,0,'Named for Ernest Lawrence, inventor of the cyclotron. Purely a research curiosity.'],
+  [104,'Rf','Rutherfordium','[267]',2,7,4,'Named for Ernest Rutherford, father of nuclear physics. A synthetic element studied a few atoms at a time.'],
+  [105,'Db','Dubnium','[268]',2,7,5,'Named for Dubna, home of Russia’s nuclear research institute. Survives mere hours at best.'],
+  [106,'Sg','Seaborgium','[269]',2,7,6,'Honours Glenn Seaborg — the first element ever named for a living person.'],
+  [107,'Bh','Bohrium','[270]',2,7,7,'Named for Niels Bohr, architect of atomic theory. Synthetic; decays within seconds.'],
+  [108,'Hs','Hassium','[269]',2,7,8,'Named for the German state of Hesse, where it was created in 1984.'],
+  [109,'Mt','Meitnerium','[278]',2,7,9,'Honours Lise Meitner, co-discoverer of nuclear fission who was denied the Nobel Prize.'],
+  [110,'Ds','Darmstadtium','[281]',2,7,10,'Named for Darmstadt, Germany, where a handful of atoms were forged in 1994.'],
+  [111,'Rg','Roentgenium','[282]',2,7,11,'Named for Wilhelm Röntgen, discoverer of X-rays. Only a few dozen atoms ever made.'],
+  [112,'Cn','Copernicium','[285]',2,7,12,'Named for Copernicus, who put the Sun at the centre. Predicted to behave like a bizarre, volatile metal.'],
+  [113,'Nh','Nihonium','[286]',3,7,13,'“Nihon” means Japan — the first element ever discovered in Asia, at the RIKEN laboratory.'],
+  [114,'Fl','Flerovium','[289]',3,7,14,'Named for the Flerov Laboratory in Dubna. Its chemistry is a live research question.'],
+  [115,'Mc','Moscovium','[290]',3,7,15,'Named for the Moscow region; created by fusing calcium ions with americium targets.'],
+  [116,'Lv','Livermorium','[293]',3,7,16,'Named for Lawrence Livermore National Laboratory in California. Exists for milliseconds.'],
+  [117,'Ts','Tennessine','[294]',6,7,17,'Named for Tennessee, home of Oak Ridge. The second-heaviest element ever created.'],
+  [118,'Og','Oganesson','[294]',7,7,18,'Named for physicist Yuri Oganessian — one of two elements named for a living person. Roughly five atoms have ever been made.']
+  ];
+
+  var table = document.getElementById('ptable');
+  var chipsNav = document.querySelector('nav.chips');
+  var searchInput = document.getElementById('search');
+  var matchCount = document.getElementById('matchCount');
+
+  /* ---------- build category chips ---------- */
+  var activeCat = -1; // -1 = all
+  function makeChip(label, cat, colorVar){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip';
+    b.setAttribute('aria-pressed', cat === -1 ? 'true' : 'false');
+    if (colorVar) b.style.setProperty('--dot', 'var(' + colorVar + ')');
+    else b.style.setProperty('--dot', '#e9edfb');
+    var dot = document.createElement('span');
+    dot.className = 'dot';
+    dot.setAttribute('aria-hidden', 'true');
+    b.appendChild(dot);
+    b.appendChild(document.createTextNode(label));
+    b.addEventListener('click', function(){
+      activeCat = (activeCat === cat) ? -1 : cat;
+      Array.prototype.forEach.call(chipsNav.children, function(c, ci){
+        var cCat = ci === 0 ? -1 : ci - 1;
+        c.setAttribute('aria-pressed', String(cCat === activeCat));
+      });
+      applyFilters();
+    });
+    chipsNav.appendChild(b);
+  }
+  makeChip('All', -1, null);
+  CATS.forEach(function(c, i){ makeChip(c[0], i, c[1]); });
+
+  /* ---------- build table ---------- */
+  function gridPos(el){
+    var n = el[0];
+    if (n >= 57 && n <= 71) return { col: n - 57 + 3, row: 9 };
+    if (n >= 89 && n <= 103) return { col: n - 89 + 3, row: 10 };
+    return { col: el[6], row: el[5] };
+  }
+  var cells = [];
+  E.forEach(function(el, i){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'el';
+    b.style.setProperty('--c', 'var(' + CATS[el[4]][1] + ')');
+    b.style.setProperty('--i', String(i));
+    var pos = gridPos(el);
+    b.style.gridColumn = String(pos.col);
+    b.style.gridRow = String(pos.row);
+    b.setAttribute('aria-label', el[2] + ', symbol ' + el[1] + ', element ' + el[0] + ', ' + CATS[el[4]][0]);
+    b.dataset.idx = String(i);
+    b.innerHTML = '<span class="num">' + el[0] + '</span><span class="sym">' + el[1] + '</span><span class="mass">' + el[3] + '</span>';
+    table.appendChild(b);
+    cells.push(b);
+  });
+  // f-block markers
+  function marker(text, col, row){
+    var m = document.createElement('div');
+    m.className = 'marker';
+    m.textContent = text;
+    m.style.gridColumn = String(col);
+    m.style.gridRow = String(row);
+    m.setAttribute('aria-hidden', 'true');
+    table.appendChild(m);
+  }
+  marker('57–71', 3, 6);
+  marker('89–103', 3, 7);
+
+  /* ---------- detail card ---------- */
+  var detailCard = document.getElementById('detail');
+  var dSym = document.getElementById('dSym');
+  var dNum = document.getElementById('dNum');
+  var dName = document.getElementById('dName');
+  var dMeta = document.getElementById('dMeta');
+  var dUse = document.getElementById('dUse');
+  var selectedIdx = -1;
+
+  function showDetail(i){
+    var el = E[i];
+    detailCard.style.setProperty('--c', 'var(' + CATS[el[4]][1] + ')');
+    dSym.textContent = el[1];
+    dNum.textContent = String(el[0]);
+    dName.textContent = el[2];
+    var groupTxt = el[6] === 0 ? 'f-block' : 'Group ' + el[6];
+    dMeta.innerHTML = '<span class="cat">' + CATS[el[4]][0] + '</span> · Period ' + el[5] + ' · ' + groupTxt + ' · mass ' + el[3];
+    dUse.textContent = el[7];
+  }
+
+  table.addEventListener('pointerover', function(ev){
+    var b = ev.target.closest('button.el');
+    if (b) showDetail(parseInt(b.dataset.idx, 10));
+  });
+  table.addEventListener('pointerout', function(ev){
+    if (selectedIdx >= 0 && !ev.relatedTarget) showDetail(selectedIdx);
+  });
+  table.addEventListener('focusin', function(ev){
+    var b = ev.target.closest('button.el');
+    if (b) showDetail(parseInt(b.dataset.idx, 10));
+  });
+  table.addEventListener('click', function(ev){
+    var b = ev.target.closest('button.el');
+    if (!b) return;
+    var i = parseInt(b.dataset.idx, 10);
+    if (selectedIdx === i){
+      selectedIdx = -1;
+      b.classList.remove('selected');
+    } else {
+      if (selectedIdx >= 0) cells[selectedIdx].classList.remove('selected');
+      selectedIdx = i;
+      b.classList.add('selected');
+    }
+    showDetail(i);
+  });
+  table.addEventListener('pointerleave', function(){
+    if (selectedIdx >= 0) showDetail(selectedIdx);
+  });
+
+  /* ---------- search + filter ---------- */
+  var query = '';
+  function matches(el){
+    if (activeCat >= 0 && el[4] !== activeCat) return false;
+    if (!query) return true;
+    var name = el[2].toLowerCase();
+    var sym = el[1].toLowerCase();
+    var num = String(el[0]);
+    return name.indexOf(query) !== -1 || sym.indexOf(query) === 0 || num.indexOf(query) === 0;
+  }
+  function applyFilters(){
+    var shown = 0;
+    E.forEach(function(el, i){
+      var ok = matches(el);
+      cells[i].classList.toggle('dimmed', !ok);
+      if (ok) shown++;
+    });
+    matchCount.textContent = shown + ' / 118';
+  }
+  searchInput.addEventListener('input', function(){
+    query = searchInput.value.trim().toLowerCase();
+    applyFilters();
+  });
+  applyFilters();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Into the Deep — A Scroll to the Bottom of the Ocean</title>
+<meta name="description" content="Scroll from the sunlit surface down 11,000 metres through the ocean's five zones — Sunlight, Twilight, Midnight, Abyss and Hadal — meeting real deep-sea creatures and landmarks like the Titanic and Challenger Deep along the way.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌊</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#eef6ff;
+    --dim:#a8c3d8;
+    --card:rgba(2,14,30,.58);
+    --edge:rgba(140,200,255,.22);
+    --accent:#5fd4ff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    color:var(--ink);
+    font-family:Inter,system-ui,sans-serif;
+    overflow-x:hidden;
+    background:#062c4e;
+  }
+  .hub-link{position:fixed;top:14px;left:14px;z-index:1000;padding:8px 14px;border-radius:999px;font:600 13px/1 Inter,system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(8px);background:rgba(15,15,25,.55);color:#fff;border:1px solid rgba(255,255,255,.25)}
+
+  #bg{position:fixed;inset:0;z-index:-2;background:#2fa9dd}
+  #vignette{
+    position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background:
+      linear-gradient(180deg,rgba(0,8,20,.38),rgba(0,8,20,0) 30%),
+      radial-gradient(ellipse at 50% 120%,rgba(0,4,12,.5),transparent 60%);
+  }
+  #rays{
+    position:fixed;top:-12vh;left:0;right:0;height:75vh;z-index:-1;pointer-events:none;
+    background:
+      linear-gradient(112deg,transparent 42%,rgba(255,255,255,.16) 46%,transparent 50%),
+      linear-gradient(100deg,transparent 60%,rgba(255,255,255,.12) 64%,transparent 68%),
+      linear-gradient(124deg,transparent 22%,rgba(255,255,255,.10) 26%,transparent 31%);
+    transform-origin:top center;
+    animation:sway 9s ease-in-out infinite alternate;
+  }
+  @keyframes sway{from{transform:skewX(-2deg)}to{transform:skewX(2.5deg)}}
+
+  /* ---------- depth meter ---------- */
+  #meter{
+    position:fixed;right:10px;top:50%;transform:translateY(-50%);z-index:50;
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+    pointer-events:none;
+  }
+  #readout{
+    font:700 clamp(13px,2vw,17px)/1.15 Sora,sans-serif;color:#fff;
+    background:rgba(2,12,26,.72);border:1px solid var(--edge);border-radius:10px;
+    padding:8px 10px;text-align:center;min-width:84px;backdrop-filter:blur(6px);
+  }
+  #readout small{display:block;font:600 9px/1.4 Inter,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+  #track{
+    position:relative;width:6px;height:min(52vh,440px);border-radius:3px;
+    background:linear-gradient(180deg,#59c9f2,#0c5d94 25%,#083053 55%,#041526 80%,#02070f);
+    border:1px solid rgba(255,255,255,.18);
+  }
+  #marker{
+    position:absolute;left:50%;top:0;width:16px;height:16px;border-radius:50%;
+    background:#fff;box-shadow:0 0 12px rgba(120,220,255,.9);
+    transform:translate(-50%,-50%);will-change:transform;
+  }
+  .tick{
+    position:absolute;right:10px;transform:translateY(-50%);
+    font:600 9px/1 Inter,sans-serif;color:var(--dim);white-space:nowrap;
+    padding-right:4px;
+  }
+  .tick::after{content:"";position:absolute;right:-9px;top:50%;width:8px;height:1px;background:var(--dim)}
+
+  /* ---------- layout ---------- */
+  main{width:100%}
+  .wrap{
+    max-width:1060px;margin:0 auto;
+    padding-left:clamp(18px,5vw,48px);
+    padding-right:calc(clamp(18px,5vw,48px) + 64px);
+  }
+  section.hero{
+    min-height:100svh;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
+    position:relative;
+  }
+  .hero .kicker{font:600 clamp(11px,1.8vw,14px)/1 Inter,sans-serif;letter-spacing:.34em;text-transform:uppercase;color:#dff4ff;margin-bottom:14px}
+  .hero h1{
+    font:800 clamp(42px,10vw,110px)/0.95 Sora,sans-serif;letter-spacing:-.02em;
+    color:#fff;text-shadow:0 4px 40px rgba(0,20,40,.55);
+  }
+  .hero h1 span{display:block;color:#063a5e;text-shadow:none;-webkit-text-stroke:0}
+  .hero p.lede{margin-top:20px;max-width:52ch;font:500 clamp(15px,2.4vw,19px)/1.6 Inter,sans-serif;color:#f2fbff;text-shadow:0 1px 12px rgba(0,20,40,.6)}
+  .hero .cue{
+    margin-top:38px;display:inline-flex;align-items:center;gap:10px;
+    font:600 13px/1 Inter,sans-serif;color:#fff;
+    background:var(--card);border:1px solid var(--edge);border-radius:999px;padding:12px 20px;
+    backdrop-filter:blur(6px);
+  }
+  .hero .cue .arrow{display:inline-block;animation:bob 1.6s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(-2px)}50%{transform:translateY(4px)}}
+
+  section.zone{padding:16vh 0 14vh;min-height:150vh}
+  .zone-head{max-width:640px;margin-bottom:48px}
+  .zone-head .range{
+    font:700 clamp(13px,2vw,16px)/1 Sora,sans-serif;color:var(--accent);
+    letter-spacing:.12em;margin-bottom:10px;
+  }
+  .zone-head h2{font:800 clamp(30px,6vw,58px)/1.02 Sora,sans-serif;color:#fff;letter-spacing:-.01em}
+  .zone-head .latin{font:italic 500 clamp(13px,2vw,15px)/1.4 Inter,serif;color:var(--dim);margin:6px 0 16px}
+  .zone-head .desc{
+    font:400 clamp(14px,2.2vw,17px)/1.7 Inter,sans-serif;color:#e5f2fb;
+    background:var(--card);border:1px solid var(--edge);border-radius:14px;padding:18px 20px;
+    backdrop-filter:blur(6px);
+  }
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(250px,100%),1fr));gap:16px;margin:34px 0}
+  .card{
+    background:var(--card);border:1px solid var(--edge);border-radius:16px;
+    padding:20px;backdrop-filter:blur(6px);
+    transition:transform .25s ease,border-color .25s ease;
+  }
+  .card:hover{transform:translateY(-4px);border-color:rgba(120,215,255,.55)}
+  .card .cr{font-size:clamp(30px,5vw,40px);line-height:1;display:inline-block;filter:drop-shadow(0 0 12px rgba(95,212,255,.35))}
+  .card h3{font:700 clamp(16px,2.6vw,19px)/1.25 Sora,sans-serif;color:#fff;margin:10px 0 4px}
+  .card .sci{font:italic 400 12px/1.4 Inter,serif;color:var(--dim);margin-bottom:8px}
+  .card p{font:400 14px/1.65 Inter,sans-serif;color:#d9ecf8}
+  .landmark{
+    display:flex;align-items:center;gap:14px;margin:34px 0;
+  }
+  .landmark .lm-depth{
+    flex:0 0 auto;font:800 clamp(14px,2.4vw,18px)/1 Sora,sans-serif;color:#04202f;
+    background:var(--accent);padding:10px 14px;border-radius:10px;box-shadow:0 0 20px rgba(95,212,255,.35);
+  }
+  .landmark p{
+    font:500 clamp(13px,2vw,15px)/1.55 Inter,sans-serif;color:#eaf6ff;
+    background:var(--card);border:1px dashed rgba(140,210,255,.4);border-radius:12px;padding:12px 16px;
+    backdrop-filter:blur(6px);
+  }
+  section.finale{min-height:92vh;display:flex;align-items:center;padding:10vh 0 16vh}
+  .finale-card{
+    background:linear-gradient(180deg,rgba(4,18,36,.85),rgba(1,6,14,.9));
+    border:1px solid var(--edge);border-radius:22px;padding:clamp(24px,5vw,48px);
+    backdrop-filter:blur(8px);max-width:720px;
+  }
+  .finale-card h2{font:800 clamp(28px,6vw,50px)/1.05 Sora,sans-serif;color:#fff;margin-bottom:16px}
+  .finale-card p{font:400 clamp(14px,2.2vw,16px)/1.75 Inter,sans-serif;color:#dcedf9;margin-bottom:14px}
+  .finale-card strong{color:var(--accent)}
+  #surfaceBtn{
+    margin-top:10px;min-height:48px;padding:0 26px;border-radius:999px;cursor:pointer;
+    font:700 15px/1 Sora,sans-serif;color:#04202f;background:var(--accent);border:none;
+    transition:transform .2s ease;
+  }
+  #surfaceBtn:hover{transform:translateY(-3px)}
+  #surfaceBtn:active{transform:scale(.96)}
+  #surfaceBtn:focus-visible{outline:3px solid #fff;outline-offset:3px}
+  a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+
+  @media (max-width:560px){
+    #meter{right:4px}
+    #readout{min-width:66px;padding:6px 6px}
+    #track{height:38vh}
+    .tick{display:none}
+    .wrap{padding-right:calc(18px + 62px)}
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto}
+    *{animation:none!important;transition-duration:.001s!important}
+  }
+</style>
+</head>
+<body>
+<a class="hub-link" href="https://thirty-worlds.vercel.app/" aria-label="All thirty sites">← All 30</a>
+
+<div id="bg" aria-hidden="true"></div>
+<div id="rays" aria-hidden="true"></div>
+<div id="vignette" aria-hidden="true"></div>
+
+<div id="meter" aria-hidden="true">
+  <div id="readout">0 m<small id="zoneName">Surface</small></div>
+  <div id="track"><div id="marker"></div></div>
+</div>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <p class="kicker">A journey in five zones</p>
+      <h1>Into<br>the Deep</h1>
+      <p class="lede">The ocean is a vertical world. Scroll down and you will sink 11,000 metres — past the last ray of sunlight, past the Titanic, all the way to the deepest place on Earth. Everything you meet on the way down is real.</p>
+      <p class="cue"><span class="arrow" aria-hidden="true">↓</span> Scroll to begin your descent</p>
+    </div>
+  </section>
+
+  <!-- ================= SUNLIGHT ================= -->
+  <section class="zone" data-from="0" data-to="200" data-name="Sunlight Zone">
+    <div class="wrap">
+      <div class="zone-head">
+        <p class="range">0 – 200 m</p>
+        <h2>The Sunlight Zone</h2>
+        <p class="latin">Epipelagic — “upon the sea”</p>
+        <p class="desc">Warm, bright and busy. This thin skin of water — thinner, proportionally, than the peel on an apple — is the only layer where there is enough light for photosynthesis, so nearly all of the ocean’s food is made here. Around 90% of all marine life lives in this zone, and tropical surface water can reach a bath-like 30&nbsp;°C.</p>
+      </div>
+      <div class="landmark"><span class="lm-depth">40 m</span><p>The recommended limit for recreational scuba diving. Beyond this, ordinary air starts to act strangely on the human body.</p></div>
+      <div class="cards">
+        <article class="card"><span class="cr" aria-hidden="true">🐢</span><h3>Green sea turtle</h3><p class="sci">Chelonia mydas</p><p>Grazes seagrass meadows like an underwater cow, and can hold its breath for several hours while resting. Females navigate thousands of kilometres of open ocean to lay eggs on the very beach where they hatched.</p></article>
+        <article class="card"><span class="cr" aria-hidden="true">🦈</span><h3>Whale shark</h3><p class="sci">Rhincodon typus</p><p>The largest fish on Earth — commonly 10–12 m long — yet it eats almost nothing but plankton, filtering it through its metre-wide mouth. Each shark’s pattern of white spots is unique, like a fingerprint.</p></article>
+        <article class="card"><span class="cr" aria-hidden="true">🪼</span><h3>Moon jellyfish</h3><p class="sci">Aurelia aurita</p><p>About 95% water, with no brain, heart, bones or blood — and it has drifted through the seas in roughly this form since long before the dinosaurs, more than 500 million years.</p></article>
+        <article class="card"><span class="cr" aria-hidden="true">🐟</span><h3>Sardine</h3><p class="sci">Sardinops sagax</p><p>Safety in numbers, taken to extremes: sardines school in shoals of many millions. South Africa’s annual “sardine run” is one of the largest movements of animal biomass anywhere on the planet.</p></article>
+      </div>
+      <div class="landmark"><span class="lm-depth">200 m</span><p>Light fades to about 1% of its surface strength. Photosynthesis becomes impossible. The open ocean’s “surface” world ends here.</p></div>
+    </div>
+  </section>
+
+  <!-- ================= TWILIGHT ================= -->
+  <section class="zone" data-from="200" data-to="1000" data-name="Twilight Zone">
+    <div class="wrap">
+      <div class="zone-head">
+        <p class="range">200 – 1,000 m</p>
+        <h2>The Twilight Zone</h2>
+        <p class="latin">Mesopelagic — “middle sea”</p>
+        <p class="desc">A blue dusk that never becomes day. No plants can grow, so everything here either hunts, scavenges the “marine snow” drifting down from above, or commutes: every night, billions of animals rise hundreds of metres to feed near the surface and sink again by dawn — the largest migration on Earth, and it happens daily. Most residents make their own light.</p>
+      </div>
+      <div class="landmark"><span class="lm-depth">214 m</span><p>The deepest a human has ever free-dived on a single breath — Herbert Nitsch, “no limits” record, 2007.</p></div>
+      <div class="landmark"><span class="lm-depth">332 m</span><p>The deepest scuba dive in history (Ahmed Gabr, 2014). The descent took 12 minutes; returning safely took nearly 14 hours.</p></div>
+      <div class="cards">
+        <article class="card"><span class="cr" aria-hidden="true">🏮</span><h3>Lanternfish</h3><p class="sci">Family Myctophidae</p><p>Possibly the most abundant vertebrates on Earth. Their nightly rise to the surface is so dense that early sonar operators mistook the layer of fish for a false seafloor.</p></article>
+        <article class="card"><span class="cr" aria-hidden="true">🐠</span><h3>Marine hatchetfish</h3><p class="sci">Argyropelecus spp.</p><p>Mirror-silver sides and rows of belly photophores tuned to match the faint light above — “counter-illumination” camouflage that erases its silhouette from predators looking up.</p></article>
+        <article class="card"><span class="cr" aria-hidden="true">🦑</span><h3>Vampire squid</h3><p class="sci">Vampyroteuthis infernalis</p><p>Neither a vampire nor a true squid. It drifts in water almost empty of oxygen, eats drifting marine snow, and when startled turns its webbed arms inside-out over its head like a spiky umbrella.</p></article>
+        <article class="card"><span class="cr" aria-hidden="true">🐡</span><h3>Barreleye</h3><p class="sci">Macropinna microstoma</p><p>Has a transparent, fluid-filled head. Its green tube-shaped eyes sit <em>inside</em> the dome and rotate upward to spot prey silhouetted against the dim light far above.</p></article>
+      </div>
+      <div class="landmark"><span class="lm-depth">535 m</span><p>The deepest recorded dive of an emperor penguin — the deepest-diving bird in the world.</p></div>
+    </div>
+  </section>
+
+  <!-- ================= MIDNIGHT ================= -->
+  <section class="zone" data-from="1000" data-to="4000" data-name="Midnight Zone">
+    <div class="wrap">
+      <div class="zone-head">
+        <p class="range">1,000 – 4,000 m</p>
+        <h2>The Midnight Zone</h2>
+        <p class="latin">Bathypelagic — “deep sea”</p>
+        <p class="desc">Total, permanent darkness — not one photon of sunlight has ever reached below 1,000 m. The water hovers around 4&nbsp;°C and the pressure exceeds 100 atmospheres. The only lights are living ones: an estimated three-quarters of the animals here can produce their own bioluminescent glow.</p>
+      </div>
+      <div class="landmark"><span class="lm-depth">1,000 m</span><p>The last, faintest trace of sunlight is gone. From here to the seafloor, the ocean has been dark for its entire 4-billion-year history.</p></div>
+      <div class="cards">
+        <article class="card"><span class="cr" aria-hidden="true">🎣</span><h3>Humpback anglerfish</h3><p class="sci">Melanocetus johnsonii</p><p>The female’s glowing lure is a colony of luminous bacteria on a modified fin ray. The male is a tiny fraction of her size; in some anglerfish species he fuses to her body for life, sharing her bloodstream.</p></article>
+        <article class="card"><span class="cr" aria-hidden="true">🦑</span><h3>Giant squid</h3><p class="sci">Architeuthis dux</p><p>Grows to 12–13 m and has the largest eyes in the animal kingdom — about 27 cm across, the size of dinner plates — for catching the faintest flickers of light. First filmed alive in the deep only in 2012.</p></article>
+        <article class="card"><span class="cr" aria-hidden="true">🐍</span><h3>Gulper eel</h3><p class="sci">Eurypharynx pelecanoides</p><p>Mostly mouth: its pelican-like jaws can engulf prey larger than its own body, and the tip of its whip-thin tail carries a glowing organ thought to lure prey close in the dark.</p></article>
+        <article class="card"><span class="cr" aria-hidden="true">🐋</span><h3>Sperm whale</h3><p class="sci">Physeter macrocephalus</p><p>A visitor from the surface that dives past 2,000 m on breath-holds over an hour long, hunting squid by sonar. Its echolocation clicks reach ~230 decibels — the loudest sound made by any animal.</p></article>
+      </div>
+      <div class="landmark"><span class="lm-depth">2,992 m</span><p>The deepest dive ever recorded for any mammal — a Cuvier’s beaked whale, tracked in 2014.</p></div>
+      <div class="landmark"><span class="lm-depth">3,700 m</span><p>You pass the ocean’s <em>average</em> depth (~3,700 m). Roughly half of all the seawater on Earth lies deeper still.</p></div>
+      <div class="landmark"><span class="lm-depth">3,800 m</span><p>The wreck of RMS <em>Titanic</em> rests here on the North Atlantic floor, discovered in 1985 — 73 years after she sank.</p></div>
+    </div>
+  </section>
+
+  <!-- ================= ABYSS ================= -->
+  <section class="zone" data-from="4000" data-to="6000" data-name="Abyssal Zone">
+    <div class="wrap">
+      <div class="zone-head">
+        <p class="range">4,000 – 6,000 m</p>
+        <h2>The Abyss</h2>
+        <p class="latin">Abyssopelagic — “bottomless sea”</p>
+        <p class="desc">Named from the Greek for “bottomless”. Near-freezing water, crushing pressure, and vast plains of soft mud: the abyssal plains that begin here are the largest single habitat on Earth, covering more than half the planet’s surface. Food is so scarce that many residents simply wait for it to fall from above.</p>
+      </div>
+      <div class="cards">
+        <article class="card"><span class="cr" aria-hidden="true">🐙</span><h3>Dumbo octopus</h3><p class="sci">Grimpoteuthis spp.</p><p>The deepest-living octopus known, filmed near 7,000 m. It swims by flapping two ear-like fins, and has lost its ink sac entirely — ink is useless where there is no light to hide from.</p></article>
+        <article class="card"><span class="cr" aria-hidden="true">🐟</span><h3>Tripod fish</h3><p class="sci">Bathypterois grallator</p><p>Stands motionless on three stilt-like fin rays, facing into the current with feeler-fins raised, waiting for plankton to drift into reach. Its eyes barely work — it hunts by touch.</p></article>
+        <article class="card"><span class="cr" aria-hidden="true">🐖</span><h3>Sea pig</h3><p class="sci">Scotoplanes globosa</p><p>A pink, plump sea cucumber that walks the mud on inflatable tube-feet “legs”. Sea pigs gather in herds, all facing the same direction, plowing the seafloor for freshly fallen organic matter.</p></article>
+        <article class="card"><span class="cr" aria-hidden="true">🦷</span><h3>Fangtooth</h3><p class="sci">Anoplogaster cornuta</p><p>Has the largest teeth of any fish relative to its body size — so long that it has special sockets beside its brain so the mouth can close. Fearsome looking, but only about 16 cm long.</p></article>
+      </div>
+      <div class="landmark"><span class="lm-depth">6,000 m</span><p>The abyssal plains end. Only ocean trenches plunge deeper — and a whole hidden world lives in them.</p></div>
+    </div>
+  </section>
+
+  <!-- ================= HADAL ================= -->
+  <section class="zone" data-from="6000" data-to="10935" data-name="Hadal Zone">
+    <div class="wrap">
+      <div class="zone-head">
+        <p class="range">6,000 – 11,000 m</p>
+        <h2>The Hadal Zone</h2>
+        <p class="latin">Hadopelagic — named for Hades, god of the underworld</p>
+        <p class="desc">The deep beyond the deep: found only in long, narrow trenches where one tectonic plate dives beneath another. Pressure here climbs past 1,000 atmospheres — over a tonne pressing on every square centimetre — yet even the deepest trench floor is alive.</p>
+      </div>
+      <div class="landmark"><span class="lm-depth">6,500 m</span><p>The operating limit of most crewed research submersibles, including the upgraded American sub <em>Alvin</em> — famous for exploring the Titanic.</p></div>
+      <div class="cards">
+        <article class="card"><span class="cr" aria-hidden="true">🐟</span><h3>Hadal snailfish</h3><p class="sci">Pseudoliparis spp.</p><p>The deepest fish ever seen: one was filmed at 8,336 m in Japan’s Izu-Ogasawara Trench in 2023. Soft, scaleless and faintly pink, it survives thanks to pressure-stabilising molecules in its cells.</p></article>
+        <article class="card"><span class="cr" aria-hidden="true">🦐</span><h3>Giant hadal amphipod</h3><p class="sci">Hirondellea gigas</p><p>Shrimp-like scavengers that swarm by the thousand on the floor of the Challenger Deep. They coat their shells in an aluminium-hydroxide gel — home-made armour against the crushing, corrosive depths.</p></article>
+        <article class="card"><span class="cr" aria-hidden="true">🦠</span><h3>Xenophyophore</h3><p class="sci">e.g. Syringammina</p><p>Among the largest single cells on Earth — one cell the size of your fist. These fragile giants glue sediment into elaborate shelters and carpet parts of the trench floor.</p></article>
+        <article class="card"><span class="cr" aria-hidden="true">🐟</span><h3>Cusk-eel</h3><p class="sci">Abyssobrotula galatheae</p><p>Trawled from 8,370 m in the Puerto Rico Trench in 1970, it held the “deepest fish” record for half a century — and it still holds the record for the deepest fish ever physically caught.</p></article>
+      </div>
+      <div class="landmark"><span class="lm-depth">8,336 m</span><p>The deepest any fish has ever been observed. Below roughly 8,400 m, scientists believe fish bodies simply cannot work.</p></div>
+      <div class="landmark"><span class="lm-depth">10,935 m</span><p>Challenger Deep, Mariana Trench — the deepest surveyed point in all the world’s oceans.</p></div>
+    </div>
+  </section>
+
+  <!-- ================= FINALE ================= -->
+  <section class="finale" data-from="10935" data-to="10935" data-name="Challenger Deep">
+    <div class="wrap">
+      <div class="finale-card">
+        <h2>You’ve reached the bottom.</h2>
+        <p>This is <strong>Challenger Deep</strong>: 10,935 metres down. If Mount Everest were dropped in here, its summit would still be more than <strong>2 km underwater</strong>. The pressure is about <strong>1,086 bar</strong> — the weight of a small car concentrated on your thumbnail.</p>
+        <p>Humans first touched this floor on 23 January 1960, when <strong>Jacques Piccard and Don Walsh</strong> rode the bathyscaphe <em>Trieste</em> down in a dive that took nearly five hours. Film director <strong>James Cameron</strong> repeated the feat solo in 2012. Until 2019, more people had walked on the Moon than had ever been here.</p>
+        <p>And yet, even here, the mud stirs with amphipods, sea cucumbers and giant single-celled life. We have better maps of Mars than of our own seafloor — over <strong>75%</strong> of it has never been mapped in high resolution. The deep is not empty. It is simply unvisited.</p>
+        <button id="surfaceBtn" type="button">↑ Return to the surface</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+(function(){
+  'use strict';
+  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  gsap.registerPlugin(ScrollTrigger);
+
+  /* ---------- depth-to-colour mapping ---------- */
+  var STOPS = [
+    [0,     [47, 169, 221]],
+    [200,   [15, 111, 168]],
+    [1000,  [10,  58, 102]],
+    [4000,  [ 7,  27,  56]],
+    [6000,  [ 4,  15,  36]],
+    [10935, [ 1,   5,  14]]
+  ];
+  function colourAt(d){
+    if (d <= STOPS[0][0]) return STOPS[0][1];
+    for (var i = 1; i < STOPS.length; i++){
+      if (d <= STOPS[i][0]){
+        var a = STOPS[i-1], b = STOPS[i];
+        var t = (d - a[0]) / (b[0] - a[0]);
+        return [
+          Math.round(a[1][0] + (b[1][0]-a[1][0]) * t),
+          Math.round(a[1][1] + (b[1][1]-a[1][1]) * t),
+          Math.round(a[1][2] + (b[1][2]-a[1][2]) * t)
+        ];
+      }
+    }
+    return STOPS[STOPS.length-1][1];
+  }
+
+  var bg = document.getElementById('bg');
+  var rays = document.getElementById('rays');
+  var readout = document.getElementById('readout');
+  var zoneNameEl = document.getElementById('zoneName');
+  var marker = document.getElementById('marker');
+  var track = document.getElementById('track');
+
+  var currentDepth = 0;
+  var currentZone = 'Surface';
+  function setDepth(d, zoneName){
+    currentDepth = d;
+    if (zoneName) currentZone = zoneName;
+    var c = colourAt(d);
+    bg.style.background = 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')';
+    rays.style.opacity = String(Math.max(0, 1 - d / 260));
+    readout.firstChild.nodeValue = Math.round(d).toLocaleString('en-US') + ' m';
+    zoneNameEl.textContent = currentZone;
+  }
+
+  /* ---------- per-zone depth triggers ---------- */
+  var zones = gsap.utils.toArray('section[data-from]');
+  zones.forEach(function(sec){
+    var from = parseFloat(sec.dataset.from);
+    var to = parseFloat(sec.dataset.to);
+    var name = sec.dataset.name;
+    ScrollTrigger.create({
+      trigger: sec,
+      start: 'top 60%',
+      end: 'bottom 60%',
+      onUpdate: function(self){
+        setDepth(from + (to - from) * self.progress, name);
+      },
+      onEnter: function(){ setDepth(from, name); },
+      onEnterBack: function(){ setDepth(to, name); }
+    });
+  });
+
+  /* ---------- whole-page marker on the meter track ---------- */
+  ScrollTrigger.create({
+    trigger: document.body,
+    start: 'top top',
+    end: 'bottom bottom',
+    onUpdate: function(self){
+      marker.style.transform = 'translate(-50%,' + (self.progress * track.clientHeight - 8) + 'px)';
+    }
+  });
+
+  /* ---------- zone ticks on the track ---------- */
+  function positionTicks(){
+    Array.prototype.forEach.call(track.querySelectorAll('.tick'), function(t){ t.remove(); });
+    var scrollMax = document.documentElement.scrollHeight - window.innerHeight;
+    if (scrollMax <= 0) return;
+    zones.forEach(function(sec){
+      var from = parseFloat(sec.dataset.from);
+      var to = parseFloat(sec.dataset.to);
+      if (to === from) return;
+      var p = (sec.offsetTop - window.innerHeight * 0.6) / scrollMax;
+      p = Math.max(0, Math.min(1, p));
+      var tick = document.createElement('span');
+      tick.className = 'tick';
+      tick.style.top = (p * 100) + '%';
+      tick.textContent = from.toLocaleString('en-US') + ' m';
+      track.appendChild(tick);
+    });
+  }
+  ScrollTrigger.addEventListener('refresh', positionTicks);
+
+  /* ---------- entrance + ambient animation ---------- */
+  if (!reducedMotion){
+    gsap.utils.toArray('.card').forEach(function(card, i){
+      gsap.from(card, {
+        y: 42, opacity: 0, duration: 0.7, ease: 'power2.out',
+        delay: (i % 4) * 0.06,
+        scrollTrigger: { trigger: card, start: 'top 90%' }
+      });
+    });
+    gsap.utils.toArray('.zone-head, .landmark, .finale-card').forEach(function(el){
+      gsap.from(el, {
+        y: 30, opacity: 0, duration: 0.8, ease: 'power2.out',
+        scrollTrigger: { trigger: el, start: 'top 88%' }
+      });
+    });
+    gsap.utils.toArray('.card .cr').forEach(function(em, i){
+      gsap.to(em, {
+        y: -7, duration: 2 + (i % 5) * 0.4,
+        ease: 'sine.inOut', yoyo: true, repeat: -1, delay: i * 0.15
+      });
+    });
+  }
+
+  /* ---------- pause ambient loops when tab hidden ---------- */
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden) gsap.globalTimeline.pause();
+    else gsap.globalTimeline.play();
+  });
+
+  document.getElementById('surfaceBtn').addEventListener('click', function(){
+    window.scrollTo({ top: 0, behavior: reducedMotion ? 'auto' : 'smooth' });
+  });
+
+  setDepth(0, 'Surface');
+  ScrollTrigger.refresh();
+})();
+</script>
+</body>
+</html>

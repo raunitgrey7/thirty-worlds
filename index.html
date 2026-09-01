@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thirty Worlds</title>
+<meta name="description" content="Thirty tiny websites to learn, play, create and wander — space, oceans, myths, music, games and more. One for every mood, every age, every culture.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#07070f;
+    --ink:#eef0ff;
+    --muted:#9aa0c3;
+    --card:#11122212;
+    --line:rgba(255,255,255,.09);
+    --learn:#5eb0ff; --play:#ff7a9e; --culture:#ffb454; --create:#7ef0c3; --wellness:#c39bff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:Inter,system-ui,-apple-system,sans-serif;
+    min-height:100vh;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* ---------- aurora backdrop ---------- */
+  .sky{position:fixed;inset:0;z-index:-2;overflow:hidden;background:
+    radial-gradient(60vw 60vw at 15% -10%, rgba(94,110,255,.20), transparent 60%),
+    radial-gradient(50vw 50vw at 90% 10%, rgba(255,122,158,.13), transparent 60%),
+    radial-gradient(70vw 55vw at 50% 110%, rgba(126,240,195,.10), transparent 60%),
+    var(--bg);}
+  .aurora{position:absolute;width:70vmax;height:70vmax;border-radius:50%;filter:blur(90px);opacity:.16;animation:drift 26s ease-in-out infinite alternate}
+  .aurora.a{background:#4756ff;top:-25vmax;left:-15vmax}
+  .aurora.b{background:#b64dff;bottom:-30vmax;right:-18vmax;animation-duration:33s;animation-delay:-8s}
+  @keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(9vmax,6vmax) scale(1.18)}}
+  #stars{position:fixed;inset:0;z-index:-1}
+  /* ---------- header ---------- */
+  header{max-width:1180px;margin:0 auto;padding:clamp(64px,10vh,120px) 24px 8px;text-align:center}
+  .kicker{font:500 13px/1 Inter,sans-serif;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);animation:rise .8s .05s both}
+  h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(44px,8.5vw,104px);line-height:1.02;letter-spacing:-.02em;margin:18px 0 20px;animation:rise .8s .15s both}
+  h1 .grad{background:linear-gradient(92deg,#7ea2ff 0%,#ff7a9e 45%,#ffb454 75%,#7ef0c3 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{max-width:620px;margin:0 auto;color:var(--muted);font-size:clamp(15px,2vw,18px);line-height:1.65;animation:rise .8s .25s both}
+  @keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+  /* ---------- controls ---------- */
+  .controls{max-width:1180px;margin:40px auto 6px;padding:0 24px;display:flex;flex-wrap:wrap;gap:12px;justify-content:center;align-items:center;animation:rise .8s .35s both}
+  .chip{
+    font:600 13px/1 Inter,sans-serif;color:var(--muted);background:rgba(255,255,255,.045);
+    border:1px solid var(--line);border-radius:999px;padding:11px 18px;cursor:pointer;
+    transition:transform .18s ease,color .18s,background .18s,border-color .18s;min-height:44px;
+  }
+  .chip:hover{transform:translateY(-2px);color:var(--ink)}
+  .chip:focus-visible{outline:2px solid #7ea2ff;outline-offset:2px}
+  .chip[aria-pressed="true"]{color:#0a0a14;background:var(--ink);border-color:var(--ink)}
+  .search{position:relative}
+  .search input{
+    font:500 14px/1 Inter,sans-serif;color:var(--ink);background:rgba(255,255,255,.045);
+    border:1px solid var(--line);border-radius:999px;padding:12px 18px 12px 42px;width:min(240px,62vw);min-height:44px;
+    transition:border-color .2s, width .25s ease;
+  }
+  .search input:focus{outline:none;border-color:rgba(126,162,255,.65);width:min(300px,68vw)}
+  .search input::placeholder{color:var(--muted)}
+  .search svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);opacity:.55;pointer-events:none}
+  /* ---------- grid ---------- */
+  .grid{max-width:1180px;margin:34px auto 0;padding:0 24px 40px;display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(255px,1fr))}
+  .card{
+    position:relative;display:flex;flex-direction:column;gap:10px;text-decoration:none;color:var(--ink);
+    background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.018));
+    border:1px solid var(--line);border-radius:20px;padding:22px 20px 18px;min-height:172px;
+    opacity:0;transform:translateY(26px);
+    transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.2,1),border-color .25s,box-shadow .25s;
+    will-change:transform;
+  }
+  .card.in{opacity:1;transform:none}
+  .card:hover{border-color:rgba(255,255,255,.28);box-shadow:0 18px 44px -18px rgba(60,80,255,.35);transform:translateY(-5px)}
+  .card:focus-visible{outline:2px solid #7ea2ff;outline-offset:3px}
+  .card .emoji{font-size:34px;line-height:1;filter:drop-shadow(0 4px 14px rgba(0,0,0,.5));transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+  .card:hover .emoji{transform:scale(1.22) rotate(-6deg)}
+  .card h2{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:700;letter-spacing:-.01em}
+  .card p{color:var(--muted);font-size:13.5px;line-height:1.55;flex:1}
+  .meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .tag{font:600 10.5px/1 Inter,sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;border-radius:999px;border:1px solid}
+  .tag.cat-Learn{color:var(--learn);border-color:color-mix(in srgb,var(--learn) 45%,transparent)}
+  .tag.cat-Play{color:var(--play);border-color:color-mix(in srgb,var(--play) 45%,transparent)}
+  .tag.cat-Culture{color:var(--culture);border-color:color-mix(in srgb,var(--culture) 45%,transparent)}
+  .tag.cat-Create{color:var(--create);border-color:color-mix(in srgb,var(--create) 45%,transparent)}
+  .tag.cat-Wellness{color:var(--wellness);border-color:color-mix(in srgb,var(--wellness) 45%,transparent)}
+  .aud{font:500 11px/1 Inter,sans-serif;color:var(--muted)}
+  .num{position:absolute;top:16px;right:18px;font:700 12px/1 'Space Grotesk',sans-serif;color:rgba(255,255,255,.16)}
+  .empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:60px 0;font-size:15px;display:none}
+  footer{max-width:1180px;margin:0 auto;padding:26px 24px 54px;text-align:center;color:var(--muted);font-size:13px;line-height:1.8}
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+    .card{opacity:1;transform:none}
+    html{scroll-behavior:auto}
+  }
+  @media (max-width:420px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="sky" aria-hidden="true"><div class="aurora a"></div><div class="aurora b"></div></div>
+<canvas id="stars" aria-hidden="true"></canvas>
+
+<header>
+  <p class="kicker">Thirty tiny websites · one big playground</p>
+  <h1>Thirty <span class="grad">Worlds</span></h1>
+  <p class="sub">Fly a solar system, drum a beat, breathe like a monk, out-think an AI, scroll to the bottom of the ocean. Something to learn, play, or make — for every age and every corner of the world.</p>
+</header>
+
+<nav class="controls" aria-label="Filter the collection">
+  <button class="chip" aria-pressed="true"  data-cat="All">All 30</button>
+  <button class="chip" aria-pressed="false" data-cat="Learn">Learn</button>
+  <button class="chip" aria-pressed="false" data-cat="Play">Play</button>
+  <button class="chip" aria-pressed="false" data-cat="Culture">Culture</button>
+  <button class="chip" aria-pressed="false" data-cat="Create">Create</button>
+  <button class="chip" aria-pressed="false" data-cat="Wellness">Wellness</button>
+  <div class="search">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#eef0ff" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.4-3.4"/></svg>
+    <input id="q" type="search" placeholder="Search worlds…" aria-label="Search the thirty worlds">
+  </div>
+</nav>
+
+<main class="grid" id="grid" aria-label="The thirty worlds"></main>
+<p class="empty" id="empty">No world matches that — try another word.</p>
+
+<footer>
+  Thirty Worlds — built as one collection, every world its own little site.<br>
+  Best explored slowly. Sound worlds (Beat Lab, Stillpoint) ask for a tap before they sing.
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var SITES=[
+    {href:"/cosmos/",e:"🪐",t:"Cosmos Explorer",d:"Fly through a 3D solar system — drag, zoom, and tap planets for their secrets.",cat:"Learn",aud:"All ages"},
+    {href:"/night-sky/",e:"✨",t:"Night Sky Stories",d:"A twinkling star map of real constellations and the ancient myths behind them.",cat:"Learn",aud:"All ages"},
+    {href:"/ocean-depths/",e:"🌊",t:"Into the Deep",d:"Scroll 11,000 meters down through the five ocean zones and meet what lives there.",cat:"Learn",aud:"All ages"},
+    {href:"/physics-lab/",e:"⚡",t:"Physics Playground",d:"Spawn bouncing balls, then bend gravity, wind and friction to your will.",cat:"Learn",aud:"Teens"},
+    {href:"/periodic-table/",e:"🧪",t:"Element Lab",d:"All 118 elements, color-coded and searchable, with real-world uses.",cat:"Learn",aud:"Students"},
+    {href:"/cloud-atlas/",e:"☁️",t:"Cloud Atlas",d:"Learn to read the sky — ten cloud types and the weather each one whispers.",cat:"Learn",aud:"All ages"},
+    {href:"/body-atlas/",e:"🫀",t:"Body Atlas",d:"Toggle five body systems on one map — bones, blood, nerves, breath and lunch.",cat:"Learn",aud:"Students"},
+    {href:"/math-arena/",e:"🔢",t:"Math Arena",d:"Sixty-second mental-math sprints with streaks, fire and personal bests.",cat:"Learn",aud:"Kids 6–12"},
+    {href:"/pocket-budget/",e:"💰",t:"Pocket Budget",d:"Money skills before you need them — budgets, the 50/30/20 rule, savings goals.",cat:"Learn",aud:"Teens"},
+    {href:"/inventions/",e:"💡",t:"Spark",d:"A scroll-drawn timeline of twelve inventions that changed everything.",cat:"Learn",aud:"All ages"},
+    {href:"/alphabet-safari/",e:"🦁",t:"Alphabet Safari",d:"Twenty-six letters that bounce, roar, speak and burst into confetti.",cat:"Play",aud:"Kids 2–6"},
+    {href:"/memory-match/",e:"🃏",t:"Memory Match",d:"Flip cards, find pairs, earn stars — animals, food or outer space.",cat:"Play",aud:"Kids"},
+    {href:"/type-racer/",e:"⌨️",t:"Typing Velocity",d:"How fast can you really type? Live WPM, accuracy and a speed graph.",cat:"Play",aud:"Teens +"},
+    {href:"/flag-quest/",e:"🚩",t:"Flag Quest",d:"Guess flags from every continent and pick up capital cities on the way.",cat:"Play",aud:"All ages"},
+    {href:"/snake/",e:"🐍",t:"Neon Serpent",d:"The classic snake, reborn in neon — keyboard, swipe or D-pad.",cat:"Play",aud:"All ages"},
+    {href:"/tic-tac-toe/",e:"⭕",t:"Tactic",d:"Tic-tac-toe against a minimax AI. On Hard, it has never lost.",cat:"Play",aud:"All ages"},
+    {href:"/recipe-roulette/",e:"🍳",t:"Recipe Roulette",d:"Can't decide dinner? Spin the wheel and get a real five-step recipe.",cat:"Play",aud:"Adults"},
+    {href:"/cuisine-atlas/",e:"🍜",t:"World Cuisine Atlas",d:"Signature dishes of sixteen cuisines, from doro wat to ceviche.",cat:"Culture",aud:"All ages"},
+    {href:"/festivals/",e:"🎆",t:"Festivals of the World",d:"Scroll through a year of celebration — lanterns, color, marigolds, fireworks.",cat:"Culture",aud:"All ages"},
+    {href:"/hello-world/",e:"👋",t:"Hello, World",d:"Greetings in twenty languages, in native script — and spoken aloud.",cat:"Culture",aud:"All ages"},
+    {href:"/myth-codex/",e:"🏺",t:"Myth Codex",d:"Gods and legends of five mythologies, from Olympus to Amaterasu.",cat:"Culture",aud:"Teens +"},
+    {href:"/ancient-wonders/",e:"🏛️",t:"Seven Wonders",d:"A layered parallax journey to the seven wonders of the ancient world.",cat:"Culture",aud:"All ages"},
+    {href:"/beat-lab/",e:"🥁",t:"Beat Lab",d:"A 16-step drum machine and synth pads, right in your browser.",cat:"Create",aud:"Teens +"},
+    {href:"/color-play/",e:"🎨",t:"Color Theory Playground",d:"Harmonies, palettes and WCAG contrast — a designer's sketchbook.",cat:"Create",aud:"Designers"},
+    {href:"/pixel-studio/",e:"👾",t:"Pixel Studio",d:"Paint pixel art with fill, mirror and undo — then export it as a PNG.",cat:"Create",aud:"All ages"},
+    {href:"/haiku-garden/",e:"🌸",t:"Haiku Garden",d:"Generative five-seven-five poems in a zen garden that follows the seasons.",cat:"Create",aud:"Adults"},
+    {href:"/story-forge/",e:"📖",t:"Story Forge",d:"Pick a hero, a place and a problem — forge a read-aloud adventure.",cat:"Create",aud:"Kids"},
+    {href:"/breathe/",e:"🫁",t:"Stillpoint",d:"Box, 4-7-8 and coherent breathing, guided by a slowly glowing orb.",cat:"Wellness",aud:"Adults"},
+    {href:"/fit-seven/",e:"💪",t:"Fit Seven",d:"The science-backed 7-minute workout with a big honest countdown ring.",cat:"Wellness",aud:"Adults"},
+    {href:"/mind-gym/",e:"🧠",t:"Mind Gym",d:"Gentle brain training in big friendly type — trivia, recall, odd-one-out.",cat:"Wellness",aud:"Seniors"}
+  ];
+
+  var grid=document.getElementById("grid"), empty=document.getElementById("empty");
+  var frag=document.createDocumentFragment();
+  SITES.forEach(function(s,i){
+    var a=document.createElement("a");
+    a.className="card"; a.href=s.href;
+    a.dataset.cat=s.cat; a.dataset.text=(s.t+" "+s.d+" "+s.cat+" "+s.aud).toLowerCase();
+    a.innerHTML='<span class="num">'+String(i+1).padStart(2,"0")+'</span>'+
+      '<span class="emoji" aria-hidden="true">'+s.e+'</span>'+
+      "<h2>"+s.t+"</h2><p>"+s.d+"</p>"+
+      '<span class="meta"><span class="tag cat-'+s.cat+'">'+s.cat+'</span><span class="aud">'+s.aud+"</span></span>";
+    frag.appendChild(a);
+  });
+  grid.appendChild(frag);
+  var cards=Array.prototype.slice.call(grid.children);
+
+  /* staggered reveal */
+  var reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if("IntersectionObserver" in window && !reduce){
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(en.isIntersecting){
+          var el=en.target;
+          setTimeout(function(){el.classList.add("in");}, (el.dataset.stagger||0)*55);
+          io.unobserve(el);
+        }
+      });
+    },{threshold:.12});
+    cards.forEach(function(c,i){c.dataset.stagger=i%6;io.observe(c);});
+  }else{
+    cards.forEach(function(c){c.classList.add("in");});
+  }
+
+  /* filter + search */
+  var activeCat="All", q="";
+  function apply(){
+    var shown=0;
+    cards.forEach(function(c){
+      var ok=(activeCat==="All"||c.dataset.cat===activeCat)&&(!q||c.dataset.text.indexOf(q)>-1);
+      c.style.display=ok?"":"none";
+      if(ok)shown++;
+    });
+    empty.style.display=shown?"none":"block";
+  }
+  document.querySelectorAll(".chip").forEach(function(ch){
+    ch.addEventListener("click",function(){
+      document.querySelectorAll(".chip").forEach(function(o){o.setAttribute("aria-pressed","false");});
+      ch.setAttribute("aria-pressed","true");
+      activeCat=ch.dataset.cat; apply();
+    });
+  });
+  document.getElementById("q").addEventListener("input",function(e){
+    q=e.target.value.trim().toLowerCase(); apply();
+  });
+
+  /* star field */
+  var cv=document.getElementById("stars"), ctx=cv.getContext("2d"), stars=[], raf=null;
+  function size(){
+    cv.width=window.innerWidth*window.devicePixelRatio;
+    cv.height=window.innerHeight*window.devicePixelRatio;
+    cv.style.width=window.innerWidth+"px"; cv.style.height=window.innerHeight+"px";
+    stars=[];
+    var n=Math.min(160,Math.floor(window.innerWidth/9));
+    for(var i=0;i<n;i++)stars.push({
+      x:Math.random()*cv.width,y:Math.random()*cv.height,
+      r:(Math.random()*1.3+.3)*window.devicePixelRatio,
+      p:Math.random()*Math.PI*2, s:Math.random()*.9+.25
+    });
+  }
+  function draw(t){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    for(var i=0;i<stars.length;i++){
+      var st=stars[i], a=.25+.55*Math.abs(Math.sin(t*.00045*st.s+st.p));
+      ctx.globalAlpha=a; ctx.fillStyle="#cfd6ff";
+      ctx.beginPath(); ctx.arc(st.x,st.y,st.r,0,6.2832); ctx.fill();
+    }
+    ctx.globalAlpha=1;
+    raf=requestAnimationFrame(draw);
+  }
+  function startStars(){ if(!raf && !reduce){ raf=requestAnimationFrame(draw); } }
+  function stopStars(){ if(raf){ cancelAnimationFrame(raf); raf=null; } }
+  size(); startStars();
+  if(reduce){ // one static frame so the sky isn't empty
+    (function(){ draw(1000); stopStars(); })();
+  }
+  window.addEventListener("resize",size);
+  document.addEventListener("visibilitychange",function(){ document.hidden?stopStars():startStars(); });
+})();
+</script>
+</body>
+</html>

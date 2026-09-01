@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Night Sky Stories — Constellations &amp; Their Myths</title>
+<meta name="description" content="A living star map of eight real constellations — Orion, Ursa Major, Cassiopeia, Scorpius, Cygnus, Leo, Lyra and Crux — with the ancient myths behind them and when to see each one.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --midnight:#060b21;
+    --deep:#0a1433;
+    --gold:#d4af37;
+    --gold-soft:#e8cf8a;
+    --ink:#f2ecd9;
+    --dim:#8f97b8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    overflow:hidden;
+    background:var(--midnight);
+    color:var(--ink);
+    font-family:Inter,system-ui,sans-serif;
+  }
+  .hub-link{position:fixed;top:14px;left:14px;z-index:1000;padding:8px 14px;border-radius:999px;font:600 13px/1 Inter,system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(8px);background:rgba(15,15,25,.55);color:#fff;border:1px solid rgba(255,255,255,.25)}
+  .hub-link:hover{border-color:var(--gold)}
+  canvas#sky{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:manipulation}
+
+  header{
+    position:fixed;top:10px;left:0;right:0;z-index:20;text-align:center;pointer-events:none;
+    padding:0 76px;
+  }
+  header h1{
+    font:600 clamp(26px,5.5vw,52px)/1.05 "Cormorant Garamond",serif;
+    color:var(--ink);letter-spacing:.04em;
+    text-shadow:0 0 24px rgba(212,175,55,.35);
+  }
+  header h1 em{font-style:italic;color:var(--gold-soft)}
+  header p{
+    margin-top:4px;font:500 clamp(10px,1.6vw,13px)/1.4 Inter,sans-serif;
+    letter-spacing:.28em;text-transform:uppercase;color:var(--dim);
+  }
+  header .rule{
+    width:min(340px,60vw);height:1px;margin:10px auto 0;
+    background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  }
+
+  nav.const-list{
+    position:fixed;left:0;right:0;bottom:0;z-index:40;
+    display:flex;gap:8px;overflow-x:auto;
+    padding:10px 14px calc(12px + env(safe-area-inset-bottom,0px));
+    -webkit-overflow-scrolling:touch;scrollbar-width:thin;
+  }
+  nav.const-list::before,nav.const-list::after{content:"";flex:1 0 0}
+  .const-btn{
+    flex:0 0 auto;min-height:44px;padding:0 16px;border-radius:999px;cursor:pointer;
+    font:600 14px/1 "Cormorant Garamond",serif;letter-spacing:.06em;
+    color:var(--gold-soft);background:rgba(8,13,35,.75);
+    border:1px solid rgba(212,175,55,.35);
+    transition:transform .18s ease,border-color .18s ease,color .18s ease;
+    backdrop-filter:blur(6px);
+  }
+  .const-btn:hover{transform:translateY(-2px);border-color:var(--gold);color:#fff}
+  .const-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .const-btn[aria-pressed="true"]{background:var(--gold);color:#1a1405;border-color:var(--gold)}
+
+  aside#story{
+    position:fixed;z-index:60;
+    left:50%;bottom:0;transform:translate(-50%,110%);
+    width:min(94vw,520px);
+    max-height:min(72vh,560px);overflow-y:auto;
+    background:linear-gradient(180deg,rgba(13,20,48,.97),rgba(6,10,28,.97));
+    border:1px solid rgba(212,175,55,.5);border-bottom:none;
+    border-radius:18px 18px 0 0;
+    padding:26px 26px calc(20px + env(safe-area-inset-bottom,0px));
+    transition:transform .4s cubic-bezier(.2,.9,.25,1),visibility 0s linear .4s;
+    box-shadow:0 -10px 60px rgba(0,0,0,.6);
+    visibility:hidden;
+  }
+  aside#story.open{transform:translate(-50%,0);visibility:visible;transition:transform .4s cubic-bezier(.2,.9,.25,1),visibility 0s linear 0s}
+  #story h2{font:700 clamp(26px,6vw,36px)/1.05 "Cormorant Garamond",serif;color:var(--gold-soft)}
+  #story .epithet{font:italic 500 clamp(15px,3vw,18px)/1.3 "Cormorant Garamond",serif;color:var(--dim);margin:2px 0 14px}
+  #story .tale{font:400 15px/1.75 Inter,sans-serif;color:#e7e2d2}
+  #story .tale::first-letter{
+    font:700 200%/0.8 "Cormorant Garamond",serif;color:var(--gold);
+    float:left;padding:6px 8px 0 0;
+  }
+  #story .meta{
+    margin-top:16px;display:grid;gap:6px;
+    border-top:1px solid rgba(212,175,55,.3);padding-top:14px;
+  }
+  #story .meta div{font:500 13px/1.5 Inter,sans-serif;color:var(--dim)}
+  #story .meta strong{color:var(--gold-soft);font-weight:600}
+  #closeStory{
+    position:absolute;top:10px;right:10px;width:44px;height:44px;border-radius:50%;
+    background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.4);
+    color:var(--gold-soft);font-size:17px;cursor:pointer;
+  }
+  #closeStory:hover{background:rgba(212,175,55,.3);color:#fff}
+  #closeStory:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+  .whisper{
+    position:fixed;bottom:74px;left:50%;transform:translateX(-50%);z-index:15;
+    font:italic 500 clamp(12px,2vw,15px)/1.4 "Cormorant Garamond",serif;color:var(--dim);
+    pointer-events:none;text-align:center;width:max-content;max-width:92vw;
+    opacity:0;animation:fadeUp 1.2s ease .6s forwards;
+  }
+  @keyframes fadeUp{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001s!important;transition-duration:.001s!important}
+    .whisper{opacity:1;animation:none}
+  }
+</style>
+</head>
+<body>
+<a class="hub-link" href="https://thirty-worlds.vercel.app/" aria-label="All thirty sites">← All 30</a>
+
+<canvas id="sky" aria-label="Star map with eight constellations. Use the buttons below to open each constellation's story."></canvas>
+
+<header>
+  <h1>Night Sky <em>Stories</em></h1>
+  <p>Eight constellations · the myths that named them</p>
+  <div class="rule"></div>
+</header>
+
+<p class="whisper">Tap a constellation on the map, or choose one below…</p>
+
+<nav class="const-list" aria-label="Constellations"></nav>
+
+<aside id="story" aria-label="Constellation story" tabindex="-1">
+  <button id="closeStory" aria-label="Close story">✕</button>
+  <h2 id="storyName"></h2>
+  <p class="epithet" id="storyEpithet"></p>
+  <p class="tale" id="storyTale"></p>
+  <div class="meta">
+    <div><strong>Best viewing:</strong> <span id="storySeason"></span></div>
+    <div><strong>Hemisphere:</strong> <span id="storyHemi"></span></div>
+    <div><strong>Brightest star:</strong> <span id="storyStar"></span></div>
+  </div>
+</aside>
+
+<script>
+(function(){
+  'use strict';
+  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var canvas = document.getElementById('sky');
+  var ctx = canvas.getContext('2d');
+
+  /* ---------------- constellation data ----------------
+     Local star coords are approximate sky patterns, x right / y down, ~-1..1 */
+  var CONSTELLATIONS = [
+    {
+      name:'Orion', epithet:'The Hunter',
+      stars:[[-0.42,-0.72,4],[0.38,-0.65,3.4],[-0.16,0.02,3],[0,0.06,3],[0.16,0.1,3],[-0.34,0.78,3.2],[0.4,0.72,4],[0,-0.98,2.2]],
+      lines:[[0,2],[1,4],[2,3],[3,4],[2,5],[4,6],[0,7],[1,7]],
+      tale:'Orion was a giant huntsman of Greek myth, so mighty he boasted he could slay every animal on Earth. Gaia, the Earth herself, sent a scorpion to stop him — and its sting proved fatal. Zeus set both hunter and scorpion in the sky, but on opposite sides: Orion sets in the west just as Scorpius rises in the east, so the old rivals never meet. Find the three-star Belt; it points down to Sirius, the brightest star in the whole night sky.',
+      season:'December – February (northern winter)', hemi:'Both — sits right on the celestial equator', star:'Rigel (blue supergiant, ~860 light-years)'
+    },
+    {
+      name:'Ursa Major', epithet:'The Great Bear',
+      stars:[[0.62,-0.45,3.4],[0.6,0.05,3.2],[0.18,0.1,3.2],[0.22,-0.32,2.6],[-0.15,-0.3,3.2],[-0.5,-0.22,3.2],[-0.88,0.02,3.2]],
+      lines:[[0,1],[1,2],[2,3],[3,0],[3,4],[4,5],[5,6]],
+      tale:'Zeus loved the nymph Callisto, and jealous Hera turned her into a bear. Years later Callisto’s son Arcas, out hunting, raised his spear at a great bear — not knowing it was his own mother. Zeus stopped the tragedy by sweeping both into the heavens: Callisto became the Great Bear, Arcas the Little Bear. Hera, still furious, forbade the ocean to receive them, which is why, from mid-northern latitudes, the Bear circles the pole and never sets. Its seven brightest stars form the Big Dipper, or the Plough.',
+      season:'March – May (northern spring)', hemi:'Northern — circumpolar above ~41°N', star:'Alioth (magnitude 1.8)'
+    },
+    {
+      name:'Cassiopeia', epithet:'The Vain Queen',
+      stars:[[-0.8,-0.05,3.2],[-0.4,0.25,3.4],[0,-0.15,3.2],[0.4,0.2,3],[0.8,-0.1,2.6]],
+      lines:[[0,1],[1,2],[2,3],[3,4]],
+      tale:'Cassiopeia, queen of Aethiopia, boasted that she and her daughter Andromeda outshone the Nereids, the sea nymphs. Poseidon answered with a flood and a sea monster, Cetus, and only chaining Andromeda to a rock as an offering could calm him — until the hero Perseus swooped in to the rescue. For her vanity, Cassiopeia was bound to her throne and set wheeling around the celestial pole, hanging upside down for half of every year. Her five bright stars trace an unmistakable W in the northern sky.',
+      season:'September – November (northern autumn)', hemi:'Northern — circumpolar above ~34°N', star:'Schedar (orange giant)'
+    },
+    {
+      name:'Scorpius', epithet:'The Scorpion',
+      stars:[[0.55,-0.78,3],[0.62,-0.55,2.8],[0.6,-0.32,2.8],[0.33,-0.18,4.2],[0.24,0.02,3],[0.15,0.22,2.8],[0.02,0.42,3],[-0.12,0.55,2.8],[-0.32,0.62,2.8],[-0.52,0.58,3],[-0.62,0.42,2.6],[-0.55,0.28,3.4]],
+      lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[8,9],[9,10],[10,11]],
+      tale:'This is the very scorpion Gaia sent to humble the boastful hunter Orion. It felled the giant with a single sting, and both combatants were honoured with a place in the heavens — set carefully half a sky apart so the duel can never resume. At the scorpion’s heart burns red Antares, whose name means “rival of Mars”, a supergiant roughly 700 times wider than our Sun. The curved tail, tipped by the stinger stars Shaula and Lesath, hooks into the richest star fields of the Milky Way.',
+      season:'June – August (southern winter)', hemi:'Best from the Southern Hemisphere', star:'Antares (red supergiant)'
+    },
+    {
+      name:'Cygnus', epithet:'The Swan · Northern Cross',
+      stars:[[0,-0.75,3.6],[0,-0.15,3.2],[0.08,0.8,3],[-0.55,-0.4,3],[0.55,0.08,3],[-0.92,-0.55,2.4],[0.92,0.3,2.4]],
+      lines:[[0,1],[1,2],[1,3],[1,4],[3,5],[4,6]],
+      tale:'The swan gliding down the Milky Way honours loyal Cycnus, dearest friend of Phaethon, the boy who lost control of the Sun god’s chariot and fell blazing into the river Eridanus. Cycnus dived into the waters again and again to gather his friend’s body for a proper burial, until the gods, moved by such devotion, changed him into a swan and set him among the stars. Deneb marks the tail; Albireo, a gorgeous gold-and-sapphire double star, marks the beak of the Northern Cross.',
+      season:'July – October (northern summer)', hemi:'Northern — part of the Summer Triangle', star:'Deneb (one of the most luminous stars known)'
+    },
+    {
+      name:'Leo', epithet:'The Nemean Lion',
+      stars:[[0.45,0.35,3.8],[0.5,0.05,3],[0.48,-0.22,3.2],[0.3,-0.45,2.8],[0.05,-0.55,2.6],[-0.12,-0.42,3],[-0.85,0.05,3.2],[-0.45,-0.15,3],[-0.42,0.22,2.8]],
+      lines:[[0,1],[1,2],[2,3],[3,4],[4,5],[6,7],[7,8],[8,6],[8,0],[7,2]],
+      tale:'Leo is the Nemean Lion, a monster whose golden hide no weapon could pierce. Heracles’ first labour was to slay it; when his arrows simply bounced off, he wrestled the beast and choked it with his bare hands, then wore its invulnerable pelt as armour ever after. Zeus lifted the lion into the sky in honour of that epic struggle. The lion’s head is the “Sickle”, a backwards question mark of stars anchored by blue-white Regulus — “the little king” — sitting almost exactly on the Sun’s yearly path.',
+      season:'March – May (northern spring)', hemi:'Both hemispheres', star:'Regulus (spins so fast it bulges at the equator)'
+    },
+    {
+      name:'Lyra', epithet:'The Lyre of Orpheus',
+      stars:[[0,-0.6,4.2],[0.15,-0.28,2.8],[0.05,0.28,3],[0.45,0.42,3],[0.52,-0.12,2.8]],
+      lines:[[0,1],[1,2],[2,3],[3,4],[4,1]],
+      tale:'This small constellation is the lyre of Orpheus, the greatest musician of Greek myth, whose songs charmed wild beasts, rivers, even stones. He played so beautifully that Hades agreed to release his wife Eurydice from the underworld — only for Orpheus to lose her again by looking back too soon. After his death, Zeus placed the lyre among the stars, its frame marked by brilliant blue-white Vega. Just 25 light-years away, Vega was the first star ever photographed, in 1850, and the first with a measured spectrum.',
+      season:'June – September (northern summer)', hemi:'Northern — part of the Summer Triangle', star:'Vega (5th brightest star in the night sky)'
+    },
+    {
+      name:'Crux', epithet:'The Southern Cross',
+      stars:[[0,-0.7,3.6],[0.06,0.75,3.8],[-0.6,-0.05,3.4],[0.55,0.08,2.8],[0.28,0.3,2]],
+      lines:[[0,1],[2,3]],
+      tale:'The smallest of all 88 constellations, Crux was unknown to the ancient Greeks — Earth’s slow axial wobble had carried it below the Mediterranean horizon by classical times. To the cultures of the south it is central: many Aboriginal Australian traditions see it as a stingray or as part of the great Emu in the Sky, while the Inca knew it as the chakana, the sacred bridge between worlds. Navigators still extend its long axis four and a half times to find due south. It flies on five national flags.',
+      season:'April – June (southern autumn)', hemi:'Southern only — circumpolar south of ~34°S', star:'Acrux (actually a multiple star system)'
+    }
+  ];
+
+  /* ---------------- layout ---------------- */
+  var W = 0, H = 0, DPR = 1;
+  var bgStars = [];
+  function layout(){
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = Math.round(W * DPR);
+    canvas.height = Math.round(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+    var portrait = W / H < 0.85;
+    var cols = portrait ? 2 : 4;
+    var rows = portrait ? 4 : 2;
+    var topPad = portrait ? 120 : 130;
+    var botPad = 86;
+    var cellW = W / cols;
+    var cellH = (H - topPad - botPad) / rows;
+    CONSTELLATIONS.forEach(function(c, i){
+      var col = i % cols, row = Math.floor(i / cols);
+      c.cx = cellW * (col + 0.5);
+      c.cy = topPad + cellH * (row + 0.5);
+      c.scale = Math.min(cellW, cellH) * 0.30;
+    });
+
+    var target = Math.min(520, Math.round((W * H) / 3800));
+    bgStars = [];
+    for (var i2 = 0; i2 < target; i2++){
+      bgStars.push({
+        x: Math.random(), y: Math.random(),
+        r: 0.4 + Math.random() * 1.3,
+        base: 0.25 + Math.random() * 0.55,
+        amp: reducedMotion ? 0 : Math.random() * 0.35,
+        speed: 0.5 + Math.random() * 1.6,
+        phase: Math.random() * Math.PI * 2,
+        layer: Math.random() < 0.6 ? 0.4 : 1
+      });
+    }
+  }
+
+  /* ---------------- pointer parallax + hover ---------------- */
+  var px = 0, py = 0;          // eased parallax -1..1
+  var tx = 0, ty = 0;          // target
+  var hovered = -1, active = -1;
+  function setPointer(clientX, clientY){
+    tx = (clientX / W) * 2 - 1;
+    ty = (clientY / H) * 2 - 1;
+  }
+  function hitTest(clientX, clientY){
+    var best = -1, bestD = Infinity;
+    CONSTELLATIONS.forEach(function(c, i){
+      var d = Math.hypot(clientX - c.cx, clientY - c.cy);
+      if (d < c.scale * 1.5 && d < bestD){ bestD = d; best = i; }
+    });
+    return best;
+  }
+  canvas.addEventListener('pointermove', function(e){
+    setPointer(e.clientX, e.clientY);
+    var h = hitTest(e.clientX, e.clientY);
+    if (h !== hovered){
+      hovered = h;
+      canvas.style.cursor = h >= 0 ? 'pointer' : 'default';
+      if (reducedMotion) draw(performance.now());
+    }
+  });
+  canvas.addEventListener('click', function(e){
+    var h = hitTest(e.clientX, e.clientY);
+    if (h >= 0) openStory(h, null);
+    else if (active >= 0) closeStory();
+  });
+
+  /* ---------------- shooting stars ---------------- */
+  var shooter = null, nextShooter = performance.now() + 3500;
+  function maybeShoot(now){
+    if (reducedMotion) return;
+    if (!shooter && now > nextShooter){
+      var fromLeft = Math.random() < 0.5;
+      shooter = {
+        x: fromLeft ? -40 : W + 40,
+        y: 40 + Math.random() * H * 0.35,
+        vx: (fromLeft ? 1 : -1) * (420 + Math.random() * 300),
+        vy: 120 + Math.random() * 160,
+        life: 1
+      };
+    }
+    if (shooter){
+      shooter.x += shooter.vx / 60;
+      shooter.y += shooter.vy / 60;
+      shooter.life -= 0.012;
+      if (shooter.life <= 0 || shooter.x < -80 || shooter.x > W + 80 || shooter.y > H + 80){
+        shooter = null;
+        nextShooter = now + 4000 + Math.random() * 6000;
+      }
+    }
+  }
+
+  /* ---------------- drawing ---------------- */
+  function draw(now){
+    var t = now / 1000;
+    // sky gradient
+    var grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, '#04081c');
+    grad.addColorStop(0.55, '#081130');
+    grad.addColorStop(1, '#101a42');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    // faint milky-way band
+    ctx.save();
+    ctx.translate(W / 2, H / 2);
+    ctx.rotate(-0.5);
+    var mw = ctx.createLinearGradient(0, -H * 0.28, 0, H * 0.28);
+    mw.addColorStop(0, 'rgba(180,200,255,0)');
+    mw.addColorStop(0.5, 'rgba(190,205,255,0.05)');
+    mw.addColorStop(1, 'rgba(180,200,255,0)');
+    ctx.fillStyle = mw;
+    ctx.fillRect(-W, -H * 0.3, W * 2, H * 0.6);
+    ctx.restore();
+
+    // background stars with parallax
+    for (var i = 0; i < bgStars.length; i++){
+      var s = bgStars[i];
+      var a = s.base + s.amp * Math.sin(t * s.speed + s.phase);
+      if (a <= 0.02) continue;
+      ctx.globalAlpha = Math.min(1, a);
+      ctx.fillStyle = '#dfe6ff';
+      ctx.beginPath();
+      ctx.arc(s.x * W - px * 8 * s.layer, s.y * H - py * 8 * s.layer, s.r, 0, 6.2832);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // shooting star
+    if (shooter){
+      var tailX = shooter.x - shooter.vx * 0.14;
+      var tailY = shooter.y - shooter.vy * 0.14;
+      var sg = ctx.createLinearGradient(shooter.x, shooter.y, tailX, tailY);
+      sg.addColorStop(0, 'rgba(255,250,230,' + (0.9 * shooter.life) + ')');
+      sg.addColorStop(1, 'rgba(255,250,230,0)');
+      ctx.strokeStyle = sg;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(shooter.x, shooter.y);
+      ctx.lineTo(tailX, tailY);
+      ctx.stroke();
+    }
+
+    // constellations (stronger parallax layer)
+    var ox = -px * 16, oy = -py * 16;
+    CONSTELLATIONS.forEach(function(c, i){
+      var lit = i === hovered || i === active;
+      var sx = function(ls){ return c.cx + ls[0] * c.scale + ox; };
+      var sy = function(ls){ return c.cy + ls[1] * c.scale + oy; };
+
+      ctx.strokeStyle = lit ? 'rgba(232,207,138,0.95)' : 'rgba(212,175,55,0.38)';
+      ctx.lineWidth = lit ? 1.6 : 1;
+      ctx.beginPath();
+      c.lines.forEach(function(ln){
+        ctx.moveTo(sx(c.stars[ln[0]]), sy(c.stars[ln[0]]));
+        ctx.lineTo(sx(c.stars[ln[1]]), sy(c.stars[ln[1]]));
+      });
+      ctx.stroke();
+
+      c.stars.forEach(function(st, si){
+        var x = sx(st), y = sy(st);
+        var r = st[2] * (c.scale / 130) + 1.1;
+        var tw = reducedMotion ? 1 : 0.82 + 0.18 * Math.sin(t * 1.8 + i * 2.4 + si * 1.7);
+        var halo = ctx.createRadialGradient(x, y, 0, x, y, r * 4);
+        halo.addColorStop(0, 'rgba(255,240,200,' + (lit ? 0.9 : 0.55) * tw + ')');
+        halo.addColorStop(1, 'rgba(255,240,200,0)');
+        ctx.fillStyle = halo;
+        ctx.beginPath(); ctx.arc(x, y, r * 4, 0, 6.2832); ctx.fill();
+        ctx.fillStyle = lit ? '#fff8e0' : '#f5e9c8';
+        ctx.globalAlpha = tw;
+        ctx.beginPath(); ctx.arc(x, y, r, 0, 6.2832); ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+
+      ctx.font = 'italic 600 ' + Math.max(13, c.scale * 0.16) + 'px "Cormorant Garamond", serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = lit ? 'rgba(232,207,138,1)' : 'rgba(160,170,205,0.75)';
+      ctx.fillText(c.name, c.cx + ox, c.cy + c.scale * 1.28 + oy);
+    });
+  }
+
+  /* ---------------- story panel ---------------- */
+  var storyEl = document.getElementById('story');
+  var listNav = document.querySelector('nav.const-list');
+  var lastFocus = null;
+
+  CONSTELLATIONS.forEach(function(c, i){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'const-btn';
+    b.textContent = c.name;
+    b.setAttribute('aria-pressed', 'false');
+    b.addEventListener('click', function(){ openStory(i, b); });
+    listNav.appendChild(b);
+  });
+
+  function openStory(i, focusSource){
+    var c = CONSTELLATIONS[i];
+    active = i;
+    document.getElementById('storyName').textContent = c.name;
+    document.getElementById('storyEpithet').textContent = c.epithet;
+    document.getElementById('storyTale').textContent = c.tale;
+    document.getElementById('storySeason').textContent = c.season;
+    document.getElementById('storyHemi').textContent = c.hemi;
+    document.getElementById('storyStar').textContent = c.star;
+    Array.prototype.forEach.call(listNav.children, function(btn, bi){
+      btn.setAttribute('aria-pressed', bi === i ? 'true' : 'false');
+    });
+    lastFocus = focusSource || document.activeElement;
+    storyEl.classList.add('open');
+    storyEl.focus({ preventScroll: true });
+    if (reducedMotion) draw(performance.now());
+  }
+  function closeStory(){
+    active = -1;
+    storyEl.classList.remove('open');
+    Array.prototype.forEach.call(listNav.children, function(btn){
+      btn.setAttribute('aria-pressed', 'false');
+    });
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+    if (reducedMotion) draw(performance.now());
+  }
+  document.getElementById('closeStory').addEventListener('click', closeStory);
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && storyEl.classList.contains('open')) closeStory();
+  });
+
+  /* ---------------- main loop ---------------- */
+  var rafId = 0;
+  function frame(now){
+    rafId = requestAnimationFrame(frame);
+    px += (tx - px) * 0.06;
+    py += (ty - py) * 0.06;
+    maybeShoot(now);
+    draw(now);
+  }
+  function start(){
+    if (reducedMotion){ draw(performance.now()); return; }
+    if (!rafId) rafId = requestAnimationFrame(frame);
+  }
+  function stop(){
+    if (rafId){ cancelAnimationFrame(rafId); rafId = 0; }
+  }
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden) stop(); else start();
+  });
+  window.addEventListener('resize', function(){
+    layout();
+    if (reducedMotion) draw(performance.now());
+  });
+
+  layout();
+  start();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Color Theory Playground — Harmony &amp; Contrast Lab</title>
+<meta name="description" content="Pick a base color and watch six classic harmony palettes compute live — complementary, analogous, triadic and more — then test any pairing against WCAG contrast standards.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎨</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#fdfcfa;
+  --ink:#191817;
+  --mut:#6f6b66;
+  --line:#e7e3dd;
+  --card:#ffffff;
+  --ok:#0a7d43;
+  --bad:#b3261e;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:Inter,system-ui,sans-serif;
+  font-size:16px;
+  line-height:1.6;
+  overflow-x:hidden;
+}
+.hub-link{position:fixed;top:14px;left:14px;z-index:1000;padding:8px 14px;border-radius:999px;font:600 13px/1 Inter,system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(8px);background:rgba(15,15,25,.55);color:#fff;border:1px solid rgba(255,255,255,.25)}
+.hub-link:hover{background:rgba(15,15,25,.75)}
+.wrap{max-width:960px;margin:0 auto;padding:84px 20px 60px}
+h1{
+  font-family:Fraunces,serif;
+  font-weight:700;
+  font-size:clamp(2.2rem,6vw,3.6rem);
+  line-height:1.08;
+  margin:0 0 10px;
+  letter-spacing:-.01em;
+}
+.lede{color:var(--mut);max-width:56ch;margin:0 0 40px;font-size:1.05rem}
+h2{
+  font-family:Fraunces,serif;
+  font-weight:600;
+  font-size:1.5rem;
+  margin:0 0 6px;
+}
+section{margin-bottom:56px}
+.harmony p.why{color:var(--mut);font-size:.92rem;max-width:64ch;margin:0 0 16px}
+/* Controls */
+.controls{
+  display:flex;flex-wrap:wrap;gap:16px;align-items:center;
+  padding:20px;border:1px solid var(--line);border-radius:14px;background:var(--card);
+}
+.controls label{font-weight:600;font-size:.9rem}
+input[type="color"]{
+  width:64px;height:48px;padding:2px;border:1px solid var(--line);border-radius:10px;
+  background:var(--card);cursor:pointer;
+}
+#hex-input{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:1rem;
+  padding:11px 14px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  width:130px;
+  min-height:44px;
+  background:var(--card);
+  color:var(--ink);
+}
+#hex-input.invalid{border-color:var(--bad);box-shadow:0 0 0 3px rgba(179,38,30,.12)}
+#hex-msg{font-size:.8rem;color:var(--bad);min-height:1.2em;margin:6px 0 0;flex-basis:100%}
+.controls .grow{flex:1}
+button{font-family:inherit;cursor:pointer}
+.btn{
+  min-height:44px;
+  padding:11px 20px;
+  border-radius:999px;
+  border:1px solid var(--ink);
+  background:var(--ink);
+  color:var(--paper);
+  font-weight:600;
+  font-size:.9rem;
+  transition:transform .12s ease, opacity .12s ease;
+}
+.btn:hover{transform:translateY(-1px);opacity:.92}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:transparent;color:var(--ink)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #2f6fed;outline-offset:2px}
+/* Swatches */
+.swatches{display:flex;flex-wrap:wrap;gap:10px}
+.swatch{
+  flex:1 1 96px;
+  min-width:96px;
+  max-width:190px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  overflow:hidden;
+  background:var(--card);
+  padding:0;
+  text-align:left;
+  transition:transform .14s ease, box-shadow .14s ease;
+}
+.swatch:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(25,24,23,.12)}
+.swatch:active{transform:translateY(0)}
+.swatch .chip{height:72px;display:flex;align-items:flex-end;padding:6px 8px}
+.swatch .chip small{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:.72rem;letter-spacing:.03em;opacity:.9;
+}
+.swatch .foot{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:7px 10px;font-size:.72rem;color:var(--mut);
+}
+.swatch .foot .copy-word{font-weight:600}
+/* WCAG */
+.wcag-grid{display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:start}
+@media (max-width:760px){.wcag-grid{grid-template-columns:1fr}}
+.wcag-pickers{display:flex;flex-direction:column;gap:14px}
+.wcag-pickers label{font-weight:600;font-size:.85rem;display:block;margin-bottom:5px}
+.wcag-pickers select{
+  width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9rem;background:var(--card);color:var(--ink);
+}
+.preview{
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:28px;
+  min-height:180px;
+  transition:background-color .25s ease;
+}
+.preview .big{font-family:Fraunces,serif;font-size:26px;font-weight:700;margin:0 0 10px}
+.preview .small-t{font-size:15px;margin:0;max-width:52ch}
+.ratio-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:18px}
+#ratio-val{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:1.5rem;font-weight:600;
+}
+.badge{
+  font-size:.72rem;font-weight:600;letter-spacing:.04em;
+  padding:6px 10px;border-radius:999px;border:1px solid;
+}
+.badge.pass{color:var(--ok);border-color:var(--ok);background:rgba(10,125,67,.07)}
+.badge.fail{color:var(--bad);border-color:var(--bad);background:rgba(179,38,30,.06)}
+.wcag-note{font-size:.8rem;color:var(--mut);margin-top:14px;max-width:60ch}
+/* Toast */
+.toast{
+  position:fixed;left:50%;bottom:26px;z-index:1200;
+  transform:translate(-50%,16px);
+  opacity:0;
+  pointer-events:none;
+  background:var(--ink);color:var(--paper);
+  padding:11px 20px;border-radius:999px;
+  font-size:.85rem;font-weight:600;
+  transition:transform .25s ease, opacity .25s ease;
+}
+.toast.show{transform:translate(-50%,0);opacity:1}
+footer{border-top:1px solid var(--line);padding-top:24px;color:var(--mut);font-size:.8rem;max-width:70ch}
+hr.rule{border:none;border-top:1px solid var(--line);margin:0 0 56px}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{transition-duration:.001s !important;animation:none !important}
+}
+</style>
+</head>
+<body>
+<a class="hub-link" href="https://thirty-worlds.vercel.app/" aria-label="All thirty sites">← All 30</a>
+
+<div class="wrap">
+  <header>
+    <h1>Color Theory<br>Playground</h1>
+    <p class="lede">Pick one base color. Six classic harmonies are computed live on the HSL wheel — click any swatch to copy its hex, then stress-test your pairings against WCAG contrast standards below.</p>
+  </header>
+
+  <main>
+    <section aria-label="Base color controls">
+      <div class="controls">
+        <label for="color-input">Base color</label>
+        <input type="color" id="color-input" value="#3a6ea5" aria-label="Pick base color">
+        <label for="hex-input" class="visually-hidden" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Hex value</label>
+        <input type="text" id="hex-input" value="#3a6ea5" spellcheck="false" autocomplete="off" inputmode="text" aria-describedby="hex-msg">
+        <span class="grow"></span>
+        <button class="btn" id="copy-css" type="button">Copy palette as CSS variables</button>
+        <p id="hex-msg" role="status"></p>
+      </div>
+    </section>
+
+    <section class="harmony" aria-labelledby="h-comp">
+      <h2 id="h-comp">Complementary</h2>
+      <p class="why">Two hues sitting directly opposite each other on the wheel produce the strongest possible color contrast. Designers reach for it when one element — a call-to-action, a price tag, a warning — must pop against everything else; let one hue dominate and keep its opposite as a small, deliberate accent.</p>
+      <div class="swatches" id="sw-complementary"></div>
+    </section>
+
+    <section class="harmony" aria-labelledby="h-ana">
+      <h2 id="h-ana">Analogous</h2>
+      <p class="why">Three neighbors on the wheel share an undertone, so the scheme reads calm, cohesive and almost inevitable — think forest greens sliding into teal. It suits editorial layouts, wellness brands and backgrounds where mood matters more than emphasis, but you will need lightness contrast to build hierarchy.</p>
+      <div class="swatches" id="sw-analogous"></div>
+    </section>
+
+    <section class="harmony" aria-labelledby="h-tri">
+      <h2 id="h-tri">Triadic</h2>
+      <p class="why">Three hues spaced evenly at 120° give vibrancy with built-in balance — the classic comic-book and children's-brand recipe. It works best when one color leads and the other two are demoted to accents; used at equal strength, all three fight for attention.</p>
+      <div class="swatches" id="sw-triadic"></div>
+    </section>
+
+    <section class="harmony" aria-labelledby="h-split">
+      <h2 id="h-split">Split-complementary</h2>
+      <p class="why">Instead of the exact opposite, you take the two hues flanking it — most of a complement's punch with far less tension. It is the scheme most often recommended to beginners because it is genuinely hard to make ugly, and it leaves you two accent options instead of one.</p>
+      <div class="swatches" id="sw-split"></div>
+    </section>
+
+    <section class="harmony" aria-labelledby="h-tet">
+      <h2 id="h-tet">Tetradic</h2>
+      <p class="why">Four hues arranged as two complementary pairs create the richest — and riskiest — palette in classical theory. It shines in data visualization and illustration where many categories need distinct colors; tame it by letting neutrals carry most of the surface area.</p>
+      <div class="swatches" id="sw-tetradic"></div>
+    </section>
+
+    <section class="harmony" aria-labelledby="h-mono">
+      <h2 id="h-mono">Monochrome</h2>
+      <p class="why">One hue stepped through lightness, from near-white to near-black, can never clash with itself — harmony is guaranteed. It is the backbone of elegant, typography-led interfaces; the trade-off is that emphasis must come from scale, weight and spacing rather than from color.</p>
+      <div class="swatches" id="sw-monochrome"></div>
+    </section>
+
+    <hr class="rule">
+
+    <section aria-labelledby="h-wcag">
+      <h2 id="h-wcag">Will it read? — WCAG contrast check</h2>
+      <p class="why" style="color:var(--mut);font-size:.92rem;max-width:64ch;margin:0 0 20px">Pick a text color and a background from the palettes above. The ratio is computed from relative luminance exactly as the WCAG 2.1 spec defines it.</p>
+      <div class="wcag-grid">
+        <div class="wcag-pickers">
+          <div>
+            <label for="text-color">Text color</label>
+            <select id="text-color" aria-label="Text color from palettes"></select>
+          </div>
+          <div>
+            <label for="bg-color">Background color</label>
+            <select id="bg-color" aria-label="Background color from palettes"></select>
+          </div>
+          <button class="btn ghost" id="swap-btn" type="button">⇅ Swap text &amp; background</button>
+        </div>
+        <div>
+          <div class="preview" id="preview">
+            <p class="big">Large text, 26px bold — the forgiving case.</p>
+            <p class="small-t">Small body text at 15px is where most palettes fail. If this line is comfortable to read, your pairing survives real paragraphs, captions and form labels — not just headlines.</p>
+          </div>
+          <div class="ratio-row">
+            <span id="ratio-val" aria-live="polite">—</span>
+            <span class="badge" id="b-aa-n">AA normal</span>
+            <span class="badge" id="b-aaa-n">AAA normal</span>
+            <span class="badge" id="b-aa-l">AA large</span>
+            <span class="badge" id="b-aaa-l">AAA large</span>
+          </div>
+          <p class="wcag-note">Thresholds: AA needs 4.5:1 for normal text and 3:1 for large text (≥24px, or ≥18.7px bold). AAA raises those to 7:1 and 4.5:1.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Harmonies are computed by rotating hue in HSL space; monochrome steps lightness only. Real-world palettes usually get a final nudge by eye — treat these as strong starting points, not verdicts.</p>
+  </footer>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var colorInput = document.getElementById('color-input');
+  var hexInput = document.getElementById('hex-input');
+  var hexMsg = document.getElementById('hex-msg');
+  var toast = document.getElementById('toast');
+  var textSel = document.getElementById('text-color');
+  var bgSel = document.getElementById('bg-color');
+  var previewEl = document.getElementById('preview');
+  var ratioVal = document.getElementById('ratio-val');
+  var badges = {
+    aaN: document.getElementById('b-aa-n'),
+    aaaN: document.getElementById('b-aaa-n'),
+    aaL: document.getElementById('b-aa-l'),
+    aaaL: document.getElementById('b-aaa-l')
+  };
+
+  var toastTimer = null;
+  var currentPalettes = [];  // [{name, key, colors:[hex,...]}]
+
+  // ---------- Color math ----------
+  function normalizeHex(str) {
+    if (typeof str !== 'string') return null;
+    var s = str.trim().replace(/^#/, '').toLowerCase();
+    if (/^[0-9a-f]{3}$/.test(s)) {
+      s = s[0] + s[0] + s[1] + s[1] + s[2] + s[2];
+    }
+    if (/^[0-9a-f]{6}$/.test(s)) return '#' + s;
+    return null;
+  }
+
+  function hexToRgb(hex) {
+    return {
+      r: parseInt(hex.slice(1, 3), 16),
+      g: parseInt(hex.slice(3, 5), 16),
+      b: parseInt(hex.slice(5, 7), 16)
+    };
+  }
+
+  function hexToHsl(hex) {
+    var c = hexToRgb(hex);
+    var r = c.r / 255, g = c.g / 255, b = c.b / 255;
+    var max = Math.max(r, g, b), min = Math.min(r, g, b);
+    var h = 0, s = 0, l = (max + min) / 2;
+    var d = max - min;
+    if (d !== 0) {
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      if (max === r) h = ((g - b) / d + (g < b ? 6 : 0));
+      else if (max === g) h = (b - r) / d + 2;
+      else h = (r - g) / d + 4;
+      h *= 60;
+    }
+    return { h: h, s: s, l: l };
+  }
+
+  function hslToHex(h, s, l) {
+    h = ((h % 360) + 360) % 360;
+    s = Math.min(1, Math.max(0, s));
+    l = Math.min(1, Math.max(0, l));
+    var c = (1 - Math.abs(2 * l - 1)) * s;
+    var x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    var m = l - c / 2;
+    var r = 0, g = 0, b = 0;
+    if (h < 60) { r = c; g = x; }
+    else if (h < 120) { r = x; g = c; }
+    else if (h < 180) { g = c; b = x; }
+    else if (h < 240) { g = x; b = c; }
+    else if (h < 300) { r = x; b = c; }
+    else { r = c; b = x; }
+    function ch(v) {
+      var n = Math.round((v + m) * 255);
+      return (n < 16 ? '0' : '') + n.toString(16);
+    }
+    return '#' + ch(r) + ch(g) + ch(b);
+  }
+
+  function relLuminance(hex) {
+    var c = hexToRgb(hex);
+    function lin(v) {
+      v /= 255;
+      return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    }
+    return 0.2126 * lin(c.r) + 0.7152 * lin(c.g) + 0.0722 * lin(c.b);
+  }
+
+  function contrastRatio(hexA, hexB) {
+    var la = relLuminance(hexA);
+    var lb = relLuminance(hexB);
+    var hi = Math.max(la, lb), lo = Math.min(la, lb);
+    return (hi + 0.05) / (lo + 0.05);
+  }
+
+  // ---------- Palettes ----------
+  function buildPalettes(baseHex) {
+    var hsl = hexToHsl(baseHex);
+    var h = hsl.h, s = hsl.s, l = hsl.l;
+    function rot(deg) { return hslToHex(h + deg, s, l); }
+    return [
+      { name: 'Complementary', key: 'complementary', colors: [baseHex, rot(180)] },
+      { name: 'Analogous', key: 'analogous', colors: [rot(-30), baseHex, rot(30)] },
+      { name: 'Triadic', key: 'triadic', colors: [baseHex, rot(120), rot(240)] },
+      { name: 'Split-complementary', key: 'split', colors: [baseHex, rot(150), rot(210)] },
+      { name: 'Tetradic', key: 'tetradic', colors: [baseHex, rot(90), rot(180), rot(270)] },
+      { name: 'Monochrome', key: 'monochrome', colors: [
+        hslToHex(h, s, Math.min(0.94, l + 0.36)),
+        hslToHex(h, s, Math.min(0.86, l + 0.18)),
+        baseHex,
+        hslToHex(h, s, Math.max(0.14, l - 0.18)),
+        hslToHex(h, s, Math.max(0.07, l - 0.34))
+      ] }
+    ];
+  }
+
+  function labelColorFor(hex) {
+    return relLuminance(hex) > 0.35 ? '#191817' : '#ffffff';
+  }
+
+  function renderPalettes(baseHex) {
+    currentPalettes = buildPalettes(baseHex);
+    currentPalettes.forEach(function (pal) {
+      var host = document.getElementById('sw-' + pal.key);
+      host.textContent = '';
+      pal.colors.forEach(function (hex) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'swatch';
+        b.setAttribute('aria-label', 'Copy ' + hex + ' from ' + pal.name + ' palette');
+        var chip = document.createElement('div');
+        chip.className = 'chip';
+        chip.style.backgroundColor = hex;
+        var lab = document.createElement('small');
+        lab.textContent = hex;
+        lab.style.color = labelColorFor(hex);
+        chip.appendChild(lab);
+        var foot = document.createElement('div');
+        foot.className = 'foot';
+        var word = document.createElement('span');
+        word.className = 'copy-word';
+        word.textContent = 'Copy';
+        foot.appendChild(word);
+        b.appendChild(chip);
+        b.appendChild(foot);
+        b.addEventListener('click', function () { copyText(hex, 'Copied ' + hex); });
+        host.appendChild(b);
+      });
+    });
+    rebuildSelects();
+  }
+
+  // ---------- Clipboard + toast ----------
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    if (toastTimer) window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(function () { toast.classList.remove('show'); }, 1600);
+  }
+
+  function copyText(text, okMsg) {
+    var done = function () { showToast(okMsg); };
+    var fail = function () { showToast('Copy failed — select and copy manually'); };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { legacyCopy(text) ? done() : fail(); });
+      } else {
+        legacyCopy(text) ? done() : fail();
+      }
+    } catch (e) { fail(); }
+  }
+
+  function legacyCopy(text) {
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      return ok;
+    } catch (e) { return false; }
+  }
+
+  // ---------- WCAG ----------
+  function uniquePaletteColors() {
+    var seen = {};
+    var out = [];
+    currentPalettes.forEach(function (pal) {
+      pal.colors.forEach(function (hex) {
+        if (!seen[hex]) {
+          seen[hex] = true;
+          out.push({ hex: hex, from: pal.name });
+        }
+      });
+    });
+    return out;
+  }
+
+  function rebuildSelects() {
+    var colors = uniquePaletteColors();
+    var prevText = textSel.value;
+    var prevBg = bgSel.value;
+    [textSel, bgSel].forEach(function (sel) {
+      sel.textContent = '';
+      colors.forEach(function (c) {
+        var opt = document.createElement('option');
+        opt.value = c.hex;
+        opt.textContent = c.hex + '  ·  ' + c.from;
+        sel.appendChild(opt);
+      });
+    });
+    var hexes = colors.map(function (c) { return c.hex; });
+    // keep previous choice if still available, else darkest text / lightest bg
+    var sorted = hexes.slice().sort(function (a, b) { return relLuminance(a) - relLuminance(b); });
+    textSel.value = hexes.indexOf(prevText) !== -1 ? prevText : sorted[0];
+    bgSel.value = hexes.indexOf(prevBg) !== -1 ? prevBg : sorted[sorted.length - 1];
+    updateContrast();
+  }
+
+  function setBadge(el, pass) {
+    el.classList.toggle('pass', pass);
+    el.classList.toggle('fail', !pass);
+    var base = el.textContent.replace(/^[✓✗]\s*/, '');
+    el.textContent = (pass ? '✓ ' : '✗ ') + base;
+  }
+
+  function updateContrast() {
+    var t = textSel.value, b = bgSel.value;
+    if (!t || !b) return;
+    previewEl.style.backgroundColor = b;
+    previewEl.style.color = t;
+    var r = contrastRatio(t, b);
+    var shown = Math.round(r * 100) / 100;
+    ratioVal.textContent = shown.toFixed(2) + ':1';
+    ratioVal.style.color = 'var(--ink)';
+    setBadge(badges.aaN, r >= 4.5);
+    setBadge(badges.aaaN, r >= 7);
+    setBadge(badges.aaL, r >= 3);
+    setBadge(badges.aaaL, r >= 4.5);
+  }
+
+  // ---------- CSS export ----------
+  function cssVariables() {
+    var lines = [':root {'];
+    currentPalettes.forEach(function (pal) {
+      pal.colors.forEach(function (hex, i) {
+        lines.push('  --' + pal.key + '-' + (i + 1) + ': ' + hex + ';');
+      });
+    });
+    lines.push('}');
+    return lines.join('\n');
+  }
+
+  // ---------- Wiring ----------
+  function applyBase(hex) {
+    colorInput.value = hex;
+    hexInput.value = hex;
+    hexInput.classList.remove('invalid');
+    hexMsg.textContent = '';
+    renderPalettes(hex);
+  }
+
+  colorInput.addEventListener('input', function () {
+    applyBase(colorInput.value);
+  });
+
+  hexInput.addEventListener('input', function () {
+    var norm = normalizeHex(hexInput.value);
+    if (norm) {
+      hexInput.classList.remove('invalid');
+      hexMsg.textContent = '';
+      colorInput.value = norm;
+      renderPalettes(norm);
+    } else {
+      hexInput.classList.add('invalid');
+      hexMsg.textContent = 'Enter a hex color like #e07a5f or #fa3';
+    }
+  });
+
+  hexInput.addEventListener('blur', function () {
+    var norm = normalizeHex(hexInput.value);
+    if (norm) {
+      hexInput.value = norm;
+    } else {
+      applyBase(colorInput.value); // snap back to last valid
+    }
+  });
+
+  textSel.addEventListener('change', updateContrast);
+  bgSel.addEventListener('change', updateContrast);
+
+  document.getElementById('swap-btn').addEventListener('click', function () {
+    var t = textSel.value;
+    textSel.value = bgSel.value;
+    bgSel.value = t;
+    updateContrast();
+  });
+
+  document.getElementById('copy-css').addEventListener('click', function () {
+    copyText(cssVariables(), 'Palette copied as CSS variables');
+  });
+
+  // init
+  applyBase('#3a6ea5');
+})();
+</script>
+</body>
+</html>

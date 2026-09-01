@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pixel Studio — Tiny Canvas, Big Art</title>
+<meta name="description" content="A pixel-art editor in your browser: paint, erase, flood fill, eyedropper, mirror mode, 20-step undo, and crisp 16× PNG export. Works with mouse and touch.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👾</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#101216;
+  --chrome:#1a1d24;
+  --chrome-2:#232732;
+  --line:#323848;
+  --ink:#dfe4ee;
+  --dim:#8b93a7;
+  --neon:#54f0a8;
+  --neon-2:#ff67c8;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:
+    radial-gradient(900px 500px at 85% -10%, rgba(84,240,168,.05), transparent 60%),
+    radial-gradient(700px 500px at 0% 100%, rgba(255,103,200,.05), transparent 60%),
+    var(--bg);
+  color:var(--ink);
+  font-family:Inter,system-ui,sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+/* scanline hint */
+body::after{
+  content:"";
+  position:fixed;inset:0;z-index:900;
+  pointer-events:none;
+  background:repeating-linear-gradient(to bottom, rgba(0,0,0,.10) 0 1px, transparent 1px 4px);
+  opacity:.5;
+}
+.hub-link{position:fixed;top:14px;left:14px;z-index:1000;padding:8px 14px;border-radius:999px;font:600 13px/1 Inter,system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(8px);background:rgba(15,15,25,.55);color:#fff;border:1px solid rgba(255,255,255,.25)}
+.wrap{max-width:1080px;margin:0 auto;padding:66px 14px 40px}
+header{text-align:center;margin-bottom:18px}
+h1{
+  font-family:VT323,monospace;
+  font-size:clamp(2.4rem,7vw,4rem);
+  margin:0;
+  letter-spacing:.04em;
+  color:var(--neon);
+  text-shadow:0 0 14px rgba(84,240,168,.5);
+}
+.sub{color:var(--dim);margin:2px 0 0;font-size:.85rem}
+.studio{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 260px;
+  gap:16px;
+  align-items:start;
+}
+@media (max-width:820px){.studio{grid-template-columns:1fr}}
+.panel{
+  background:linear-gradient(180deg,var(--chrome-2),var(--chrome));
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:14px;
+  box-shadow:0 10px 26px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.04);
+}
+.panel h2{
+  font-family:VT323,monospace;
+  font-size:1.25rem;
+  color:var(--dim);
+  margin:0 0 10px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+/* Canvas */
+.board-holder{display:flex;justify-content:center}
+canvas#board{
+  width:100%;
+  max-width:576px;
+  aspect-ratio:1/1;
+  border-radius:8px;
+  border:1px solid var(--line);
+  background:#0b0d11;
+  touch-action:none;
+  cursor:crosshair;
+  display:block;
+  image-rendering:pixelated;
+}
+/* Buttons */
+button{font-family:inherit;cursor:pointer}
+.tbtn{
+  min-height:44px;min-width:44px;
+  padding:9px 12px;
+  border-radius:9px;
+  border:1px solid var(--line);
+  background:linear-gradient(180deg,#2b303d,#20242e);
+  color:var(--ink);
+  font-weight:500;
+  font-size:.85rem;
+  display:inline-flex;align-items:center;gap:7px;justify-content:center;
+  transition:transform .1s ease, box-shadow .12s ease;
+}
+.tbtn:hover{transform:translateY(-1px)}
+.tbtn:active{transform:translateY(1px)}
+.tbtn[aria-pressed="true"]{
+  border-color:var(--neon);
+  color:var(--neon);
+  box-shadow:0 0 10px rgba(84,240,168,.35), inset 0 0 8px rgba(84,240,168,.12);
+}
+.tbtn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.tbtn:focus-visible, .pal:focus-visible, input:focus-visible{outline:2px solid var(--neon);outline-offset:2px}
+.toolgrid{display:flex;flex-wrap:wrap;gap:8px}
+.rowline{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+/* Palette */
+.palette{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}
+@media (max-width:820px){.palette{grid-template-columns:repeat(8,minmax(34px,1fr))}}
+.pal{
+  aspect-ratio:1/1;
+  min-width:26px;
+  border-radius:7px;
+  border:2px solid rgba(255,255,255,.12);
+  padding:0;
+  transition:transform .1s ease;
+}
+.pal:hover{transform:scale(1.1)}
+.pal[aria-pressed="true"]{border-color:#fff;box-shadow:0 0 0 2px var(--neon)}
+.current-row{display:flex;align-items:center;gap:10px;margin-top:12px}
+#cur-swatch{
+  width:44px;height:44px;border-radius:9px;border:2px solid rgba(255,255,255,.25);
+  flex:0 0 auto;
+}
+#custom-color{width:60px;height:44px;border:1px solid var(--line);border-radius:9px;background:var(--chrome);padding:2px;cursor:pointer}
+.cur-hex{font-family:VT323,monospace;font-size:1.15rem;color:var(--dim)}
+/* size segmented */
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{
+  min-height:44px;min-width:56px;border:none;background:transparent;color:var(--dim);
+  font-family:VT323,monospace;font-size:1.1rem;padding:0 12px;
+}
+.seg button[aria-pressed="true"]{background:var(--neon);color:#0b0d11;font-weight:600}
+.hintline{color:var(--dim);font-size:.75rem;margin:10px 0 0}
+kbd{font-family:VT323,monospace;border:1px solid var(--line);border-radius:4px;padding:0 5px;font-size:1rem}
+/* Dialog */
+.dialog-backdrop{
+  position:fixed;inset:0;z-index:1100;
+  background:rgba(5,6,9,.7);
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+  opacity:0;pointer-events:none;
+  transition:opacity .2s ease;
+}
+.dialog-backdrop.open{opacity:1;pointer-events:auto}
+.dialog{
+  background:var(--chrome-2);
+  border:1px solid var(--line);
+  border-radius:14px;
+  max-width:380px;width:100%;
+  padding:22px;
+  transform:translateY(8px);
+  transition:transform .2s ease;
+  box-shadow:0 20px 50px rgba(0,0,0,.5);
+}
+.dialog-backdrop.open .dialog{transform:translateY(0)}
+.dialog h3{font-family:VT323,monospace;font-size:1.5rem;margin:0 0 8px;color:var(--neon-2)}
+.dialog p{margin:0 0 18px;color:var(--dim);font-size:.9rem;line-height:1.5}
+.dialog .row{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+/* Toast */
+.toast{
+  position:fixed;left:50%;bottom:24px;z-index:1200;
+  transform:translate(-50%,16px);opacity:0;pointer-events:none;
+  background:#0b0d11;color:var(--neon);
+  border:1px solid var(--neon);
+  padding:10px 18px;border-radius:999px;
+  font-family:VT323,monospace;font-size:1.1rem;letter-spacing:.04em;
+  transition:transform .25s ease, opacity .25s ease;
+}
+.toast.show{transform:translate(-50%,0);opacity:1}
+footer{text-align:center;color:var(--dim);font-size:.75rem;padding:26px 0 10px}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{transition-duration:.001s !important;animation:none !important}
+}
+</style>
+</head>
+<body>
+<a class="hub-link" href="https://thirty-worlds.vercel.app/" aria-label="All thirty sites">← All 30</a>
+
+<div class="wrap">
+  <header>
+    <h1>PIXEL STUDIO</h1>
+    <p class="sub">tiny canvas · big art · autosaves to your browser when you hit Save</p>
+  </header>
+
+  <main class="studio">
+    <section class="panel" aria-label="Drawing canvas">
+      <div class="board-holder">
+        <canvas id="board" width="576" height="576" aria-label="Pixel drawing canvas. Use the tools to paint."></canvas>
+      </div>
+      <div class="rowline" role="toolbar" aria-label="Canvas actions">
+        <button class="tbtn" id="undo-btn" type="button" disabled>↩ Undo</button>
+        <button class="tbtn" id="export-btn" type="button">⤓ Export PNG ×16</button>
+        <button class="tbtn" id="save-btn" type="button">💾 Save</button>
+        <button class="tbtn" id="load-btn" type="button">📂 Load</button>
+        <button class="tbtn" id="wipe-btn" type="button">🧹 Clear</button>
+      </div>
+      <p class="hintline">Drag to paint. <kbd>B</kbd> brush · <kbd>E</kbd> eraser · <kbd>G</kbd> fill · <kbd>I</kbd> eyedropper · <kbd>Ctrl</kbd>+<kbd>Z</kbd> undo</p>
+    </section>
+
+    <div>
+      <section class="panel" aria-label="Tools" style="margin-bottom:16px">
+        <h2>Tools</h2>
+        <div class="toolgrid" role="group" aria-label="Drawing tools">
+          <button class="tbtn" id="tool-paint" type="button" aria-pressed="true">🖌 Paint</button>
+          <button class="tbtn" id="tool-erase" type="button" aria-pressed="false">⌫ Erase</button>
+          <button class="tbtn" id="tool-fill" type="button" aria-pressed="false">🪣 Fill</button>
+          <button class="tbtn" id="tool-eyedrop" type="button" aria-pressed="false">🎯 Pick</button>
+        </div>
+        <div class="rowline" role="group" aria-label="Canvas options">
+          <button class="tbtn" id="mirror-btn" type="button" aria-pressed="false">🪞 Mirror X</button>
+          <button class="tbtn" id="grid-btn" type="button" aria-pressed="true"># Grid</button>
+        </div>
+      </section>
+
+      <section class="panel" aria-label="Colors" style="margin-bottom:16px">
+        <h2>Palette</h2>
+        <div class="palette" id="palette" role="group" aria-label="Preset colors"></div>
+        <div class="current-row">
+          <span id="cur-swatch" aria-hidden="true"></span>
+          <input type="color" id="custom-color" value="#ff004d" aria-label="Custom color">
+          <span class="cur-hex" id="cur-hex">#ff004d</span>
+        </div>
+      </section>
+
+      <section class="panel" aria-label="Canvas size">
+        <h2>Canvas</h2>
+        <div class="seg" role="group" aria-label="Grid size">
+          <button type="button" id="size-8" aria-pressed="false">8×8</button>
+          <button type="button" id="size-16" aria-pressed="true">16×16</button>
+          <button type="button" id="size-32" aria-pressed="false">32×32</button>
+        </div>
+        <p class="hintline">Switching size clears the canvas — you'll be asked first.</p>
+      </section>
+    </div>
+  </main>
+
+  <footer>preset palette: PICO-8 · your save lives only in this browser</footer>
+</div>
+
+<div class="dialog-backdrop" id="dialog-backdrop">
+  <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="dlg-title" aria-describedby="dlg-msg">
+    <h3 id="dlg-title">Clear the canvas?</h3>
+    <p id="dlg-msg">This will erase your current drawing.</p>
+    <div class="row">
+      <button class="tbtn" id="dlg-cancel" type="button">Keep drawing</button>
+      <button class="tbtn" id="dlg-ok" type="button" style="border-color:var(--neon-2);color:var(--neon-2)">Yes, clear it</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var PALETTE = [
+    '#000000', '#1d2b53', '#7e2553', '#008751',
+    '#ab5236', '#5f574f', '#c2c3c7', '#fff1e8',
+    '#ff004d', '#ffa300', '#ffec27', '#00e436',
+    '#29adff', '#83769c', '#ff77a8', '#ffccaa'
+  ];
+  var MAX_UNDO = 40;
+  var SAVE_KEY = 'pixel-studio-v1';
+
+  var board = document.getElementById('board');
+  var ctx = board.getContext('2d');
+  var toast = document.getElementById('toast');
+
+  var n = 16;
+  var cells = emptyCells(n);        // array of hex or null
+  var tool = 'paint';
+  var color = '#ff004d';
+  var mirrorX = false;
+  var showGrid = true;
+  var undoStack = [];
+  var stroking = false;
+  var strokeTouched = false;
+  var toastTimer = null;
+
+  var toolButtons = {
+    paint: document.getElementById('tool-paint'),
+    erase: document.getElementById('tool-erase'),
+    fill: document.getElementById('tool-fill'),
+    eyedrop: document.getElementById('tool-eyedrop')
+  };
+  var sizeButtons = {
+    8: document.getElementById('size-8'),
+    16: document.getElementById('size-16'),
+    32: document.getElementById('size-32')
+  };
+  var undoBtn = document.getElementById('undo-btn');
+  var mirrorBtn = document.getElementById('mirror-btn');
+  var gridBtn = document.getElementById('grid-btn');
+  var curSwatch = document.getElementById('cur-swatch');
+  var curHex = document.getElementById('cur-hex');
+  var customColor = document.getElementById('custom-color');
+  var paletteEl = document.getElementById('palette');
+  var backdrop = document.getElementById('dialog-backdrop');
+  var dlgTitle = document.getElementById('dlg-title');
+  var dlgMsg = document.getElementById('dlg-msg');
+  var dlgOk = document.getElementById('dlg-ok');
+  var dlgCancel = document.getElementById('dlg-cancel');
+  var pendingAction = null;
+  var palButtons = [];
+
+  function emptyCells(size) {
+    var a = new Array(size * size);
+    for (var i = 0; i < a.length; i++) a[i] = null;
+    return a;
+  }
+
+  // ---------- Rendering ----------
+  function redraw() {
+    var px = board.width / n;
+    ctx.clearRect(0, 0, board.width, board.height);
+    for (var y = 0; y < n; y++) {
+      for (var x = 0; x < n; x++) {
+        var c = cells[y * n + x];
+        if (c === null) {
+          ctx.fillStyle = ((x + y) % 2 === 0) ? '#171a20' : '#1d212a';
+        } else {
+          ctx.fillStyle = c;
+        }
+        ctx.fillRect(x * px, y * px, px, px);
+      }
+    }
+    if (showGrid) {
+      ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+      ctx.lineWidth = 1;
+      for (var i = 1; i < n; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * px + 0.5, 0);
+        ctx.lineTo(i * px + 0.5, board.height);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, i * px + 0.5);
+        ctx.lineTo(board.width, i * px + 0.5);
+        ctx.stroke();
+      }
+    }
+  }
+
+  // ---------- Undo ----------
+  function pushUndo() {
+    undoStack.push({ n: n, cells: cells.slice() });
+    if (undoStack.length > MAX_UNDO) undoStack.shift();
+    undoBtn.disabled = false;
+  }
+
+  function doUndo() {
+    var snap = undoStack.pop();
+    if (!snap) return;
+    if (snap.n !== n) setSizeDirect(snap.n);
+    cells = snap.cells.slice();
+    undoBtn.disabled = undoStack.length === 0;
+    redraw();
+  }
+
+  // ---------- Painting ----------
+  function cellFromEvent(e) {
+    var rect = board.getBoundingClientRect();
+    var x = Math.floor((e.clientX - rect.left) / rect.width * n);
+    var y = Math.floor((e.clientY - rect.top) / rect.height * n);
+    if (x < 0 || y < 0 || x >= n || y >= n) return null;
+    return { x: x, y: y };
+  }
+
+  function setCell(x, y, value) {
+    if (cells[y * n + x] !== value) {
+      cells[y * n + x] = value;
+      strokeTouched = true;
+    }
+    if (mirrorX) {
+      var mx = n - 1 - x;
+      if (cells[y * n + mx] !== value) {
+        cells[y * n + mx] = value;
+        strokeTouched = true;
+      }
+    }
+  }
+
+  function floodFill(x, y, newColor) {
+    var target = cells[y * n + x];
+    if (target === newColor) return false;
+    var queue = [[x, y]];
+    var seen = {};
+    var changed = false;
+    while (queue.length) {
+      var p = queue.pop();
+      var px = p[0], py = p[1];
+      if (px < 0 || py < 0 || px >= n || py >= n) continue;
+      var idx = py * n + px;
+      if (seen[idx]) continue;
+      seen[idx] = true;
+      if (cells[idx] !== target) continue;
+      cells[idx] = newColor;
+      changed = true;
+      queue.push([px + 1, py], [px - 1, py], [px, py + 1], [px, py - 1]);
+    }
+    return changed;
+  }
+
+  function handlePoint(e, isDown) {
+    var cell = cellFromEvent(e);
+    if (!cell) return;
+    if (tool === 'paint' || tool === 'erase') {
+      setCell(cell.x, cell.y, tool === 'paint' ? color : null);
+      redraw();
+    } else if (isDown && tool === 'fill') {
+      pushUndo();
+      var changed = floodFill(cell.x, cell.y, color);
+      if (mirrorX && changed) { /* fill respects existing shapes; mirror applies to brush only */ }
+      if (!changed) { undoStack.pop(); undoBtn.disabled = undoStack.length === 0; }
+      redraw();
+    } else if (isDown && tool === 'eyedrop') {
+      var c = cells[cell.y * n + cell.x];
+      if (c) {
+        setColor(c);
+        setTool('paint');
+        showToast('Picked ' + c);
+      } else {
+        showToast('Empty pixel — nothing to pick');
+      }
+    }
+  }
+
+  board.addEventListener('pointerdown', function (e) {
+    if (e.button !== undefined && e.button !== 0) return;
+    e.preventDefault();
+    try { board.setPointerCapture(e.pointerId); } catch (err) { /* capture unsupported */ }
+    if (tool === 'paint' || tool === 'erase') {
+      pushUndo();
+      strokeTouched = false;
+      stroking = true;
+    }
+    handlePoint(e, true);
+  });
+
+  board.addEventListener('pointermove', function (e) {
+    if (!stroking) return;
+    e.preventDefault();
+    handlePoint(e, false);
+  });
+
+  function endStroke() {
+    if (stroking && !strokeTouched) {
+      // nothing changed; drop the snapshot we pushed
+      undoStack.pop();
+      undoBtn.disabled = undoStack.length === 0;
+    }
+    stroking = false;
+  }
+  board.addEventListener('pointerup', endStroke);
+  board.addEventListener('pointercancel', endStroke);
+
+  // ---------- Tools / options ----------
+  function setTool(t) {
+    tool = t;
+    Object.keys(toolButtons).forEach(function (k) {
+      toolButtons[k].setAttribute('aria-pressed', k === t ? 'true' : 'false');
+    });
+  }
+  toolButtons.paint.addEventListener('click', function () { setTool('paint'); });
+  toolButtons.erase.addEventListener('click', function () { setTool('erase'); });
+  toolButtons.fill.addEventListener('click', function () { setTool('fill'); });
+  toolButtons.eyedrop.addEventListener('click', function () { setTool('eyedrop'); });
+
+  mirrorBtn.addEventListener('click', function () {
+    mirrorX = !mirrorX;
+    mirrorBtn.setAttribute('aria-pressed', mirrorX ? 'true' : 'false');
+  });
+  gridBtn.addEventListener('click', function () {
+    showGrid = !showGrid;
+    gridBtn.setAttribute('aria-pressed', showGrid ? 'true' : 'false');
+    redraw();
+  });
+  undoBtn.addEventListener('click', doUndo);
+
+  // ---------- Colors ----------
+  function setColor(c) {
+    color = c;
+    curSwatch.style.backgroundColor = c;
+    curHex.textContent = c;
+    customColor.value = c;
+    palButtons.forEach(function (b) {
+      b.setAttribute('aria-pressed', b.dataset.color === c ? 'true' : 'false');
+    });
+  }
+
+  PALETTE.forEach(function (c) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'pal';
+    b.style.backgroundColor = c;
+    b.dataset.color = c;
+    b.setAttribute('aria-label', 'Select color ' + c);
+    b.setAttribute('aria-pressed', 'false');
+    b.addEventListener('click', function () {
+      setColor(c);
+      if (tool === 'erase' || tool === 'eyedrop') setTool('paint');
+    });
+    paletteEl.appendChild(b);
+    palButtons.push(b);
+  });
+
+  customColor.addEventListener('input', function () {
+    setColor(customColor.value);
+    if (tool === 'erase' || tool === 'eyedrop') setTool('paint');
+  });
+
+  // ---------- Size + dialog ----------
+  function canvasHasArt() {
+    for (var i = 0; i < cells.length; i++) if (cells[i] !== null) return true;
+    return false;
+  }
+
+  function setSizeDirect(size) {
+    n = size;
+    Object.keys(sizeButtons).forEach(function (k) {
+      sizeButtons[k].setAttribute('aria-pressed', String(size) === k ? 'true' : 'false');
+    });
+  }
+
+  function switchSize(size) {
+    if (size === n) return;
+    pushUndo();
+    setSizeDirect(size);
+    cells = emptyCells(size);
+    redraw();
+  }
+
+  function openDialog(title, msg, onOk) {
+    dlgTitle.textContent = title;
+    dlgMsg.textContent = msg;
+    pendingAction = onOk;
+    backdrop.classList.add('open');
+    dlgCancel.focus();
+  }
+  function closeDialog() {
+    backdrop.classList.remove('open');
+    pendingAction = null;
+  }
+  dlgCancel.addEventListener('click', closeDialog);
+  dlgOk.addEventListener('click', function () {
+    var act = pendingAction;
+    closeDialog();
+    if (act) act();
+  });
+  backdrop.addEventListener('click', function (e) {
+    if (e.target === backdrop) closeDialog();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && backdrop.classList.contains('open')) closeDialog();
+  });
+
+  [8, 16, 32].forEach(function (size) {
+    sizeButtons[size].addEventListener('click', function () {
+      if (size === n) return;
+      if (canvasHasArt()) {
+        openDialog('Switch to ' + size + '×' + size + '?',
+          'Changing the grid size clears your current drawing. Undo can bring it back.',
+          function () { switchSize(size); });
+      } else {
+        switchSize(size);
+      }
+    });
+  });
+
+  document.getElementById('wipe-btn').addEventListener('click', function () {
+    if (!canvasHasArt()) { showToast('Canvas is already empty'); return; }
+    openDialog('Clear the canvas?', 'This erases everything. Undo can bring it back.', function () {
+      pushUndo();
+      cells = emptyCells(n);
+      redraw();
+    });
+  });
+
+  // ---------- Export ----------
+  document.getElementById('export-btn').addEventListener('click', function () {
+    var SCALE = 16;
+    var out = document.createElement('canvas');
+    out.width = n * SCALE;
+    out.height = n * SCALE;
+    var octx = out.getContext('2d');
+    octx.imageSmoothingEnabled = false;
+    for (var y = 0; y < n; y++) {
+      for (var x = 0; x < n; x++) {
+        var c = cells[y * n + x];
+        if (c !== null) {
+          octx.fillStyle = c;
+          octx.fillRect(x * SCALE, y * SCALE, SCALE, SCALE);
+        }
+      }
+    }
+    try {
+      var a = document.createElement('a');
+      a.href = out.toDataURL('image/png');
+      a.download = 'pixel-studio-' + n + 'x' + n + '.png';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('PNG exported at ' + (n * SCALE) + '×' + (n * SCALE));
+    } catch (e) {
+      showToast('Export failed in this browser');
+    }
+  });
+
+  // ---------- Save / load ----------
+  document.getElementById('save-btn').addEventListener('click', function () {
+    try {
+      localStorage.setItem(SAVE_KEY, JSON.stringify({ n: n, cells: cells }));
+      showToast('Saved to this browser');
+    } catch (e) {
+      showToast('Save failed — storage unavailable');
+    }
+  });
+
+  document.getElementById('load-btn').addEventListener('click', function () {
+    var data = null;
+    try {
+      var raw = localStorage.getItem(SAVE_KEY);
+      if (raw) data = JSON.parse(raw);
+    } catch (e) { data = null; }
+    if (!data || !data.cells || [8, 16, 32].indexOf(data.n) === -1 ||
+        !Array.isArray(data.cells) || data.cells.length !== data.n * data.n) {
+      showToast('No saved drawing found');
+      return;
+    }
+    var apply = function () {
+      pushUndo();
+      setSizeDirect(data.n);
+      cells = data.cells.map(function (v) {
+        return (typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v)) ? v : null;
+      });
+      redraw();
+      showToast('Drawing loaded');
+    };
+    if (canvasHasArt()) {
+      openDialog('Load saved drawing?', 'Your current canvas will be replaced. Undo can bring it back.', apply);
+    } else {
+      apply();
+    }
+  });
+
+  // ---------- Keyboard ----------
+  document.addEventListener('keydown', function (e) {
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+      e.preventDefault();
+      doUndo();
+      return;
+    }
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    var k = e.key.toLowerCase();
+    if (k === 'b') setTool('paint');
+    else if (k === 'e') setTool('erase');
+    else if (k === 'g') setTool('fill');
+    else if (k === 'i') setTool('eyedrop');
+  });
+
+  // ---------- Toast ----------
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    if (toastTimer) window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(function () { toast.classList.remove('show'); }, 1700);
+  }
+
+  // init
+  setColor('#ff004d');
+  redraw();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Story Forge — Build Your Own Adventure</title>
+<meta name="description" content="Pick a hero, a sidekick, a magical place, a treasure, and a problem — then forge a brand-new five-paragraph storybook adventure. Read it aloud, twist the ending, and copy your tale.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📖</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f7ecd7;
+    --paper-deep:#efdfc0;
+    --ink:#43301f;
+    --ink-soft:#7a6248;
+    --ember:#b5432c;
+    --gold:#c8912f;
+    --leaf:#5d7a3a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{max-width:100%;overflow-x:hidden}
+  body{
+    font-family:"Fredoka",system-ui,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1100px 500px at 50% -150px, #fdf6e6, rgba(253,246,230,0) 70%),
+      repeating-linear-gradient(0deg, rgba(122,98,72,.035) 0 2px, transparent 2px 26px),
+      linear-gradient(180deg,var(--paper),var(--paper-deep));
+    min-height:100vh;
+    padding-bottom:60px;
+  }
+  .hub-link{position:fixed;top:14px;left:14px;z-index:1000;padding:8px 14px;border-radius:999px;font:600 13px/1 Inter,system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(8px);background:rgba(15,15,25,.55);color:#fff;border:1px solid rgba(255,255,255,.25)}
+  .hub-link:focus-visible{outline:4px solid var(--ink);outline-offset:3px}
+
+  header{text-align:center;padding:clamp(64px,10vh,92px) 16px 4px}
+  h1{
+    font-weight:700;
+    font-size:clamp(2.2rem,6vw,3.8rem);
+    color:var(--ember);
+    letter-spacing:.5px;
+  }
+  .tagline{
+    font-family:"Crimson Pro",serif;
+    font-style:italic;
+    font-size:clamp(1.15rem,2.6vw,1.5rem);
+    color:var(--ink-soft);
+    margin-top:8px;
+  }
+  .flourish{color:var(--gold);font-size:1.3rem;letter-spacing:8px;margin-top:10px}
+
+  .wrap{max-width:980px;margin:0 auto;padding:0 clamp(14px,3vw,28px)}
+
+  .forge{
+    background:rgba(255,252,243,.72);
+    border:2px solid rgba(200,145,47,.4);
+    border-radius:22px;
+    padding:clamp(18px,3.5vw,32px);
+    margin-top:22px;
+    box-shadow:0 8px 24px rgba(90,60,20,.12);
+  }
+  fieldset{border:none;margin-bottom:20px}
+  legend{
+    font-weight:600;
+    font-size:clamp(1.05rem,2.4vw,1.25rem);
+    color:var(--ember);
+    margin-bottom:10px;
+    letter-spacing:.4px;
+  }
+  .opts{display:flex;flex-wrap:wrap;gap:8px}
+  .opt{display:inline-flex}
+  .sr-only{
+    position:absolute;width:1px;height:1px;
+    padding:0;margin:-1px;overflow:hidden;
+    clip:rect(0 0 0 0);white-space:nowrap;border:0;
+  }
+  .opt-chip{
+    display:inline-flex;align-items:center;
+    min-height:46px;
+    padding:8px 14px;
+    border-radius:14px;
+    border:2px solid rgba(122,98,72,.35);
+    background:#fffdf6;
+    font-weight:500;
+    font-size:clamp(.9rem,2.1vw,1rem);
+    color:var(--ink);
+    cursor:pointer;
+    transition:transform .15s ease;
+    user-select:none;
+  }
+  .opt-chip:hover{transform:translateY(-2px)}
+  .opt input:checked + .opt-chip{
+    background:linear-gradient(135deg,#fbe1b6,#f5c97e);
+    border-color:var(--gold);
+    font-weight:600;
+    color:#5c3d0a;
+  }
+  .opt input:focus-visible + .opt-chip{outline:4px solid var(--ink);outline-offset:2px}
+
+  .forge-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px}
+  .btn{
+    min-height:56px;
+    padding:12px 24px;
+    border:none;border-radius:16px;
+    font-family:"Fredoka",sans-serif;
+    font-weight:600;
+    font-size:clamp(1.05rem,2.5vw,1.2rem);
+    cursor:pointer;
+    transition:transform .15s ease;
+  }
+  .btn:hover{transform:translateY(-2px)}
+  .btn:active{transform:translateY(1px) scale(.98)}
+  .btn:focus-visible{outline:4px solid var(--ink);outline-offset:3px}
+  .btn-forge{
+    flex:1 1 220px;
+    background:linear-gradient(135deg,var(--ember),#d96a3f);
+    color:#fff8ec;
+    box-shadow:0 5px 0 #7e2b1a;
+  }
+  .btn-dice{
+    background:#fffdf6;
+    color:var(--ink);
+    border:2px solid rgba(122,98,72,.4);
+    box-shadow:0 5px 0 rgba(122,98,72,.3);
+  }
+
+  /* Story book */
+  .book{
+    margin-top:34px;
+    background:#fffdf4;
+    border-radius:8px 22px 22px 8px;
+    border:1px solid rgba(122,98,72,.3);
+    border-left:10px solid var(--ember);
+    box-shadow:0 14px 34px rgba(90,60,20,.18);
+    padding:clamp(24px,5vw,56px);
+    animation:page-in .5s ease both;
+  }
+  @keyframes page-in{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+  .book h2{
+    font-family:"Crimson Pro",serif;
+    font-weight:700;
+    font-size:clamp(1.7rem,4.5vw,2.6rem);
+    text-align:center;
+    color:var(--ink);
+    margin-bottom:4px;
+  }
+  .book .ornament{text-align:center;color:var(--gold);font-size:1.2rem;letter-spacing:10px;margin:8px 0 22px}
+  .story p{
+    font-family:"Crimson Pro",serif;
+    font-size:clamp(1.15rem,2.6vw,1.4rem);
+    line-height:1.75;
+    margin-bottom:1.2em;
+    text-align:left;
+  }
+  .story p:first-of-type::first-letter{
+    font-family:"Crimson Pro",serif;
+    font-weight:700;
+    font-size:3.1em;
+    float:left;
+    line-height:.82;
+    padding:.06em .12em 0 0;
+    color:var(--ember);
+  }
+  .story p.twist-in{animation:para-in .45s ease both}
+  @keyframes para-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  .story-actions{
+    display:flex;flex-wrap:wrap;gap:10px;justify-content:center;
+    margin-top:26px;
+    padding-top:20px;
+    border-top:1px dashed rgba(122,98,72,.4);
+  }
+  .btn-tool{
+    background:#fdf3dd;
+    color:var(--ink);
+    border:2px solid rgba(200,145,47,.5);
+    box-shadow:0 4px 0 rgba(122,98,72,.25);
+    min-height:52px;
+  }
+  .btn-tool[aria-pressed="true"]{background:var(--leaf);color:#fff;border-color:#43581f}
+
+  .hint{
+    margin-top:30px;
+    text-align:center;
+    font-family:"Crimson Pro",serif;
+    font-style:italic;
+    font-size:clamp(1.1rem,2.6vw,1.35rem);
+    color:var(--ink-soft);
+  }
+  [hidden]{display:none!important}
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+<a class="hub-link" href="https://thirty-worlds.vercel.app/" aria-label="All thirty sites">← All 30</a>
+
+<header>
+  <h1>📖 Story Forge</h1>
+  <p class="tagline">Choose five sparks. Forge one adventure. No two tales alike.</p>
+  <div class="flourish" aria-hidden="true">❦ ❦ ❦</div>
+</header>
+
+<main class="wrap">
+  <section class="forge" aria-label="Story ingredients">
+    <fieldset>
+      <legend>🦸 Choose your hero</legend>
+      <div class="opts" id="heroOpts"></div>
+    </fieldset>
+    <fieldset>
+      <legend>🐾 Choose a sidekick</legend>
+      <div class="opts" id="sidekickOpts"></div>
+    </fieldset>
+    <fieldset>
+      <legend>🗺️ Choose a place</legend>
+      <div class="opts" id="placeOpts"></div>
+    </fieldset>
+    <fieldset>
+      <legend>✨ Choose a magical object</legend>
+      <div class="opts" id="objectOpts"></div>
+    </fieldset>
+    <fieldset>
+      <legend>⚡ Choose the problem</legend>
+      <div class="opts" id="problemOpts"></div>
+    </fieldset>
+    <div class="forge-actions">
+      <button type="button" class="btn btn-dice" id="surpriseBtn">🎲 Surprise me</button>
+      <button type="button" class="btn btn-forge" id="forgeBtn">🔥 Forge my story</button>
+    </div>
+  </section>
+
+  <p class="hint" id="hint">Pick your five sparks above — or roll the dice — then forge your story…</p>
+
+  <section class="book" id="book" hidden aria-label="Your story">
+    <h2 id="storyTitle"></h2>
+    <div class="ornament" aria-hidden="true">❦</div>
+    <div class="story" id="storyBody"></div>
+    <div class="story-actions">
+      <button type="button" class="btn btn-tool" id="readBtn" aria-pressed="false">🔊 Read aloud</button>
+      <button type="button" class="btn btn-tool" id="twistBtn">🌀 New twist</button>
+      <button type="button" class="btn btn-tool" id="copyBtn">📋 Copy story</button>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+  "use strict";
+  var REDUCED = false;
+  try { REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch(e){}
+
+  function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  var HEROES = [
+    { label:"🛡️ Pip the pint-sized knight", name:"Pip", kind:"a pint-sized knight", trait:"braver than anyone twice her size", skill:"never, ever giving up", they:"she", their:"her" },
+    { label:"🤖 Zizzy the curious robot", name:"Zizzy", kind:"a curious little robot", trait:"built from teapot parts and big questions", skill:"solving impossible puzzles", they:"they", their:"their" },
+    { label:"🧜 Coral the daydreaming mermaid", name:"Coral", kind:"a daydreaming mermaid", trait:"able to hear what the sea was thinking", skill:"making friends with anything that swims", they:"she", their:"her" },
+    { label:"🐉 Ember the smallest dragon", name:"Ember", kind:"the smallest dragon in the mountains", trait:"small enough to sleep in a soup pot, with a flame just big enough to toast marshmallows", skill:"flying loop-the-loops", they:"he", their:"his" },
+    { label:"🧙 Sage the trainee wizard", name:"Sage", kind:"a trainee wizard", trait:"still learning, with spells that worked almost half the time", skill:"reading ancient riddles", they:"he", their:"his" },
+    { label:"🐭 Miso the fearless mouse", name:"Miso", kind:"a fearless kitchen mouse", trait:"no bigger than a teacup and twice as bold", skill:"squeezing through impossible gaps", they:"she", their:"her" },
+    { label:"🎒 Juniper the junior explorer", name:"Juniper", kind:"a junior explorer", trait:"never without a backpack of maps she had drawn herself", skill:"spotting paths nobody else could see", they:"she", their:"her" },
+    { label:"🦝 Bandit the inventor raccoon", name:"Bandit", kind:"a gadget-building raccoon", trait:"never seen without his goggles and trusty tool belt", skill:"inventing machines out of junk", they:"he", their:"his" }
+  ];
+
+  var SIDEKICKS = [
+    { label:"🐢 Sprocket the rocket-turtle", name:"Sprocket", kind:"a turtle", quirk:"rode a rocket-powered skateboard everywhere", talent:"arriving exactly when it mattered most" },
+    { label:"🦉 Professor Hoots the owl", name:"Professor Hoots", kind:"an elderly owl", quirk:"read every map upside down", talent:"remembering everything he had ever seen" },
+    { label:"🐱 Noodle the sneezy cat", name:"Noodle", kind:"a fluffy cat", quirk:"sneezed whenever magic was near", talent:"landing on her feet in any mess" },
+    { label:"🧚 Glimmer the tiny fairy", name:"Glimmer", kind:"a thumb-sized fairy", quirk:"glowed brighter whenever she was excited", talent:"lighting up the darkest corners" },
+    { label:"🐸 Sir Ribbit the rhyming frog", name:"Sir Ribbit", kind:"a knighted frog", quirk:"spoke only in rhymes", talent:"cheering everyone up at the very worst moments" },
+    { label:"🐧 Waddles the penguin chef", name:"Waddles", kind:"a penguin chef", quirk:"carried emergency snacks in a tall white hat", talent:"cooking a feast out of almost nothing" },
+    { label:"🐕 Biscuit the trouble-sniffing pup", name:"Biscuit", kind:"a floppy-eared puppy", quirk:"could smell trouble three hills away", talent:"digging up buried secrets" },
+    { label:"🧹 Mopp the hopping broom", name:"Mopp", kind:"a friendly enchanted broom", quirk:"hopped everywhere instead of sweeping", talent:"tidying any disaster in a flash" }
+  ];
+
+  var PLACES = [
+    { label:"🏰 The Upside-Down Castle", name:"the Upside-Down Castle", sight:"staircases curled across the ceiling", sound:"the doors giggled when they opened" },
+    { label:"🌋 The Whispering Volcano", name:"the Whispering Volcano", sight:"warm smoke drew slow pictures in the air", sound:"the mountain murmured old secrets to itself" },
+    { label:"🌊 The Glow-in-the-Dark Sea", name:"the Glow-in-the-Dark Sea", sight:"every wave sparkled like spilled starlight", sound:"the fish hummed softly as they passed" },
+    { label:"🍭 The Candy Canyon", name:"the Candy Canyon", sight:"the cliffs were striped like peppermints", sound:"the river fizzed like fresh lemonade" },
+    { label:"🌲 The Forest of Forgotten Songs", name:"the Forest of Forgotten Songs", sight:"the leaves shimmered a soft silver", sound:"half-remembered tunes drifted between the trees" },
+    { label:"☁️ The Cloud City of Nimbus", name:"the Cloud City of Nimbus", sight:"little houses floated on puffs of white", sound:"the streets squished gently underfoot" },
+    { label:"🏜️ The Singing Desert", name:"the Singing Desert", sight:"golden dunes rolled all the way to the horizon", sound:"the sand chimed with every footstep" },
+    { label:"🧊 The Frozen Library", name:"the Frozen Library", sight:"bookshelves of clear blue ice towered overhead", sound:"pages turned themselves with a papery whisper" }
+  ];
+
+  var OBJECTS = [
+    { label:"🗝️ The Golden Key", name:"the Golden Key", power:"could unlock anything, even a bad mood" },
+    { label:"🧭 The Wobbly Compass", name:"the Wobbly Compass", power:"pointed to whatever you needed most, not just north" },
+    { label:"🎺 The Tiny Trumpet", name:"the Tiny Trumpet", power:"played courage straight into your heart" },
+    { label:"🫙 The Jar of Bottled Lightning", name:"the Jar of Bottled Lightning", power:"held one single flash of pure get-up-and-go" },
+    { label:"🧣 The Endless Scarf", name:"the Endless Scarf", power:"could stretch as far as anyone dared to hope" },
+    { label:"🪞 The Pocket Mirror", name:"the Pocket Mirror", power:"showed a small glimpse of tomorrow, if you asked politely" },
+    { label:"📚 The One-Page Book", name:"the One-Page Book", power:"wrote one true sentence whenever it was needed most" },
+    { label:"🌱 The Wish-Seed", name:"the Wish-Seed", power:"grew into exactly what you imagined, but only once" }
+  ];
+
+  var PROBLEMS = [
+    { label:"🌙 The moon has gone missing", titleBit:"the Missing Moon",
+      text:"the moon had slipped out of the sky and rolled away like a runaway coin",
+      seen:"The night sky hung above them, empty as a closed cupboard, and the owls flew in confused circles.",
+      fixed:"the moon sailed back up into the sky and glowed brighter than it ever had before" },
+    { label:"🎨 All the colors were stolen", titleBit:"the Stolen Colors",
+      text:"every color in the land had been stolen, leaving the whole world gray",
+      seen:"Everything — the grass, the flags, even the ladybugs — had faded to the gray of old porridge.",
+      fixed:"reds and blues and impossible purples came flooding back into the world like a tide" },
+    { label:"😢 A giant can't stop crying", titleBit:"the Crying Giant",
+      text:"a giant named Gus was crying so hard that the valleys had begun to flood",
+      seen:"Great salty tears rolled down the hillsides, and the villagers paddled past in their soup pots.",
+      fixed:"Gus's tears dried up into a warm, rumbling laugh that echoed happily for miles" },
+    { label:"🎵 The music fell asleep", titleBit:"the Sleeping Songs",
+      text:"all the music in the land had fallen fast asleep",
+      seen:"Every bell, bird, and fiddle stood silent; even the wind had forgotten how to whistle.",
+      fixed:"every song in the land woke up at once, and even the rocks tapped along in time" },
+    { label:"🏞️ The rivers flow backward", titleBit:"the Backward Rivers",
+      text:"the rivers had started flowing backward, uphill and terribly confused",
+      seen:"The rivers climbed the hills the wrong way round, carrying some very surprised fish uphill.",
+      fixed:"the rivers spun themselves around and rushed home, chuckling over their stones" },
+    { label:"🎂 A dragon's forgotten birthday", titleBit:"the Forgotten Birthday",
+      text:"a lonely dragon's birthday had been forgotten by absolutely everyone",
+      seen:"There sat the dragon on a bare hilltop, chin on claws, with not one card, not one candle, not one crumb of cake.",
+      fixed:"the dragon blew out a hundred candles with one happy puff of smoke shaped like a heart" },
+    { label:"⭐ The stars are falling down", titleBit:"the Falling Stars",
+      text:"the stars were drifting down like snow and getting stuck in the trees",
+      seen:"Stars floated down like glowing snowflakes and snagged in the treetops, where they buzzed grumpily.",
+      fixed:"the stars swirled upward in a great glittering spiral and clicked back into their constellations" },
+    { label:"🪢 Every road is tangled", titleBit:"the Great Knot",
+      text:"a great knot had tangled every road in the kingdom together",
+      seen:"Every road for miles had been tied into one enormous, stubborn bow, and the carts queued up sadly at its edges.",
+      fixed:"the roads sprang loose and stretched themselves out straight, pleased to be going places again" }
+  ];
+
+  var SKELETONS = [
+    function(c){
+      var h = c.h, s = c.s, p = c.p, o = c.o, pr = c.pr;
+      return [
+        "Once upon a time, at the very edge of the map, there lived " + h.kind + " named " + h.name + " — " + h.trait + ". Most mornings " + h.name + " practiced " + h.skill + ", and most mornings nothing much happened at all. But today a strange wind rattled the shutters, and it carried a worried whisper from far away: " + pr.text + ". " + cap(h.they) + " laced up " + h.their + " boots before the whisper had even finished.",
+        h.name + " had not traveled a mile before meeting " + s.name + ", " + s.kind + " who " + s.quirk + ". " + s.name + " was famous in three counties for " + s.talent + ", and the two of them agreed on the spot to face the trouble together. Side by side they journeyed over hills and under bridges until they reached " + p.name + ", where " + p.sight + " and " + p.sound + ". It was the most wonderful place either of them had ever seen — but there was no time to stare.",
+        "The trouble was even bigger up close. " + pr.seen + " " + h.name + "'s first plan was the sensible one: push, pull, ask nicely, and try again. It failed. The second plan involved a great deal of running about and one borrowed ladder, and it failed even harder. " + s.name + " looked at " + h.name + ". " + h.name + " looked at the satchel. There was exactly one idea left.",
+        "From the very bottom of the satchel, " + h.name + " drew out " + o.name + ", which " + o.power + ". " + cap(h.their) + " hands trembled just a little, because you only get one chance with a treasure like that. " + s.name + " helped the way only " + s.name + " could — by " + s.talent + " at exactly the right moment — while " + h.name + " did what " + h.they + " did best: " + h.skill + ". And then, in a rush of sparks and courage, it happened: " + pr.fixed + "."
+      ];
+    },
+    function(c){
+      var h = c.h, s = c.s, p = c.p, o = c.o, pr = c.pr;
+      return [
+        "The letter arrived at breakfast, sealed with purple wax and smelling faintly of adventure. It was addressed to " + h.name + ", " + h.kind + " — " + h.trait + " — and it contained a single desperate line: “Come quickly — " + pr.text + ". You are the only one who can help.” " + h.name + " read it twice, finished " + h.their + " toast (heroes should never skip breakfast), and set off before the kettle had cooled.",
+        "At the crossroads stood " + s.name + ", " + s.kind + " who " + s.quirk + " — waiting, as if the morning itself had arranged the meeting. " + s.name + " held up an identical letter and nodded gravely. Two letters meant the trouble was serious, so they pooled their snacks and marched together all the way to " + p.name + ". There, " + p.sight + ", " + p.sound + ", and somewhere in the middle of it all, the trouble was waiting for them.",
+        pr.seen + " For a long moment the two friends simply stared. Then they got to work. They tried the clever plan, and the backwards plan, and even the plan with all the humming — and the trouble ignored every single one. " + s.name + ", who never worried for long, tapped the satchel on " + h.name + "'s shoulder. And " + h.name + " suddenly remembered exactly what was inside.",
+        cap(o.name) + " came out of the satchel glowing softly, as if it had been waiting for this precise moment its whole life. Everyone knows it " + o.power + " — but knowing a thing and watching it happen are two very different marvels. " + s.name + " lent a hand by " + s.talent + ", " + h.name + " added a generous dash of " + h.skill + ", and the old magic did the rest. Slowly, wonderfully, gloriously: " + pr.fixed + "."
+      ];
+    },
+    function(c){
+      var h = c.h, s = c.s, p = c.p, o = c.o, pr = c.pr;
+      return [
+        "It was a perfectly ordinary Tuesday in the land of Everbright — right up until the sky turned the color of spilled ink. " + cap(h.kind) + " named " + h.name + " noticed it first, because " + h.name + " was " + h.trait + " and noticed nearly everything. Word spread quickly from village to village: " + pr.text + ". Somebody had to do something, and everybody agreed that the somebody should be somebody else. So " + h.name + " sighed, grabbed a satchel, and became the somebody.",
+        "No hero should tangle with trouble alone, so " + h.name + " knocked on the door of an old friend: " + s.name + ", " + s.kind + " who " + s.quirk + ". " + s.name + " packed three sandwiches and a spare umbrella, and off they went. The road led them straight to " + p.name + " — a place where " + p.sight + " and " + p.sound + " — and both of them felt that shivery, sparkly feeling you get when an adventure truly begins.",
+        pr.seen + " It would have been very easy to turn around and go home for lunch. Instead, " + h.name + " rolled up " + h.their + " sleeves. The first attempt was brave and useless. The second was clever and also useless. On the third, " + s.name + " — who was busy " + s.talent + " — bumped into the satchel, and something inside went clink in a hopeful sort of way.",
+        "Inside was " + o.name + " — and as every storybook worth its salt will tell you, it " + o.power + ". " + h.name + " lifted it high and put " + h.their + " whole heart behind it, the way " + h.they + " always did when " + h.skill + " was called for. " + s.name + " held very still, which was not easy. There came a hush, then a shimmer, then a sound like a hundred tiny bells — and at last: " + pr.fixed + "."
+      ];
+    }
+  ];
+
+  var ENDINGS = [
+    function(c){
+      var h = c.h, s = c.s, p = c.p, o = c.o;
+      return "That night, " + p.name + " threw the grandest feast anyone could remember. There were seventeen kinds of cake, " + s.name + " was carried about on cheering shoulders, and " + h.name + " told the story four times, adding one extra dragon with every telling. When the lanterns finally dimmed, the two friends agreed it had been a very good day indeed — and that " + o.name + " had earned the softest spot in the satchel forever. The End.";
+    },
+    function(c){
+      var h = c.h, s = c.s, p = c.p, o = c.o;
+      return "The walk home was long, but it was the good kind of long, full of humming and told-you-sos. At the cottage door, " + s.name + " promised to visit every single Sunday, and " + h.name + " promised to keep " + o.name + " polished and ready, just in case. Far away, " + p.name + " settled back into its peaceful, curious ways. And somewhere, a storyteller wrote it all down — every brave, ridiculous minute of it. The End.";
+    },
+    function(c){
+      var h = c.h, o = c.o;
+      return "Heroes rarely get to rest for long. The very next morning, a brand-new whisper came looking for " + h.name + " — something about a mountain that had learned to hiccup. " + cap(h.they) + " smiled, patted the satchel where " + o.name + " lay dozing, and put the kettle on. Adventures, like buses and best friends, always come along again. The End… for now.";
+    },
+    function(c){
+      var h = c.h, s = c.s, p = c.p;
+      return "The grateful folk of " + p.name + " struck two shining medals — one hero-sized, one exactly " + s.name + "-sized — and declared the day a holiday, to be celebrated forever with games and far too much pudding. " + s.name + " wore the medal upside down, naturally, and nobody minded one bit. As for " + h.name + ", " + h.they + " kept the medal in a sock drawer and kept the memory somewhere much, much safer. The End.";
+    },
+    function(c){
+      var h = c.h, s = c.s, o = c.o;
+      return "Later — much later — a small child asked " + h.name + " how the trouble had really been beaten. Was it " + o.name + "? Was it magic? " + h.name + " shook " + h.their + " head and pointed at " + s.name + ", who was snoring gently in the armchair. “Treasures help,” " + h.they + " said, “but friends are the real thing. Friends, and refusing to give up before the third try.” Which is, as it happens, entirely true. The End.";
+    },
+    function(c){
+      var h = c.h, s = c.s, p = c.p;
+      return "They celebrated the only sensible way: with a picnic on the highest hill in " + p.name + ". " + s.name + " — who " + s.quirk + ", even at picnics — proposed a toast to satchels, to second chances, and to trouble, for having the good manners to lose. " + h.name + " laughed until " + h.their + " sides ached. High above them the sky stretched wide and bright, looking exactly the way a happy ending should. The End.";
+    }
+  ];
+
+  // ---- Build the pickers ----
+  function buildOpts(containerId, groupName, list){
+    var container = document.getElementById(containerId);
+    list.forEach(function(item, i){
+      var label = document.createElement("label");
+      label.className = "opt";
+      var input = document.createElement("input");
+      input.type = "radio";
+      input.name = groupName;
+      input.value = String(i);
+      input.className = "sr-only";
+      if (i === 0) { input.checked = true; }
+      var chip = document.createElement("span");
+      chip.className = "opt-chip";
+      chip.textContent = item.label;
+      label.appendChild(input);
+      label.appendChild(chip);
+      container.appendChild(label);
+    });
+  }
+  buildOpts("heroOpts", "hero", HEROES);
+  buildOpts("sidekickOpts", "sidekick", SIDEKICKS);
+  buildOpts("placeOpts", "place", PLACES);
+  buildOpts("objectOpts", "object", OBJECTS);
+  buildOpts("problemOpts", "problem", PROBLEMS);
+
+  function picked(groupName, list){
+    var el = document.querySelector("input[name='" + groupName + "']:checked");
+    var idx = el ? parseInt(el.value, 10) : 0;
+    return list[idx];
+  }
+  function randomize(){
+    ["hero","sidekick","place","object","problem"].forEach(function(g){
+      var inputs = document.querySelectorAll("input[name='" + g + "']");
+      var pick = Math.floor(Math.random() * inputs.length);
+      inputs[pick].checked = true;
+    });
+  }
+
+  // ---- Story state ----
+  var book = document.getElementById("book");
+  var hint = document.getElementById("hint");
+  var storyTitle = document.getElementById("storyTitle");
+  var storyBody = document.getElementById("storyBody");
+  var readBtn = document.getElementById("readBtn");
+  var twistBtn = document.getElementById("twistBtn");
+  var copyBtn = document.getElementById("copyBtn");
+
+  var ctx = null;
+  var endingIdx = -1;
+  var speaking = false;
+
+  var SPEECH_OK = false;
+  try {
+    SPEECH_OK = ("speechSynthesis" in window) && (typeof SpeechSynthesisUtterance !== "undefined");
+  } catch(e){}
+  if (!SPEECH_OK) { readBtn.hidden = true; }
+
+  function stopReading(){
+    speaking = false;
+    readBtn.setAttribute("aria-pressed", "false");
+    readBtn.textContent = "🔊 Read aloud";
+    if (SPEECH_OK) {
+      try { window.speechSynthesis.cancel(); } catch(e){}
+    }
+  }
+
+  function renderStory(newTwistOnly){
+    var paras = SKELETONS[ctx.skeleton](ctx).concat([ENDINGS[endingIdx](ctx)]);
+    storyTitle.textContent = ctx.h.name + " and " + ctx.pr.titleBit;
+    storyBody.innerHTML = "";
+    paras.forEach(function(text, i){
+      var pEl = document.createElement("p");
+      pEl.textContent = text;
+      if (newTwistOnly && i === paras.length - 1) { pEl.className = "twist-in"; }
+      storyBody.appendChild(pEl);
+    });
+    ctx.paras = paras;
+  }
+
+  function forge(){
+    stopReading();
+    ctx = {
+      h: picked("hero", HEROES),
+      s: picked("sidekick", SIDEKICKS),
+      p: picked("place", PLACES),
+      o: picked("object", OBJECTS),
+      pr: picked("problem", PROBLEMS),
+      skeleton: Math.floor(Math.random() * SKELETONS.length)
+    };
+    endingIdx = Math.floor(Math.random() * ENDINGS.length);
+    renderStory(false);
+    hint.hidden = true;
+    book.hidden = false;
+    copyBtn.textContent = "📋 Copy story";
+    try {
+      book.scrollIntoView({ block: "start", behavior: REDUCED ? "auto" : "smooth" });
+    } catch(e){}
+  }
+
+  document.getElementById("forgeBtn").addEventListener("click", forge);
+  document.getElementById("surpriseBtn").addEventListener("click", function(){
+    randomize();
+    forge();
+  });
+
+  twistBtn.addEventListener("click", function(){
+    if (!ctx) { return; }
+    stopReading();
+    var next = endingIdx;
+    while (next === endingIdx) { next = Math.floor(Math.random() * ENDINGS.length); }
+    endingIdx = next;
+    renderStory(true);
+  });
+
+  readBtn.addEventListener("click", function(){
+    if (!ctx || !SPEECH_OK) { return; }
+    if (speaking) { stopReading(); return; }
+    try {
+      window.speechSynthesis.cancel();
+      speaking = true;
+      readBtn.setAttribute("aria-pressed", "true");
+      readBtn.textContent = "⏹ Stop reading";
+      var chunks = [storyTitle.textContent].concat(ctx.paras);
+      chunks.forEach(function(text, i){
+        var u = new SpeechSynthesisUtterance(text);
+        u.lang = "en-US";
+        u.rate = 0.95;
+        if (i === chunks.length - 1) {
+          u.onend = function(){ stopReading(); };
+        }
+        window.speechSynthesis.speak(u);
+      });
+    } catch(e){
+      stopReading();
+    }
+  });
+
+  function copyFallback(text){
+    var ok = false;
+    try {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+    } catch(e){ ok = false; }
+    return ok;
+  }
+
+  copyBtn.addEventListener("click", function(){
+    if (!ctx) { return; }
+    var text = storyTitle.textContent + "\n\n" + ctx.paras.join("\n\n");
+    function done(ok){
+      copyBtn.textContent = ok ? "✅ Copied!" : "❌ Copy blocked";
+      setTimeout(function(){ copyBtn.textContent = "📋 Copy story"; }, 2000);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function(){ done(true); }, function(){ done(copyFallback(text)); });
+    } else {
+      done(copyFallback(text));
+    }
+  });
+
+  document.addEventListener("visibilitychange", function(){
+    if (document.hidden && speaking) { stopReading(); }
+  });
+})();
+</script>
+</body>
+</html>

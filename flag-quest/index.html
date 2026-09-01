@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flag Quest — World Flag Quiz</title>
+<meta name="description" content="Flag Quest: a 10-round world flag quiz across 60 countries. Filter by continent, chase streaks, learn capital cities, and earn ranks from Armchair Explorer to Master Cartographer.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚩</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#16304f;
+  --navy-deep:#0e2138;
+  --paper:#f4eddc;
+  --paper-2:#ece2c8;
+  --ink:#1d2a3a;
+  --line:#cdbf9d;
+  --red:#c0392b;
+  --green:#1e7d4f;
+  --gold:#c8971f;
+  --sans:'Inter',system-ui,sans-serif;
+  --disp:'Archivo',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--sans);color:var(--ink);
+  background:var(--paper);
+  background-image:
+    linear-gradient(rgba(22,48,79,.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(22,48,79,.06) 1px, transparent 1px);
+  background-size:44px 44px;
+  min-height:100vh;overflow-x:hidden;
+}
+.hub-link{position:fixed;top:14px;left:14px;z-index:1000;padding:8px 14px;border-radius:999px;font:600 13px/1 Inter,system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(8px);background:rgba(22,48,79,.85);color:#fff;border:1px solid rgba(255,255,255,.25)}
+.hub-link:hover{background:rgba(22,48,79,1)}
+.wrap{max-width:680px;margin:0 auto;padding:70px 16px 50px}
+header.mast{text-align:center;margin-bottom:24px}
+h1{
+  font-family:var(--disp);font-weight:900;
+  font-size:clamp(2rem,7vw,3.2rem);letter-spacing:-.02em;
+  color:var(--navy);text-transform:uppercase;
+}
+h1 .flick{display:inline-block;color:var(--red);transform-origin:bottom left;animation:wave 3s ease-in-out infinite}
+@keyframes wave{0%,100%{transform:rotate(0)}50%{transform:rotate(-8deg)}}
+.sub{color:#5a6b80;font-size:.92rem;margin-top:6px}
+.card{
+  background:#fbf7ec;border:2px solid var(--navy);border-radius:14px;
+  box-shadow:6px 6px 0 rgba(22,48,79,.18);
+  padding:24px 20px;
+}
+.regions{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:18px 0 4px}
+.chip{
+  appearance:none;cursor:pointer;
+  font:600 .85rem var(--sans);
+  padding:10px 16px;min-height:44px;border-radius:999px;
+  border:2px solid var(--navy);background:transparent;color:var(--navy);
+  transition:background .15s,color .15s,transform .1s;
+}
+.chip:active{transform:scale(.95)}
+.chip[aria-pressed="true"]{background:var(--navy);color:var(--paper)}
+.chip:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.btn{
+  appearance:none;cursor:pointer;display:inline-block;
+  font:700 1rem var(--disp);letter-spacing:.06em;text-transform:uppercase;
+  background:var(--red);color:#fff;border:2px solid var(--navy);border-radius:12px;
+  padding:14px 34px;min-height:50px;
+  box-shadow:4px 4px 0 var(--navy);
+  transition:transform .12s,box-shadow .12s;
+}
+.btn:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--navy)}
+.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--navy)}
+.btn:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.btn.secondary{background:var(--paper-2);color:var(--navy)}
+.center{text-align:center}
+.best-note{margin-top:16px;font-size:.85rem;color:#5a6b80}
+.best-note strong{color:var(--gold)}
+/* quiz */
+.scorebar{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  margin-bottom:16px;font-family:var(--disp);
+}
+.scorebar .box{background:var(--navy);color:var(--paper);border-radius:10px;padding:8px 14px;text-align:center;min-width:72px}
+.scorebar .box .l{display:block;font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;opacity:.75;font-family:var(--sans);font-weight:600}
+.scorebar .box .v{font-size:1.15rem;font-weight:900;font-variant-numeric:tabular-nums}
+.scorebar .box.streak .v{color:#ffd166}
+.flag-stage{position:relative;display:flex;justify-content:center;margin-bottom:18px}
+.flag-frame{
+  background:#fff;border:2px solid var(--navy);border-radius:10px;
+  padding:10px;box-shadow:5px 5px 0 rgba(22,48,79,.15);
+  transform:rotate(-.7deg);
+  max-width:340px;width:100%;
+}
+.flag-frame img{display:block;width:100%;height:auto;min-height:100px;border:1px solid #d8d2c0;border-radius:4px;background:var(--paper-2)}
+.flag-fallback{
+  display:flex;align-items:center;justify-content:center;
+  width:100%;aspect-ratio:4/3;
+  background:var(--navy);color:var(--paper);
+  font:900 3.4rem var(--disp);letter-spacing:.1em;border-radius:4px;
+}
+.q-label{text-align:center;font:700 .78rem var(--sans);letter-spacing:.2em;text-transform:uppercase;color:#5a6b80;margin-bottom:14px}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:480px){.choices{grid-template-columns:1fr}}
+.choice{
+  appearance:none;cursor:pointer;text-align:left;
+  font:600 .95rem var(--sans);color:var(--ink);
+  background:#fff;border:2px solid var(--navy);border-radius:10px;
+  padding:13px 14px;min-height:52px;
+  display:flex;align-items:center;gap:10px;
+  transition:transform .12s,background .15s;
+}
+.choice .key{
+  flex:none;width:24px;height:24px;border-radius:6px;
+  background:var(--paper-2);border:1px solid var(--line);
+  font:700 .72rem var(--disp);color:var(--navy);
+  display:flex;align-items:center;justify-content:center;
+}
+.choice:hover:not(:disabled){transform:translateY(-2px)}
+.choice:active:not(:disabled){transform:scale(.97)}
+.choice:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.choice:disabled{cursor:default;opacity:.92}
+.choice.correct{background:var(--green);border-color:var(--green);color:#fff;animation:pulse .4s}
+.choice.correct .key{background:rgba(255,255,255,.25);border-color:transparent;color:#fff}
+.choice.wrong{background:var(--red);border-color:var(--red);color:#fff;animation:jolt .35s}
+.choice.wrong .key{background:rgba(255,255,255,.25);border-color:transparent;color:#fff}
+.choice.dimmed{opacity:.45}
+@keyframes pulse{50%{transform:scale(1.04)}}
+@keyframes jolt{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.feedback{
+  margin-top:16px;border-radius:10px;padding:13px 16px;
+  font-size:.92rem;line-height:1.45;
+  animation:slide-in .3s ease-out;
+}
+@keyframes slide-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.feedback.good{background:#e2f2e7;border:2px solid var(--green);color:#14532d}
+.feedback.bad{background:#fbe4e1;border:2px solid var(--red);color:#7f1d1d}
+.next-row{margin-top:16px;text-align:center}
+/* end screen */
+.stamp{
+  display:inline-block;margin:10px 0 4px;
+  font:900 clamp(1.5rem,6vw,2.3rem) var(--disp);text-transform:uppercase;letter-spacing:.04em;
+  color:var(--red);border:4px double var(--red);border-radius:10px;
+  padding:10px 22px;transform:rotate(-3deg);
+  animation:stamp-in .45s cubic-bezier(.2,1.6,.4,1);
+}
+@keyframes stamp-in{from{opacity:0;transform:rotate(-3deg) scale(2)}to{opacity:1;transform:rotate(-3deg) scale(1)}}
+.end-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin:20px 0}
+.end-cell{background:var(--paper-2);border:2px solid var(--line);border-radius:10px;padding:12px 8px;text-align:center}
+.end-cell .l{font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:#5a6b80;font-weight:700}
+.end-cell .v{font:900 1.5rem var(--disp);color:var(--navy);margin-top:2px}
+footer{margin-top:30px;text-align:center;font-size:.72rem;color:#8a94a3}
+[hidden]{display:none !important}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001s !important;animation-iteration-count:1 !important;transition-duration:.001s !important}
+  h1 .flick{animation:none}
+}
+</style>
+</head>
+<body>
+<a class="hub-link" href="https://thirty-worlds.vercel.app/" aria-label="All thirty sites">← All 30</a>
+<div class="wrap">
+<header class="mast">
+  <h1>Flag <span class="flick">Quest</span></h1>
+  <p class="sub">Ten flags. Four choices. One atlas-grade memory.</p>
+</header>
+
+<main>
+  <!-- START -->
+  <section id="screen-start" class="card center" aria-label="Choose your region">
+    <p style="font:700 .8rem var(--sans);letter-spacing:.18em;text-transform:uppercase;color:#5a6b80">Choose your region</p>
+    <div class="regions" role="group" aria-label="Region filter">
+      <button type="button" class="chip" data-region="World" aria-pressed="true">🌍 World</button>
+      <button type="button" class="chip" data-region="Africa" aria-pressed="false">Africa</button>
+      <button type="button" class="chip" data-region="Americas" aria-pressed="false">Americas</button>
+      <button type="button" class="chip" data-region="Asia" aria-pressed="false">Asia</button>
+      <button type="button" class="chip" data-region="Europe" aria-pressed="false">Europe</button>
+      <button type="button" class="chip" data-region="Oceania" aria-pressed="false">Oceania</button>
+    </div>
+    <p style="margin:14px 0 20px;font-size:.9rem;color:#5a6b80">60 countries in the atlas · 10 rounds per expedition</p>
+    <button type="button" class="btn" id="btn-start">Begin expedition</button>
+    <p class="best-note" id="best-note"></p>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="screen-quiz" class="card" hidden aria-label="Flag quiz">
+    <div class="scorebar">
+      <div class="box"><span class="l">Round</span><span class="v" id="hud-round">1/10</span></div>
+      <div class="box"><span class="l">Score</span><span class="v" id="hud-score">0</span></div>
+      <div class="box streak"><span class="l">Streak</span><span class="v" id="hud-streak">0</span></div>
+    </div>
+    <div class="flag-stage">
+      <div class="flag-frame" id="flag-frame">
+        <img id="flag-img" src="" alt="Mystery flag to identify" loading="lazy" width="320" height="240">
+        <div class="flag-fallback" id="flag-fallback" hidden aria-hidden="true"></div>
+      </div>
+    </div>
+    <p class="q-label">Which country flies this flag?</p>
+    <div class="choices" id="choices" role="group" aria-label="Answer choices"></div>
+    <div class="feedback" id="feedback" hidden role="status"></div>
+    <div class="next-row"><button type="button" class="btn" id="btn-next" hidden>Next flag →</button></div>
+  </section>
+
+  <!-- END -->
+  <section id="screen-end" class="card center" hidden aria-label="Expedition results">
+    <p style="font:700 .8rem var(--sans);letter-spacing:.18em;text-transform:uppercase;color:#5a6b80">Expedition complete</p>
+    <div class="stamp" id="rank-title">Globetrotter</div>
+    <p id="rank-blurb" style="margin-top:10px;color:#5a6b80;font-size:.92rem"></p>
+    <div class="end-grid">
+      <div class="end-cell"><div class="l">Correct</div><div class="v" id="end-correct">0/10</div></div>
+      <div class="end-cell"><div class="l">Score</div><div class="v" id="end-score">0</div></div>
+      <div class="end-cell"><div class="l">Best streak</div><div class="v" id="end-streak">0</div></div>
+    </div>
+    <p class="best-note" id="end-best"></p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:16px">
+      <button type="button" class="btn" id="btn-replay">Play again</button>
+      <button type="button" class="btn secondary" id="btn-region">Change region</button>
+    </div>
+  </section>
+</main>
+<footer>Flags served by flagcdn.com · capitals per current national designations</footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+/* iso2, name, continent, capital */
+var COUNTRIES = [
+  ["ng","Nigeria","Africa","Abuja"],
+  ["eg","Egypt","Africa","Cairo"],
+  ["za","South Africa","Africa","Pretoria"],
+  ["ke","Kenya","Africa","Nairobi"],
+  ["ma","Morocco","Africa","Rabat"],
+  ["gh","Ghana","Africa","Accra"],
+  ["et","Ethiopia","Africa","Addis Ababa"],
+  ["tz","Tanzania","Africa","Dodoma"],
+  ["dz","Algeria","Africa","Algiers"],
+  ["sn","Senegal","Africa","Dakar"],
+  ["tn","Tunisia","Africa","Tunis"],
+  ["ug","Uganda","Africa","Kampala"],
+  ["us","United States","Americas","Washington, D.C."],
+  ["ca","Canada","Americas","Ottawa"],
+  ["mx","Mexico","Americas","Mexico City"],
+  ["br","Brazil","Americas","Brasilia"],
+  ["ar","Argentina","Americas","Buenos Aires"],
+  ["cl","Chile","Americas","Santiago"],
+  ["co","Colombia","Americas","Bogota"],
+  ["pe","Peru","Americas","Lima"],
+  ["cu","Cuba","Americas","Havana"],
+  ["jm","Jamaica","Americas","Kingston"],
+  ["uy","Uruguay","Americas","Montevideo"],
+  ["ve","Venezuela","Americas","Caracas"],
+  ["jp","Japan","Asia","Tokyo"],
+  ["cn","China","Asia","Beijing"],
+  ["in","India","Asia","New Delhi"],
+  ["kr","South Korea","Asia","Seoul"],
+  ["th","Thailand","Asia","Bangkok"],
+  ["vn","Vietnam","Asia","Hanoi"],
+  ["id","Indonesia","Asia","Jakarta"],
+  ["ph","Philippines","Asia","Manila"],
+  ["sa","Saudi Arabia","Asia","Riyadh"],
+  ["tr","Turkey","Asia","Ankara"],
+  ["ae","United Arab Emirates","Asia","Abu Dhabi"],
+  ["np","Nepal","Asia","Kathmandu"],
+  ["fr","France","Europe","Paris"],
+  ["de","Germany","Europe","Berlin"],
+  ["it","Italy","Europe","Rome"],
+  ["es","Spain","Europe","Madrid"],
+  ["gb","United Kingdom","Europe","London"],
+  ["pt","Portugal","Europe","Lisbon"],
+  ["nl","Netherlands","Europe","Amsterdam"],
+  ["se","Sweden","Europe","Stockholm"],
+  ["no","Norway","Europe","Oslo"],
+  ["ch","Switzerland","Europe","Bern"],
+  ["gr","Greece","Europe","Athens"],
+  ["pl","Poland","Europe","Warsaw"],
+  ["au","Australia","Oceania","Canberra"],
+  ["nz","New Zealand","Oceania","Wellington"],
+  ["fj","Fiji","Oceania","Suva"],
+  ["pg","Papua New Guinea","Oceania","Port Moresby"],
+  ["ws","Samoa","Oceania","Apia"],
+  ["to","Tonga","Oceania","Nuku'alofa"],
+  ["vu","Vanuatu","Oceania","Port Vila"],
+  ["sb","Solomon Islands","Oceania","Honiara"],
+  ["ki","Kiribati","Oceania","South Tarawa"],
+  ["fm","Micronesia","Oceania","Palikir"],
+  ["pw","Palau","Oceania","Ngerulmud"],
+  ["mh","Marshall Islands","Oceania","Majuro"]
+];
+var RANKS = [
+  [10, "Master Cartographer", "Flawless. You could redraw the world map from memory."],
+  [8,  "Globetrotter", "Passport pages full — the atlas holds few secrets from you."],
+  [6,  "Pathfinder", "A sharp eye for stripes and stars. Keep charting."],
+  [4,  "Wayfarer", "You know the landmarks. The back roads come next."],
+  [2,  "Day-Tripper", "A promising start — pack a compass next time."],
+  [0,  "Armchair Explorer", "Every cartographer starts with a single flag."]
+];
+
+var els = {
+  start: document.getElementById('screen-start'),
+  quiz: document.getElementById('screen-quiz'),
+  end: document.getElementById('screen-end'),
+  bestNote: document.getElementById('best-note'),
+  btnStart: document.getElementById('btn-start'),
+  hudRound: document.getElementById('hud-round'),
+  hudScore: document.getElementById('hud-score'),
+  hudStreak: document.getElementById('hud-streak'),
+  flagImg: document.getElementById('flag-img'),
+  flagFallback: document.getElementById('flag-fallback'),
+  choices: document.getElementById('choices'),
+  feedback: document.getElementById('feedback'),
+  btnNext: document.getElementById('btn-next'),
+  rankTitle: document.getElementById('rank-title'),
+  rankBlurb: document.getElementById('rank-blurb'),
+  endCorrect: document.getElementById('end-correct'),
+  endScore: document.getElementById('end-score'),
+  endStreak: document.getElementById('end-streak'),
+  endBest: document.getElementById('end-best'),
+  btnReplay: document.getElementById('btn-replay'),
+  btnRegion: document.getElementById('btn-region')
+};
+
+var S = {
+  region: 'World',
+  rounds: [],
+  idx: 0,
+  score: 0,
+  streak: 0,
+  bestStreak: 0,
+  correct: 0,
+  answered: false
+};
+
+function shuffle(arr){
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+function bestKey(){ return 'fq-best-' + S.region; }
+function getBest(){
+  try { var v = localStorage.getItem(bestKey()); return v ? parseInt(v, 10) : 0; }
+  catch(e){ return 0; }
+}
+function saveBest(v){ try { localStorage.setItem(bestKey(), String(v)); } catch(e){} }
+
+function refreshBestNote(){
+  var b = getBest();
+  els.bestNote.innerHTML = b > 0
+    ? 'Best score for <strong>' + S.region + '</strong>: <strong>' + b + '</strong>'
+    : 'No expeditions logged for ' + S.region + ' yet.';
+}
+
+function buildRounds(){
+  var pool = S.region === 'World'
+    ? COUNTRIES.slice()
+    : COUNTRIES.filter(function(c){ return c[2] === S.region; });
+  var answers = shuffle(pool).slice(0, 10);
+  S.rounds = answers.map(function(ans){
+    var sameCont = COUNTRIES.filter(function(c){ return c[2] === ans[2] && c[0] !== ans[0]; });
+    var distractors = shuffle(sameCont).slice(0, 3);
+    return { ans: ans, options: shuffle([ans].concat(distractors)) };
+  });
+}
+
+function flagUrl(iso){ return 'https://flagcdn.com/w320/' + iso + '.png'; }
+
+function preloadNext(){
+  var nxt = S.rounds[S.idx + 1];
+  if (nxt) { var im = new Image(); im.src = flagUrl(nxt.ans[0]); }
+}
+
+function showScreen(name){
+  els.start.hidden = name !== 'start';
+  els.quiz.hidden = name !== 'quiz';
+  els.end.hidden = name !== 'end';
+}
+
+function renderRound(){
+  var r = S.rounds[S.idx];
+  S.answered = false;
+  els.hudRound.textContent = (S.idx + 1) + '/10';
+  els.hudScore.textContent = String(S.score);
+  els.hudStreak.textContent = String(S.streak);
+  els.feedback.hidden = true;
+  els.feedback.className = 'feedback';
+  els.btnNext.hidden = true;
+  els.flagFallback.hidden = true;
+  els.flagImg.hidden = false;
+  els.flagImg.src = flagUrl(r.ans[0]);
+  els.choices.textContent = '';
+  r.options.forEach(function(opt, i){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'choice';
+    b.setAttribute('data-iso', opt[0]);
+    var k = document.createElement('span');
+    k.className = 'key';
+    k.textContent = String(i + 1);
+    k.setAttribute('aria-hidden', 'true');
+    b.appendChild(k);
+    b.appendChild(document.createTextNode(opt[1]));
+    b.addEventListener('click', function(){ answer(opt, b); });
+    els.choices.appendChild(b);
+  });
+  preloadNext();
+}
+
+function answer(opt, btn){
+  if (S.answered) return;
+  S.answered = true;
+  var r = S.rounds[S.idx];
+  var right = opt[0] === r.ans[0];
+  var buttons = els.choices.querySelectorAll('.choice');
+  buttons.forEach(function(b){
+    b.disabled = true;
+    var iso = b.getAttribute('data-iso');
+    if (iso === r.ans[0]) b.classList.add('correct');
+    else if (b === btn && !right) b.classList.add('wrong');
+    else b.classList.add('dimmed');
+  });
+  if (right) {
+    S.streak++;
+    if (S.streak > S.bestStreak) S.bestStreak = S.streak;
+    S.correct++;
+    var pts = 100 + (S.streak - 1) * 25;
+    S.score += pts;
+    els.feedback.className = 'feedback good';
+    els.feedback.innerHTML = '<strong>Correct! +' + pts + '</strong> — Capital fact: the capital of ' +
+      r.ans[1] + ' is <strong>' + r.ans[3] + '</strong>.';
+  } else {
+    S.streak = 0;
+    els.feedback.className = 'feedback bad';
+    els.feedback.innerHTML = '<strong>Not quite.</strong> That flag belongs to <strong>' + r.ans[1] +
+      '</strong> (capital: ' + r.ans[3] + ').';
+  }
+  els.hudScore.textContent = String(S.score);
+  els.hudStreak.textContent = String(S.streak);
+  els.feedback.hidden = false;
+  els.btnNext.hidden = false;
+  els.btnNext.textContent = S.idx === S.rounds.length - 1 ? 'See results →' : 'Next flag →';
+  els.btnNext.focus();
+}
+
+function nextRound(){
+  if (S.idx >= S.rounds.length - 1) { endGame(); return; }
+  S.idx++;
+  renderRound();
+}
+
+function endGame(){
+  showScreen('end');
+  var rank = RANKS[RANKS.length - 1];
+  for (var i = 0; i < RANKS.length; i++) {
+    if (S.correct >= RANKS[i][0]) { rank = RANKS[i]; break; }
+  }
+  els.rankTitle.textContent = rank[1];
+  els.rankBlurb.textContent = rank[2];
+  els.endCorrect.textContent = S.correct + '/10';
+  els.endScore.textContent = String(S.score);
+  els.endStreak.textContent = String(S.bestStreak);
+  var prev = getBest();
+  if (S.score > prev) {
+    saveBest(S.score);
+    els.endBest.innerHTML = '★ New best score for <strong>' + S.region + '</strong>: <strong>' + S.score + '</strong>';
+  } else {
+    els.endBest.innerHTML = 'Best score for <strong>' + S.region + '</strong>: <strong>' + prev + '</strong>';
+  }
+  els.btnReplay.focus();
+}
+
+function startGame(){
+  S.idx = 0; S.score = 0; S.streak = 0; S.bestStreak = 0; S.correct = 0;
+  buildRounds();
+  showScreen('quiz');
+  renderRound();
+}
+
+/* flag image error fallback: show ISO letters in a styled box */
+els.flagImg.addEventListener('error', function(){
+  var r = S.rounds[S.idx];
+  if (!r) return;
+  els.flagImg.hidden = true;
+  els.flagFallback.textContent = r.ans[0].toUpperCase();
+  els.flagFallback.hidden = false;
+});
+els.flagImg.addEventListener('load', function(){
+  els.flagFallback.hidden = true;
+  els.flagImg.hidden = false;
+});
+
+/* region chips */
+document.querySelectorAll('.chip').forEach(function(chip){
+  chip.addEventListener('click', function(){
+    document.querySelectorAll('.chip').forEach(function(c){ c.setAttribute('aria-pressed', 'false'); });
+    chip.setAttribute('aria-pressed', 'true');
+    S.region = chip.getAttribute('data-region');
+    refreshBestNote();
+  });
+});
+
+els.btnStart.addEventListener('click', startGame);
+els.btnNext.addEventListener('click', nextRound);
+els.btnReplay.addEventListener('click', startGame);
+els.btnRegion.addEventListener('click', function(){
+  showScreen('start');
+  refreshBestNote();
+});
+
+/* keyboard: 1-4 answer, Enter advances */
+document.addEventListener('keydown', function(e){
+  if (els.quiz.hidden) return;
+  if (!S.answered && e.key >= '1' && e.key <= '4') {
+    var i = parseInt(e.key, 10) - 1;
+    var btns = els.choices.querySelectorAll('.choice');
+    if (btns[i]) { e.preventDefault(); btns[i].click(); }
+  } else if (S.answered && (e.key === 'Enter' || e.key === ' ')) {
+    if (document.activeElement !== els.btnNext) { e.preventDefault(); nextRound(); }
+  }
+});
+
+refreshBestNote();
+})();
+</script>
+</body>
+</html>

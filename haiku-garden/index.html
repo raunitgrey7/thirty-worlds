@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Haiku Garden — Generative Poems for Four Seasons</title>
+<meta name="description" content="A quiet corner of the web that composes 5-7-5 haiku from hand-written seasonal lines — petals in spring, fireflies in summer, leaves in autumn, snow in winter.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌸</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#2b2723;
+  --dim:#7a7268;
+  --accent:#b25674;
+  --bg:#f7f2ea;
+  --bg2:#efe6d8;
+  --card:#fbf7f0;
+  --card-line:rgba(43,39,35,.14);
+}
+body.season-summer{
+  --ink:#f0ead8;
+  --dim:#a9a390;
+  --accent:#ffd97a;
+  --bg:#232936;
+  --bg2:#1a1f2a;
+  --card:#2c3342;
+  --card-line:rgba(240,234,216,.16);
+}
+body.season-autumn{
+  --ink:#33261c;
+  --dim:#84705e;
+  --accent:#b0511f;
+  --bg:#f4ead9;
+  --bg2:#ecdcc2;
+  --card:#faf3e6;
+  --card-line:rgba(51,38,28,.14);
+}
+body.season-winter{
+  --ink:#26303a;
+  --dim:#6e7b88;
+  --accent:#4e6f8f;
+  --bg:#e9eef3;
+  --bg2:#dbe4ec;
+  --card:#f4f7fa;
+  --card-line:rgba(38,48,58,.14);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  color:var(--ink);
+  font-family:Inter,system-ui,sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+  background:
+    radial-gradient(1000px 500px at 80% -5%, rgba(255,255,255,.35), transparent 55%),
+    linear-gradient(180deg, var(--bg), var(--bg2));
+  transition:background .6s ease, color .6s ease;
+}
+body.season-summer{
+  background:
+    radial-gradient(1000px 500px at 80% -5%, rgba(255,217,122,.07), transparent 55%),
+    linear-gradient(180deg, var(--bg), var(--bg2));
+}
+canvas#sky{position:fixed;inset:0;z-index:0;pointer-events:none}
+.hub-link{position:fixed;top:14px;left:14px;z-index:1000;padding:8px 14px;border-radius:999px;font:600 13px/1 Inter,system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(8px);background:rgba(15,15,25,.55);color:#fff;border:1px solid rgba(255,255,255,.25)}
+.wrap{position:relative;z-index:1;max-width:640px;margin:0 auto;padding:80px 20px 56px;text-align:center}
+h1{
+  font-family:"Zen Old Mincho",serif;
+  font-weight:600;
+  font-size:clamp(2rem,6vw,3rem);
+  letter-spacing:.14em;
+  margin:0 0 4px;
+}
+.sub{color:var(--dim);font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;margin:0 0 34px}
+/* Season picker */
+.seasons{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:38px}
+button{font-family:inherit;cursor:pointer}
+.season-btn{
+  min-height:44px;
+  padding:10px 18px;
+  border-radius:999px;
+  border:1px solid var(--card-line);
+  background:transparent;
+  color:var(--dim);
+  font-weight:500;
+  font-size:.9rem;
+  letter-spacing:.04em;
+  transition:transform .15s ease, background .2s ease, color .2s ease, border-color .2s ease;
+}
+.season-btn:hover{transform:translateY(-2px)}
+.season-btn[aria-pressed="true"]{
+  background:var(--accent);
+  border-color:var(--accent);
+  color:var(--bg);
+  font-weight:600;
+}
+.season-btn:focus-visible, .act-btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+/* Poem card — washi paper */
+.poem-card{
+  position:relative;
+  border:1px solid var(--card-line);
+  border-radius:6px;
+  padding:52px 26px 44px;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255,255,255,.5), transparent 42%),
+    radial-gradient(circle at 84% 88%, rgba(255,255,255,.28), transparent 46%),
+    repeating-linear-gradient(2deg, transparent 0 7px, rgba(127,110,90,.028) 7px 8px),
+    repeating-linear-gradient(92deg, transparent 0 5px, rgba(127,110,90,.02) 5px 6px),
+    var(--card);
+  box-shadow:0 18px 44px rgba(30,25,20,.14);
+  transition:background-color .6s ease;
+}
+body.season-summer .poem-card{
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255,255,255,.05), transparent 42%),
+    repeating-linear-gradient(2deg, transparent 0 7px, rgba(255,255,255,.02) 7px 8px),
+    var(--card);
+  box-shadow:0 18px 44px rgba(0,0,0,.35);
+}
+.season-tag{
+  position:absolute;top:16px;left:50%;transform:translateX(-50%);
+  font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);
+  font-weight:600;
+}
+.kanji{
+  position:absolute;top:14px;right:16px;
+  font-family:"Zen Old Mincho",serif;
+  font-size:1.5rem;color:var(--accent);opacity:.55;
+}
+.poem{
+  font-family:"Zen Old Mincho",serif;
+  font-size:clamp(1.3rem,4.6vw,1.8rem);
+  line-height:2.05;
+  letter-spacing:.03em;
+  margin:0;
+  transition:opacity .5s ease, transform .5s ease;
+}
+.poem.fading{opacity:0;transform:translateY(6px)}
+.divider{color:var(--ink);opacity:.75;margin:26px auto 6px;display:block;width:min(240px,70%)}
+/* Actions */
+.actions{display:flex;justify-content:center;gap:12px;margin-top:30px;flex-wrap:wrap}
+.act-btn{
+  min-height:44px;
+  padding:11px 22px;
+  border-radius:999px;
+  border:1px solid var(--ink);
+  background:var(--ink);
+  color:var(--bg);
+  font-weight:600;
+  font-size:.88rem;
+  letter-spacing:.03em;
+  transition:transform .15s ease, opacity .15s ease;
+}
+.act-btn:hover{transform:translateY(-2px);opacity:.9}
+.act-btn:active{transform:translateY(0)}
+.act-btn.ghost{background:transparent;color:var(--ink)}
+/* Footnote */
+.footnote{
+  margin-top:58px;
+  text-align:left;
+  border-top:1px solid var(--card-line);
+  padding-top:26px;
+}
+.footnote h2{
+  font-family:"Zen Old Mincho",serif;
+  font-size:1.15rem;
+  font-weight:600;
+  letter-spacing:.08em;
+  margin:0 0 10px;
+}
+.footnote p{color:var(--dim);font-size:.86rem;line-height:1.75;margin:0 0 10px}
+.footnote em{color:var(--ink);font-style:normal;font-weight:600}
+/* Toast */
+.toast{
+  position:fixed;left:50%;bottom:26px;z-index:1200;
+  transform:translate(-50%,16px);opacity:0;pointer-events:none;
+  background:var(--ink);color:var(--bg);
+  padding:10px 20px;border-radius:999px;
+  font-size:.85rem;font-weight:600;
+  transition:transform .25s ease, opacity .25s ease;
+}
+.toast.show{transform:translate(-50%,0);opacity:1}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{transition-duration:.001s !important;animation:none !important}
+  canvas#sky{display:none}
+}
+</style>
+</head>
+<body class="season-spring">
+<a class="hub-link" href="https://thirty-worlds.vercel.app/" aria-label="All thirty sites">← All 30</a>
+<canvas id="sky" aria-hidden="true"></canvas>
+
+<div class="wrap">
+  <header>
+    <h1>Haiku Garden</h1>
+    <p class="sub">generative poems · four seasons</p>
+  </header>
+
+  <main>
+    <nav class="seasons" aria-label="Choose a season">
+      <button class="season-btn" id="btn-spring" type="button" aria-pressed="true">🌸 Spring</button>
+      <button class="season-btn" id="btn-summer" type="button" aria-pressed="false">✨ Summer</button>
+      <button class="season-btn" id="btn-autumn" type="button" aria-pressed="false">🍁 Autumn</button>
+      <button class="season-btn" id="btn-winter" type="button" aria-pressed="false">❄ Winter</button>
+    </nav>
+
+    <article class="poem-card" aria-label="Generated haiku">
+      <span class="season-tag" id="season-tag">Spring</span>
+      <span class="kanji" id="season-kanji" aria-hidden="true">春</span>
+      <p class="poem" id="poem">
+        plum blossoms open<br>
+        the sparrow shakes off the rain<br>
+        mist on the mountain
+      </p>
+      <svg class="divider" viewBox="0 0 300 26" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8 15 C 52 7, 110 20, 158 12 C 206 4, 258 16, 292 10" stroke="currentColor" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+        <path d="M22 19 C 90 13, 170 22, 268 13" stroke="currentColor" stroke-width="1.1" fill="none" stroke-linecap="round" opacity=".38"/>
+        <circle cx="296" cy="9" r="1.6" fill="currentColor" opacity=".5"/>
+      </svg>
+    </article>
+
+    <div class="actions">
+      <button class="act-btn" id="new-btn" type="button">New haiku</button>
+      <button class="act-btn ghost" id="copy-btn" type="button">Copy</button>
+    </div>
+
+    <section class="footnote" aria-labelledby="fn-title">
+      <h2 id="fn-title">What makes a haiku</h2>
+      <p>In English practice, a haiku is three unrhymed lines of <em>5, 7 and 5 syllables</em> — a single breath of poetry. Every haiku carries a <em>kigo</em>, a season word (blossoms, cicadas, frost) that anchors it in time.</p>
+      <p>The best ones also hold a <em>kireji</em>, a cut: two images placed side by side so that the space between them sparks a small surprise. Concrete, present-tense, and about the world rather than the poet — that restraint is the whole art.</p>
+    </section>
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  // Every line below is hand-counted: five-syllable and seven-syllable banks per season.
+  var BANKS = {
+    spring: {
+      five: [
+        'plum blossoms open', 'a warm rain falling', 'the thawing river',
+        'new grass in the field', 'petals on the wind', 'the first swallow comes',
+        'mist on the mountain', 'a green shoot rises', 'soft mud in the lane',
+        'cherry trees in bloom', 'light rain at morning', 'the pond ice has gone'
+      ],
+      seven: [
+        'the sparrow shakes off the rain', 'petals drift across the path',
+        'a frog leaps into the pond', 'buds unfold along the bough',
+        'the plow turns over dark earth', 'swallows stitch the evening sky',
+        'rain taps softly on new leaves', 'the melting snow feeds the stream',
+        'a kite tugs at a child’s hand', 'white blossoms fill the old tree',
+        'the garden smells of wet stone', 'green returns field by slow field'
+      ]
+    },
+    summer: {
+      five: [
+        'the noon cicada', 'heat shimmers the road', 'deep shade of the oak',
+        'a slow dragonfly', 'the river runs low', 'sunflowers at noon',
+        'an afternoon storm', 'the fireflies at dusk', 'ripe peaches hang low',
+        'salt wind from the sea', 'the cool of evening', 'thunder far away'
+      ],
+      seven: [
+        'cicadas ring in the pines', 'the pond holds the whole blue sky',
+        'barefoot children chase the waves', 'a fan stirs the heavy air',
+        'lightning splits the purple dusk', 'the melon cools in the well',
+        'grasshoppers leap from tall grass', 'the moon floats on the still lake',
+        'sweat cools on the farmer’s back', 'fireflies drift over the field',
+        'mosquito hum at the ear'
+      ]
+    },
+    autumn: {
+      five: [
+        'the red maple leaf', 'a chill in the air', 'the harvest moon climbs',
+        'persimmons ripen', 'smoke from burning leaves', 'geese cross the gray sky',
+        'the scarecrow leans west', 'acorns on the roof', 'the long night begins',
+        'frost on the window', 'a thin autumn rain', 'chrysanthemums bloom'
+      ],
+      seven: [
+        'leaves let go of the tall trees', 'the rice fields turn to dry gold',
+        'wind strips the maple branch bare', 'a crow settles on dead wood',
+        'the last cricket sings slower', 'apples heavy in the dusk',
+        'mist settles over the fields', 'the harvest moon lights the road',
+        'woodsmoke drifts between the hills', 'each leaf falls in its own time',
+        'the old dog sleeps in thin sun'
+      ]
+    },
+    winter: {
+      five: [
+        'snow on the pine bough', 'the frozen river', 'a crow in bare trees',
+        'the first snow falling', 'ice on the water', 'the short day darkens',
+        'breath white in the air', 'a lamp in the snow', 'the kettle whistles',
+        'deep drifts by the door', 'the cold moon rises', 'bare branches at dusk'
+      ],
+      seven: [
+        'snow erases every road', 'the world goes quiet and white',
+        'footprints fill with falling snow', 'the pond wears a lid of ice',
+        'wind rattles the paper door', 'one crow calls across the field',
+        'the stove ticks in the dark house', 'icicles catch the low sun',
+        'stars sharpen in the cold air', 'snow bends the bamboo lower',
+        'the quilt holds the shape of sleep'
+      ]
+    }
+  };
+
+  var SEASON_META = {
+    spring: { label: 'Spring', kanji: '春' },
+    summer: { label: 'Summer', kanji: '夏' },
+    autumn: { label: 'Autumn', kanji: '秋' },
+    winter: { label: 'Winter', kanji: '冬' }
+  };
+
+  var season = 'spring';
+  var lastKey = '';
+  var currentLines = ['plum blossoms open', 'the sparrow shakes off the rain', 'mist on the mountain'];
+  var poemEl = document.getElementById('poem');
+  var tagEl = document.getElementById('season-tag');
+  var kanjiEl = document.getElementById('season-kanji');
+  var toast = document.getElementById('toast');
+  var toastTimer = null;
+  var fadeTimer = null;
+
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  // ---------- Haiku generation ----------
+  function rand(n) { return Math.floor(Math.random() * n); }
+
+  function composeHaiku() {
+    var bank = BANKS[season];
+    var i, j, k, key, tries = 0;
+    do {
+      i = rand(bank.five.length);
+      j = rand(bank.seven.length);
+      do { k = rand(bank.five.length); } while (k === i);
+      key = i + '-' + j + '-' + k;
+      tries++;
+    } while (key === lastKey && tries < 12);
+    lastKey = key;
+    return [bank.five[i], bank.seven[j], bank.five[k]];
+  }
+
+  function renderPoem(lines) {
+    poemEl.textContent = '';
+    lines.forEach(function (line, idx) {
+      poemEl.appendChild(document.createTextNode(line));
+      if (idx < lines.length - 1) poemEl.appendChild(document.createElement('br'));
+    });
+  }
+
+  function newHaiku() {
+    var lines = composeHaiku();
+    currentLines = lines;
+    if (reduceMotion.matches) {
+      renderPoem(lines);
+      return;
+    }
+    poemEl.classList.add('fading');
+    if (fadeTimer) window.clearTimeout(fadeTimer);
+    fadeTimer = window.setTimeout(function () {
+      renderPoem(lines);
+      poemEl.classList.remove('fading');
+    }, 480);
+  }
+
+  // ---------- Season switching ----------
+  var seasonButtons = {
+    spring: document.getElementById('btn-spring'),
+    summer: document.getElementById('btn-summer'),
+    autumn: document.getElementById('btn-autumn'),
+    winter: document.getElementById('btn-winter')
+  };
+
+  function setSeason(s) {
+    if (season === s) return;
+    season = s;
+    lastKey = '';
+    Object.keys(seasonButtons).forEach(function (k) {
+      seasonButtons[k].setAttribute('aria-pressed', k === s ? 'true' : 'false');
+    });
+    document.body.className = 'season-' + s;
+    tagEl.textContent = SEASON_META[s].label;
+    kanjiEl.textContent = SEASON_META[s].kanji;
+    buildParticles();
+    newHaiku();
+  }
+
+  Object.keys(seasonButtons).forEach(function (s) {
+    seasonButtons[s].addEventListener('click', function () { setSeason(s); });
+  });
+
+  document.getElementById('new-btn').addEventListener('click', newHaiku);
+
+  // ---------- Copy ----------
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    if (toastTimer) window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(function () { toast.classList.remove('show'); }, 1600);
+  }
+
+  document.getElementById('copy-btn').addEventListener('click', function () {
+    var text = currentLines.join('\n');
+    var ok = function () { showToast('Haiku copied'); };
+    var fail = function () { showToast('Copy failed'); };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(ok, fail);
+      } else {
+        fail();
+      }
+    } catch (e) { fail(); }
+  });
+
+  // ---------- Particles ----------
+  var canvas = document.getElementById('sky');
+  var ctx = canvas.getContext('2d');
+  var particles = [];
+  var rafId = null;
+  var running = false;
+  var W = 0, H = 0, DPR = 1;
+
+  function resize() {
+    DPR = Math.min(2, window.devicePixelRatio || 1);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = Math.floor(W * DPR);
+    canvas.height = Math.floor(H * DPR);
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+
+  var PART_CFG = {
+    spring: { count: 30, colors: ['#f2b3c5', '#e79ab1', '#f7cdd8', '#e8a7ba'] },
+    summer: { count: 24, colors: ['#ffd97a', '#ffe9ae', '#ffce5c'] },
+    autumn: { count: 28, colors: ['#c65f2e', '#a4451f', '#d8842f', '#8f5b23'] },
+    winter: { count: 42, colors: ['#ffffff', '#eef4fa', '#dfe9f2'] }
+  };
+
+  function makeParticle(fresh) {
+    var cfg = PART_CFG[season];
+    var p = {
+      x: Math.random() * W,
+      y: fresh ? Math.random() * H : -12,
+      color: cfg.colors[rand(cfg.colors.length)],
+      phase: Math.random() * Math.PI * 2,
+      spin: (Math.random() - 0.5) * 0.06
+    };
+    if (season === 'spring') {
+      p.size = 4 + Math.random() * 4;
+      p.vy = 0.35 + Math.random() * 0.6;
+      p.sway = 0.6 + Math.random() * 0.9;
+      p.rot = Math.random() * Math.PI;
+    } else if (season === 'summer') {
+      p.size = 1.4 + Math.random() * 1.8;
+      p.vx = (Math.random() - 0.5) * 0.35;
+      p.vy = (Math.random() - 0.5) * 0.3;
+      p.pulse = 0.015 + Math.random() * 0.02;
+    } else if (season === 'autumn') {
+      p.size = 5 + Math.random() * 5;
+      p.vy = 0.6 + Math.random() * 0.9;
+      p.sway = 0.9 + Math.random() * 1.2;
+      p.rot = Math.random() * Math.PI;
+      p.spin = (Math.random() - 0.5) * 0.12;
+    } else {
+      p.size = 1.2 + Math.random() * 2.4;
+      p.vy = 0.4 + Math.random() * 0.8;
+      p.sway = 0.3 + Math.random() * 0.6;
+    }
+    return p;
+  }
+
+  function buildParticles() {
+    particles = [];
+    if (reduceMotion.matches) return;
+    var cfg = PART_CFG[season];
+    for (var i = 0; i < cfg.count; i++) particles.push(makeParticle(true));
+  }
+
+  function stepParticle(p) {
+    p.phase += 0.02;
+    if (season === 'summer') {
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.x < -10) p.x = W + 10;
+      if (p.x > W + 10) p.x = -10;
+      if (p.y < -10) p.y = H + 10;
+      if (p.y > H + 10) p.y = -10;
+    } else {
+      p.y += p.vy;
+      p.x += Math.sin(p.phase) * p.sway * 0.4;
+      if (p.rot !== undefined) p.rot += p.spin;
+      if (p.y > H + 14) {
+        var np = makeParticle(false);
+        for (var k in np) if (Object.prototype.hasOwnProperty.call(np, k)) p[k] = np[k];
+      }
+      if (p.x < -16) p.x = W + 14;
+      if (p.x > W + 16) p.x = -14;
+    }
+  }
+
+  function drawParticle(p) {
+    ctx.save();
+    if (season === 'spring') {
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = 0.8;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, p.size, p.size * 0.55, 0, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (season === 'summer') {
+      var glow = 0.35 + 0.65 * Math.abs(Math.sin(p.phase * (p.pulse * 60)));
+      ctx.globalAlpha = glow;
+      ctx.fillStyle = p.color;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (season === 'autumn') {
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = 0.85;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, p.size, p.size * 0.45, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(60,35,15,.35)';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(-p.size, 0);
+      ctx.lineTo(p.size, 0);
+      ctx.stroke();
+    } else {
+      ctx.globalAlpha = 0.9;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function loop() {
+    if (!running) return;
+    ctx.clearRect(0, 0, W, H);
+    for (var i = 0; i < particles.length; i++) {
+      stepParticle(particles[i]);
+      drawParticle(particles[i]);
+    }
+    rafId = window.requestAnimationFrame(loop);
+  }
+
+  function startLoop() {
+    if (running || reduceMotion.matches) return;
+    running = true;
+    rafId = window.requestAnimationFrame(loop);
+  }
+
+  function stopLoop() {
+    running = false;
+    if (rafId) window.cancelAnimationFrame(rafId);
+    rafId = null;
+  }
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) stopLoop();
+    else startLoop();
+  });
+
+  function onMotionPrefChange() {
+    if (reduceMotion.matches) {
+      stopLoop();
+      ctx.clearRect(0, 0, W, H);
+      particles = [];
+    } else {
+      buildParticles();
+      startLoop();
+    }
+  }
+  if (typeof reduceMotion.addEventListener === 'function') {
+    reduceMotion.addEventListener('change', onMotionPrefChange);
+  }
+
+  window.addEventListener('resize', resize);
+
+  // init
+  resize();
+  buildParticles();
+  startLoop();
+})();
+</script>
+</body>
+</html>

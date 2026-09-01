@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mind Gym — Gentle Brain Training</title>
+<meta name="description" content="A calm, friendly brain gym for seniors: real trivia questions, number recall practice, and odd-one-out puzzles — big readable text, warm colors, and absolutely no time pressure.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#faf4e6;
+    --card:#fffdf7;
+    --ink:#2b2620;
+    --ink-soft:#5c5344;
+    --rust:#9c4a2f;
+    --rust-deep:#7c3a24;
+    --green:#2f6b3a;
+    --green-soft:#e4efe0;
+    --red-soft:#f6e2dc;
+    --line:#d8cbb2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{font-size:20px}
+  html,body{max-width:100%;overflow-x:hidden}
+  body{
+    font-family:"Atkinson Hyperlegible",system-ui,sans-serif;
+    background:var(--cream);
+    color:var(--ink);
+    line-height:1.6;
+    min-height:100vh;
+    padding-bottom:3rem;
+  }
+  .hub-link{position:fixed;top:14px;left:14px;z-index:1000;padding:8px 14px;border-radius:999px;font:600 13px/1 Inter,system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(8px);background:rgba(15,15,25,.55);color:#fff;border:1px solid rgba(255,255,255,.25)}
+  .hub-link:focus-visible{outline:4px solid var(--ink);outline-offset:3px}
+
+  header{
+    text-align:center;
+    padding:4.2rem 1rem 0.5rem;
+    max-width:52rem;
+    margin:0 auto;
+  }
+  h1{font-size:2.1rem;font-weight:700;color:var(--rust);letter-spacing:.02em}
+  .tagline{color:var(--ink-soft);font-size:1.05rem;margin-top:.4rem}
+
+  .size-control{
+    display:flex;justify-content:center;align-items:center;gap:.6rem;
+    margin:1rem auto .4rem;
+    flex-wrap:wrap;
+  }
+  .size-control span{font-size:.95rem;color:var(--ink-soft)}
+  .size-btn{
+    min-width:56px;min-height:52px;
+    font-family:inherit;
+    font-size:1.15rem;font-weight:700;
+    color:var(--ink);
+    background:var(--card);
+    border:2px solid var(--ink);
+    border-radius:12px;
+    cursor:pointer;
+  }
+  .size-btn:hover{background:#f1e8d4}
+  .size-btn:disabled{opacity:.4;cursor:default}
+
+  .tabs{
+    display:flex;justify-content:center;gap:.6rem;flex-wrap:wrap;
+    max-width:52rem;
+    margin:1.2rem auto 0;
+    padding:0 1rem;
+  }
+  .tab{
+    flex:1 1 10rem;
+    min-height:64px;
+    font-family:inherit;
+    font-size:1.1rem;font-weight:700;
+    padding:.6rem 1rem;
+    border:2px solid var(--ink);
+    border-radius:14px 14px 0 0;
+    background:#efe5cd;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .tab[aria-selected="true"]{
+    background:var(--rust);
+    border-color:var(--rust-deep);
+    color:#fff;
+  }
+  .tab:focus-visible,.size-btn:focus-visible,.choice:focus-visible,.action-btn:focus-visible,#recallInput:focus-visible{
+    outline:4px solid var(--ink);outline-offset:3px;
+  }
+
+  .panel{
+    max-width:52rem;
+    margin:0 auto;
+    background:var(--card);
+    border:2px solid var(--line);
+    border-radius:0 0 18px 18px;
+    padding:clamp(1.2rem,4vw,2.4rem);
+  }
+  .score-line{
+    font-size:1rem;
+    color:var(--ink-soft);
+    border-bottom:1px solid var(--line);
+    padding-bottom:.8rem;
+    margin-bottom:1.2rem;
+  }
+  .prompt{font-size:1.35rem;font-weight:700;margin-bottom:1.2rem}
+  .choices{display:grid;grid-template-columns:1fr;gap:.8rem}
+  @media(min-width:640px){.choices{grid-template-columns:1fr 1fr}}
+  .choice{
+    min-height:64px;
+    font-family:inherit;
+    font-size:1.15rem;font-weight:700;
+    text-align:left;
+    padding:.8rem 1.1rem;
+    background:var(--cream);
+    color:var(--ink);
+    border:2px solid var(--ink);
+    border-radius:14px;
+    cursor:pointer;
+    transition:transform .15s ease;
+  }
+  .choice:hover{transform:translateY(-2px);background:#f3ead6}
+  .choice:disabled{cursor:default;transform:none}
+  .choice.correct{background:var(--green);border-color:var(--green);color:#fff}
+  .choice.wrong{background:var(--red-soft);border-color:var(--rust);color:var(--rust-deep)}
+  .feedback{
+    margin-top:1.2rem;
+    font-size:1.1rem;
+    padding:1rem 1.2rem;
+    border-radius:14px;
+    border:2px solid transparent;
+    min-height:3.2rem;
+  }
+  .feedback.good{background:var(--green-soft);border-color:var(--green);color:#1d3f24}
+  .feedback.kind{background:#f8ecd9;border-color:var(--rust);color:var(--rust-deep)}
+  .action-btn{
+    display:inline-block;
+    margin-top:1.2rem;
+    min-height:60px;
+    font-family:inherit;
+    font-size:1.15rem;font-weight:700;
+    padding:.7rem 1.8rem;
+    background:var(--rust);
+    color:#fff;
+    border:2px solid var(--rust-deep);
+    border-radius:14px;
+    cursor:pointer;
+  }
+  .action-btn:hover{background:var(--rust-deep)}
+  .action-btn.quiet{background:var(--card);color:var(--ink);border-color:var(--ink)}
+  .action-btn.quiet:hover{background:#f1e8d4}
+
+  .big-number{
+    font-size:clamp(2.6rem,10vw,4rem);
+    font-weight:700;
+    letter-spacing:.18em;
+    text-align:center;
+    padding:1.4rem .5rem;
+    color:var(--rust-deep);
+  }
+  .recall-note{text-align:center;color:var(--ink-soft);font-size:1.05rem}
+  #recallInput{
+    display:block;
+    width:100%;
+    max-width:22rem;
+    margin:0 auto;
+    font-family:inherit;
+    font-size:1.8rem;
+    font-weight:700;
+    letter-spacing:.15em;
+    text-align:center;
+    padding:.7rem 1rem;
+    border:2px solid var(--ink);
+    border-radius:14px;
+    background:var(--cream);
+    color:var(--ink);
+    min-height:64px;
+  }
+  .center{text-align:center}
+  .summary{font-size:1.2rem;line-height:1.8}
+  [hidden]{display:none!important}
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+<a class="hub-link" href="https://thirty-worlds.vercel.app/" aria-label="All thirty sites">← All 30</a>
+
+<header>
+  <h1>🧠 Mind Gym</h1>
+  <p class="tagline">A gentle daily workout for your wonderful brain. Take all the time you like.</p>
+  <div class="size-control">
+    <button type="button" class="size-btn" id="sizeDown" aria-label="Make text smaller">A−</button>
+    <span id="sizeLabel" aria-live="polite">Text size 1 of 5</span>
+    <button type="button" class="size-btn" id="sizeUp" aria-label="Make text larger">A+</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Choose an activity">
+  <button type="button" class="tab" id="tab-trivia" role="tab" aria-selected="true" aria-controls="panel-trivia">💡 Trivia</button>
+  <button type="button" class="tab" id="tab-recall" role="tab" aria-selected="false" aria-controls="panel-recall">🔢 Number Recall</button>
+  <button type="button" class="tab" id="tab-odd" role="tab" aria-selected="false" aria-controls="panel-odd">🔍 Odd One Out</button>
+</nav>
+
+<main>
+  <!-- ===== TRIVIA ===== -->
+  <section class="panel" id="panel-trivia" role="tabpanel" aria-labelledby="tab-trivia">
+    <p class="score-line" id="triviaScore">Question 1 of 20 · 0 correct so far</p>
+    <div id="triviaPlay">
+      <p class="prompt" id="triviaQ"></p>
+      <div class="choices" id="triviaChoices"></div>
+      <div class="feedback" id="triviaFeedback" aria-live="polite"></div>
+      <button type="button" class="action-btn" id="triviaNext" hidden>Next question →</button>
+    </div>
+    <div id="triviaDone" hidden>
+      <p class="prompt">That's all twenty questions — well done for finishing!</p>
+      <p class="summary" id="triviaSummary"></p>
+      <button type="button" class="action-btn" id="triviaRestart">Play the quiz again</button>
+    </div>
+  </section>
+
+  <!-- ===== NUMBER RECALL ===== -->
+  <section class="panel" id="panel-recall" role="tabpanel" aria-labelledby="tab-recall" hidden>
+    <p class="score-line" id="recallScore">Rounds remembered: 0 · Longest number so far: — </p>
+    <div id="recallIdle">
+      <p class="prompt">I will show you a number for a few seconds. When it disappears, type it back from memory.</p>
+      <p class="summary">We will start with 4 digits. Each time you remember one, the next number grows a little longer — up to 7 digits. If one slips away, we simply go one step shorter. No rush, ever.</p>
+      <div class="center"><button type="button" class="action-btn" id="recallStart">Show me a number</button></div>
+    </div>
+    <div id="recallShow" hidden>
+      <p class="recall-note" id="recallCountdown">Memorize it…</p>
+      <div class="big-number" id="recallNumber" aria-live="polite"></div>
+    </div>
+    <div id="recallAsk" hidden>
+      <p class="prompt center">What was the number?</p>
+      <input id="recallInput" inputmode="numeric" autocomplete="off" aria-label="Type the number you remember">
+      <div class="center"><button type="button" class="action-btn" id="recallCheck">Check my answer</button></div>
+    </div>
+    <div id="recallResult" hidden>
+      <div class="feedback" id="recallFeedback" aria-live="polite"></div>
+      <div class="center"><button type="button" class="action-btn" id="recallAgain">Try another number</button></div>
+    </div>
+  </section>
+
+  <!-- ===== ODD ONE OUT ===== -->
+  <section class="panel" id="panel-odd" role="tabpanel" aria-labelledby="tab-odd" hidden>
+    <p class="score-line" id="oddScore">Round 1 of 15 · 0 spotted so far</p>
+    <div id="oddPlay">
+      <p class="prompt">Which one of these does not belong with the others?</p>
+      <div class="choices" id="oddChoices"></div>
+      <div class="feedback" id="oddFeedback" aria-live="polite"></div>
+      <button type="button" class="action-btn" id="oddNext" hidden>Next round →</button>
+    </div>
+    <div id="oddDone" hidden>
+      <p class="prompt">All fifteen rounds complete — a fine bit of detective work!</p>
+      <p class="summary" id="oddSummary"></p>
+      <button type="button" class="action-btn" id="oddRestart">Play again with fresh order</button>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- Text size control ----------
+  var SIZES = [20, 22, 24, 26, 28];
+  var sizeIdx = 0;
+  try {
+    var saved = window.localStorage.getItem("mindgym-size");
+    if (saved !== null) {
+      var n = parseInt(saved, 10);
+      if (n >= 0 && n < SIZES.length) { sizeIdx = n; }
+    }
+  } catch(e){}
+  var sizeDown = document.getElementById("sizeDown");
+  var sizeUp = document.getElementById("sizeUp");
+  var sizeLabel = document.getElementById("sizeLabel");
+  function applySize(){
+    document.documentElement.style.fontSize = SIZES[sizeIdx] + "px";
+    sizeLabel.textContent = "Text size " + (sizeIdx + 1) + " of " + SIZES.length;
+    sizeDown.disabled = sizeIdx === 0;
+    sizeUp.disabled = sizeIdx === SIZES.length - 1;
+    try { window.localStorage.setItem("mindgym-size", String(sizeIdx)); } catch(e){}
+  }
+  sizeDown.addEventListener("click", function(){ if (sizeIdx > 0) { sizeIdx -= 1; applySize(); } });
+  sizeUp.addEventListener("click", function(){ if (sizeIdx < SIZES.length - 1) { sizeIdx += 1; applySize(); } });
+  applySize();
+
+  // ---------- Tabs ----------
+  var tabs = [
+    { tab: document.getElementById("tab-trivia"), panel: document.getElementById("panel-trivia") },
+    { tab: document.getElementById("tab-recall"), panel: document.getElementById("panel-recall") },
+    { tab: document.getElementById("tab-odd"),    panel: document.getElementById("panel-odd") }
+  ];
+  function selectTab(idx){
+    tabs.forEach(function(t, i){
+      t.tab.setAttribute("aria-selected", i === idx ? "true" : "false");
+      t.panel.hidden = i !== idx;
+    });
+  }
+  tabs.forEach(function(t, i){
+    t.tab.addEventListener("click", function(){ selectTab(i); });
+    t.tab.addEventListener("keydown", function(e){
+      if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+        e.preventDefault();
+        var next = e.key === "ArrowRight" ? (i + 1) % tabs.length : (i + tabs.length - 1) % tabs.length;
+        selectTab(next);
+        tabs[next].tab.focus();
+      }
+    });
+  });
+
+  function shuffle(arr){
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+    }
+    return arr;
+  }
+
+  // ---------- TRIVIA ----------
+  var TRIVIA = [
+    { q:"Which planet is known as the Red Planet?", opts:["Mars","Jupiter","Venus","Saturn"], a:0,
+      why:"Mars looks red because its soil is full of rusty iron dust." },
+    { q:"Who painted the Mona Lisa?", opts:["Claude Monet","Leonardo da Vinci","Vincent van Gogh","Pablo Picasso"], a:1,
+      why:"Leonardo da Vinci painted her in the early 1500s, and she now hangs in the Louvre in Paris." },
+    { q:"What is the largest ocean on Earth?", opts:["Atlantic Ocean","Indian Ocean","Pacific Ocean","Arctic Ocean"], a:2,
+      why:"The Pacific is so vast it covers more area than all the world's land put together." },
+    { q:"How many strings does a standard violin have?", opts:["Three","Four","Five","Six"], a:1,
+      why:"A violin has four strings, tuned to the notes G, D, A and E." },
+    { q:"Which country gave the Statue of Liberty to the United States?", opts:["England","Spain","France","Italy"], a:2,
+      why:"France gave the statue in 1886 as a gift of friendship between the two nations." },
+    { q:"What do bees collect from flowers to make honey?", opts:["Nectar","Morning dew","Seeds","Perfume"], a:0,
+      why:"Bees sip sweet nectar from blossoms and carry it home to the hive to become honey." },
+    { q:"Who composed the piano piece known as the 'Moonlight Sonata'?", opts:["Mozart","Bach","Chopin","Beethoven"], a:3,
+      why:"Ludwig van Beethoven wrote it in 1801, and it is still one of the world's best-loved piano pieces." },
+    { q:"What is the capital city of Australia?", opts:["Sydney","Canberra","Melbourne","Perth"], a:1,
+      why:"Canberra was purpose-built as the capital — a friendly compromise between rivals Sydney and Melbourne." },
+    { q:"Which bird is famous for spreading a magnificent fan of tail feathers?", opts:["Ostrich","Swan","Peacock","Flamingo"], a:2,
+      why:"The male peacock fans out more than a hundred shimmering feathers to impress." },
+    { q:"In which decade did people first walk on the Moon?", opts:["The 1950s","The 1960s","The 1970s","The 1980s"], a:1,
+      why:"Apollo 11 landed in July 1969, when Neil Armstrong took his famous first step." },
+    { q:"Which river is usually listed as the longest in the world?", opts:["The Amazon","The Mississippi","The Nile","The Danube"], a:2,
+      why:"The Nile flows about 4,100 miles through northeastern Africa to the Mediterranean Sea." },
+    { q:"Which metal is liquid at ordinary room temperature?", opts:["Mercury","Gold","Copper","Tin"], a:0,
+      why:"Mercury stays liquid at room temperature, which is why old thermometers used it." },
+    { q:"Which musical instrument has 88 keys?", opts:["Accordion","Church organ","Piano","Harpsichord"], a:2,
+      why:"A full-size piano has 52 white keys and 36 black keys — 88 in all." },
+    { q:"What kind of animal is a Dalmatian?", opts:["A cat","A horse","A rabbit","A dog"], a:3,
+      why:"The Dalmatian is a dog breed famous for its white coat covered in black spots." },
+    { q:"How many arms does an octopus have?", opts:["Six","Eight","Ten","Twelve"], a:1,
+      why:"An octopus has eight arms — and each one can taste whatever it touches." },
+    { q:"Who was Britain's Prime Minister for most of the Second World War?", opts:["Winston Churchill","Neville Chamberlain","Clement Attlee","Harold Wilson"], a:0,
+      why:"Winston Churchill led Britain from 1940 to 1945, famous for his rousing wartime speeches." },
+    { q:"A falling apple is said to have inspired which scientist's ideas about gravity?", opts:["Albert Einstein","Isaac Newton","Galileo Galilei","Charles Darwin"], a:1,
+      why:"Isaac Newton said that watching an apple fall set him wondering why things drop toward the Earth." },
+    { q:"What is another name for the Northern Lights?", opts:["Aurora Borealis","The Midnight Sun","The Zodiac Glow","The Polar Halo"], a:0,
+      why:"Aurora Borealis is the shimmering glow seen in northern skies when particles from the sun meet our atmosphere." },
+    { q:"What is the largest animal that lives on land?", opts:["Rhinoceros","Giraffe","African elephant","Hippopotamus"], a:2,
+      why:"An African elephant can weigh over six tonnes — heavier than three motor cars." },
+    { q:"In the famous carol, how many days of Christmas are there?", opts:["Seven","Ten","Twelve","Fourteen"], a:2,
+      why:"'The Twelve Days of Christmas' counts gifts from a partridge in a pear tree to twelve drummers drumming." }
+  ];
+
+  var KIND_RIGHT = ["Well done — that's exactly right!", "Splendid! You knew it.", "Quite right — lovely work.", "Yes indeed — well remembered!"];
+  var KIND_WRONG = ["Good try — these can be tricky.", "So close — you'll have the next one.", "A fine guess — here's the answer.", "Not quite, but that's how we learn."];
+
+  var trIdx = 0, trCorrect = 0, trAnswered = false;
+  var triviaQ = document.getElementById("triviaQ");
+  var triviaChoices = document.getElementById("triviaChoices");
+  var triviaFeedback = document.getElementById("triviaFeedback");
+  var triviaNext = document.getElementById("triviaNext");
+  var triviaScore = document.getElementById("triviaScore");
+  var triviaPlay = document.getElementById("triviaPlay");
+  var triviaDone = document.getElementById("triviaDone");
+
+  function showTrivia(){
+    var item = TRIVIA[trIdx];
+    trAnswered = false;
+    triviaScore.textContent = "Question " + (trIdx + 1) + " of " + TRIVIA.length + " · " + trCorrect + " correct so far";
+    triviaQ.textContent = item.q;
+    triviaFeedback.textContent = "";
+    triviaFeedback.className = "feedback";
+    triviaNext.hidden = true;
+    triviaChoices.innerHTML = "";
+    item.opts.forEach(function(opt, i){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "choice";
+      b.textContent = opt;
+      b.addEventListener("click", function(){ answerTrivia(b, i); });
+      triviaChoices.appendChild(b);
+    });
+  }
+
+  function answerTrivia(btn, i){
+    if (trAnswered) { return; }
+    trAnswered = true;
+    var item = TRIVIA[trIdx];
+    var buttons = triviaChoices.querySelectorAll(".choice");
+    for (var k = 0; k < buttons.length; k++) { buttons[k].disabled = true; }
+    buttons[item.a].classList.add("correct");
+    if (i === item.a) {
+      trCorrect += 1;
+      triviaFeedback.className = "feedback good";
+      triviaFeedback.textContent = KIND_RIGHT[trIdx % KIND_RIGHT.length] + " " + item.why;
+    } else {
+      btn.classList.add("wrong");
+      triviaFeedback.className = "feedback kind";
+      triviaFeedback.textContent = KIND_WRONG[trIdx % KIND_WRONG.length] + " The answer is " + item.opts[item.a] + ". " + item.why;
+    }
+    triviaScore.textContent = "Question " + (trIdx + 1) + " of " + TRIVIA.length + " · " + trCorrect + " correct so far";
+    triviaNext.hidden = false;
+    triviaNext.textContent = trIdx === TRIVIA.length - 1 ? "See my results →" : "Next question →";
+  }
+
+  triviaNext.addEventListener("click", function(){
+    trIdx += 1;
+    if (trIdx >= TRIVIA.length) {
+      triviaPlay.hidden = true;
+      triviaDone.hidden = false;
+      var pct = Math.round((trCorrect / TRIVIA.length) * 100);
+      var line;
+      if (trCorrect >= 17) { line = "A remarkable memory — you should be setting the questions!"; }
+      else if (trCorrect >= 12) { line = "A really strong showing. Your brain is in fine form today."; }
+      else if (trCorrect >= 7) { line = "A solid effort — and every question you missed is now one you know."; }
+      else { line = "Thank you for playing every round. The score matters far less than the exercise."; }
+      document.getElementById("triviaSummary").textContent =
+        "You answered " + trCorrect + " of " + TRIVIA.length + " correctly (" + pct + "%). " + line;
+      triviaScore.textContent = "Quiz complete · " + trCorrect + " of " + TRIVIA.length + " correct";
+    } else {
+      showTrivia();
+    }
+  });
+  document.getElementById("triviaRestart").addEventListener("click", function(){
+    trIdx = 0; trCorrect = 0;
+    triviaDone.hidden = true;
+    triviaPlay.hidden = false;
+    showTrivia();
+  });
+  showTrivia();
+
+  // ---------- NUMBER RECALL ----------
+  var recallDigits = 4;
+  var recallWins = 0;
+  var recallBest = 0;
+  var recallTarget = "";
+  var recallTimer = null;
+
+  var recallScore = document.getElementById("recallScore");
+  var recallIdle = document.getElementById("recallIdle");
+  var recallShow = document.getElementById("recallShow");
+  var recallAsk = document.getElementById("recallAsk");
+  var recallResult = document.getElementById("recallResult");
+  var recallNumber = document.getElementById("recallNumber");
+  var recallCountdown = document.getElementById("recallCountdown");
+  var recallInput = document.getElementById("recallInput");
+  var recallFeedback = document.getElementById("recallFeedback");
+
+  function updateRecallScore(){
+    recallScore.textContent = "Rounds remembered: " + recallWins +
+      " · Longest number so far: " + (recallBest ? recallBest + " digits" : "—");
+  }
+
+  function makeNumber(n){
+    var s = String(Math.floor(Math.random() * 9) + 1);
+    for (var i = 1; i < n; i++) { s += String(Math.floor(Math.random() * 10)); }
+    return s;
+  }
+
+  function recallPhase(phase){
+    recallIdle.hidden = phase !== "idle";
+    recallShow.hidden = phase !== "show";
+    recallAsk.hidden = phase !== "ask";
+    recallResult.hidden = phase !== "result";
+  }
+
+  function startRecallRound(){
+    recallTarget = makeNumber(recallDigits);
+    recallNumber.textContent = recallTarget;
+    recallCountdown.textContent = "Memorize this " + recallDigits + "-digit number…";
+    recallPhase("show");
+    var secondsLeft = 3;
+    if (recallTimer) { clearInterval(recallTimer); }
+    recallTimer = setInterval(function(){
+      secondsLeft -= 1;
+      if (secondsLeft > 0) {
+        recallCountdown.textContent = "Hiding in " + secondsLeft + "…";
+      } else {
+        clearInterval(recallTimer);
+        recallTimer = null;
+        recallNumber.textContent = "• • • •";
+        recallInput.value = "";
+        recallPhase("ask");
+        try { recallInput.focus(); } catch(e){}
+      }
+    }, 1000);
+  }
+
+  function checkRecall(){
+    var guess = recallInput.value.replace(/\D/g, "");
+    if (!guess) {
+      recallInput.value = "";
+      try { recallInput.focus(); } catch(e){}
+      return;
+    }
+    if (guess === recallTarget) {
+      recallWins += 1;
+      if (recallDigits > recallBest) { recallBest = recallDigits; }
+      recallFeedback.className = "feedback good";
+      if (recallDigits < 7) {
+        recallFeedback.textContent = "That's right — " + recallTarget + "! Wonderful memory. The next one grows to " + (recallDigits + 1) + " digits.";
+        recallDigits += 1;
+      } else {
+        recallFeedback.textContent = "That's right — " + recallTarget + "! Seven digits is a phone number — a truly excellent memory.";
+      }
+    } else {
+      recallFeedback.className = "feedback kind";
+      if (recallDigits > 4) {
+        recallFeedback.textContent = "Good try — the number was " + recallTarget + ". No matter at all; we'll ease back to " + (recallDigits - 1) + " digits and build up again.";
+        recallDigits -= 1;
+      } else {
+        recallFeedback.textContent = "Good try — the number was " + recallTarget + ". Four digits takes practice; another one is ready whenever you are.";
+      }
+    }
+    updateRecallScore();
+    recallPhase("result");
+  }
+
+  document.getElementById("recallStart").addEventListener("click", startRecallRound);
+  document.getElementById("recallAgain").addEventListener("click", startRecallRound);
+  document.getElementById("recallCheck").addEventListener("click", checkRecall);
+  recallInput.addEventListener("keydown", function(e){
+    if (e.key === "Enter") { e.preventDefault(); checkRecall(); }
+  });
+  updateRecallScore();
+
+  // ---------- ODD ONE OUT ----------
+  var ODD_SETS = [
+    { words:["Rose","Tulip","Oak","Daisy"], odd:"Oak", why:"An oak is a tree — the others are flowers." },
+    { words:["Copper","Iron","Granite","Silver"], odd:"Granite", why:"Granite is a rock — the others are metals." },
+    { words:["Trout","Salmon","Dolphin","Cod"], odd:"Dolphin", why:"A dolphin is a mammal that breathes air — the others are fish." },
+    { words:["Paris","London","Brazil","Rome"], odd:"Brazil", why:"Brazil is a country — the others are capital cities." },
+    { words:["Violin","Cello","Trumpet","Harp"], odd:"Trumpet", why:"A trumpet is a brass instrument — the others have strings." },
+    { words:["Breakfast","Lunch","Kitchen","Dinner"], odd:"Kitchen", why:"A kitchen is a room — the others are meals." },
+    { words:["Earth","Mars","Jupiter","The Sun"], odd:"The Sun", why:"The Sun is a star — the others are planets." },
+    { words:["Shirt","Trousers","Hat","Sandwich"], odd:"Sandwich", why:"A sandwich is something to eat — the others are clothes." },
+    { words:["Red","Blue","Circle","Yellow"], odd:"Circle", why:"A circle is a shape — the others are colors." },
+    { words:["Sparrow","Robin","Bat","Eagle"], odd:"Bat", why:"A bat is a flying mammal — the others are birds." },
+    { words:["Winter","Spring","August","Summer"], odd:"August", why:"August is a month — the others are seasons." },
+    { words:["Nile","Amazon","Sahara","Danube"], odd:"Sahara", why:"The Sahara is a desert — the others are rivers." },
+    { words:["Carrot","Potato","Apple","Onion"], odd:"Apple", why:"An apple is a fruit — the others are vegetables." },
+    { words:["Ant","Bee","Spider","Beetle"], odd:"Spider", why:"A spider has eight legs, so it isn't an insect — insects have six." },
+    { words:["Hammer","Screwdriver","Wrench","Teapot"], odd:"Teapot", why:"A teapot belongs in the kitchen — the others are tools." }
+  ];
+
+  var oddOrder = shuffle(ODD_SETS.slice());
+  var oddIdx = 0, oddCorrect = 0, oddAnswered = false;
+  var oddScore = document.getElementById("oddScore");
+  var oddChoices = document.getElementById("oddChoices");
+  var oddFeedback = document.getElementById("oddFeedback");
+  var oddNext = document.getElementById("oddNext");
+  var oddPlay = document.getElementById("oddPlay");
+  var oddDone = document.getElementById("oddDone");
+
+  function showOdd(){
+    var item = oddOrder[oddIdx];
+    oddAnswered = false;
+    oddScore.textContent = "Round " + (oddIdx + 1) + " of " + oddOrder.length + " · " + oddCorrect + " spotted so far";
+    oddFeedback.textContent = "";
+    oddFeedback.className = "feedback";
+    oddNext.hidden = true;
+    oddChoices.innerHTML = "";
+    shuffle(item.words.slice()).forEach(function(word){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "choice";
+      b.textContent = word;
+      b.addEventListener("click", function(){ answerOdd(b, word); });
+      oddChoices.appendChild(b);
+    });
+  }
+
+  function answerOdd(btn, word){
+    if (oddAnswered) { return; }
+    oddAnswered = true;
+    var item = oddOrder[oddIdx];
+    var buttons = oddChoices.querySelectorAll(".choice");
+    for (var k = 0; k < buttons.length; k++) {
+      buttons[k].disabled = true;
+      if (buttons[k].textContent === item.odd) { buttons[k].classList.add("correct"); }
+    }
+    if (word === item.odd) {
+      oddCorrect += 1;
+      oddFeedback.className = "feedback good";
+      oddFeedback.textContent = "Spotted it! " + item.why;
+    } else {
+      btn.classList.add("wrong");
+      oddFeedback.className = "feedback kind";
+      oddFeedback.textContent = "A fair guess — the odd one out was " + item.odd + ". " + item.why;
+    }
+    oddScore.textContent = "Round " + (oddIdx + 1) + " of " + oddOrder.length + " · " + oddCorrect + " spotted so far";
+    oddNext.hidden = false;
+    oddNext.textContent = oddIdx === oddOrder.length - 1 ? "See my results →" : "Next round →";
+  }
+
+  oddNext.addEventListener("click", function(){
+    oddIdx += 1;
+    if (oddIdx >= oddOrder.length) {
+      oddPlay.hidden = true;
+      oddDone.hidden = false;
+      var line;
+      if (oddCorrect >= 13) { line = "Eagle-eyed! Very little slips past you."; }
+      else if (oddCorrect >= 9) { line = "A sharp performance — your sorting instincts are in great shape."; }
+      else { line = "Nicely done for seeing it through — the thinking counts more than the tally."; }
+      document.getElementById("oddSummary").textContent =
+        "You spotted " + oddCorrect + " of " + oddOrder.length + ". " + line;
+      oddScore.textContent = "All rounds complete · " + oddCorrect + " of " + oddOrder.length + " spotted";
+    } else {
+      showOdd();
+    }
+  });
+  document.getElementById("oddRestart").addEventListener("click", function(){
+    oddOrder = shuffle(ODD_SETS.slice());
+    oddIdx = 0; oddCorrect = 0;
+    oddDone.hidden = true;
+    oddPlay.hidden = false;
+    showOdd();
+  });
+  showOdd();
+})();
+</script>
+</body>
+</html>

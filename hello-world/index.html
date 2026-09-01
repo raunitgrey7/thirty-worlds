@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hello, World — Greetings in 20 Languages</title>
+<meta name="description" content="Learn to say Hello, Thank you and My name is… in twenty languages — native script, romanization, where each is spoken, and a speaker button to hear it aloud.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👋</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#fbfaf6;
+    --card:#ffffff;
+    --ink:#181a1e;
+    --ink-2:#565b66;
+    --line:#e3e1d8;
+    --red:#cf2e2e;
+    --blue:#20458f;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:"Noto Sans",system-ui,sans-serif;line-height:1.55;overflow-x:clip;
+  }
+  /* Native-script text: let the OS pick the right system face per script */
+  .native{
+    font-family:"Noto Sans","Segoe UI","Nirmala UI","Leelawadee UI","Malgun Gothic","Yu Gothic UI","Microsoft YaHei","Microsoft JhengHei","PingFang SC","Hiragino Sans","Apple SD Gothic Neo",system-ui,sans-serif;
+  }
+  .hub-link{position:fixed;top:14px;left:14px;z-index:1000;padding:8px 14px;border-radius:999px;font:600 13px/1 "Noto Sans",Inter,system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(8px);background:rgba(24,26,30,.82);color:#fff;border:1px solid rgba(255,255,255,.25)}
+  .hub-link:hover{background:var(--red)}
+  a:focus-visible,button:focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:6px}
+
+  /* ---------- Hero ---------- */
+  header.hero{
+    max-width:1060px;margin:0 auto;padding:92px 24px 26px;
+  }
+  .hero-top{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;border-bottom:4px solid var(--ink);padding-bottom:18px}
+  .hero-top h1{font-size:clamp(2rem,6.5vw,3.6rem);font-weight:800;letter-spacing:-.02em;margin:0}
+  .hero-top .tag{font-weight:600;color:var(--red);letter-spacing:.16em;text-transform:uppercase;font-size:12px}
+  .potd{
+    margin-top:26px;display:grid;gap:6px;
+    border-left:5px solid var(--red);padding:6px 0 10px 20px;
+  }
+  .potd .label{font-size:12px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-2)}
+  .potd .big{
+    font-size:clamp(2.4rem,9vw,4.8rem);font-weight:800;line-height:1.12;letter-spacing:-.01em;
+    overflow-wrap:anywhere;
+  }
+  .potd .sub{color:var(--ink-2);font-size:clamp(.95rem,2.2vw,1.1rem)}
+  .potd .sub b{color:var(--ink)}
+  .potd-actions{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:10px 18px;
+    border:1.5px solid var(--ink);border-radius:8px;background:var(--card);color:var(--ink);
+    font:600 14px/1 "Noto Sans",sans-serif;cursor:pointer;transition:background .2s,color .2s,opacity .2s;
+  }
+  .btn:hover{background:var(--ink);color:#fff}
+  .btn[disabled]{opacity:.4;cursor:not-allowed}
+  .btn[disabled]:hover{background:var(--card);color:var(--ink)}
+  .hero-note{margin:18px 0 0;color:var(--ink-2);font-size:.86rem}
+
+  /* ---------- Filter ---------- */
+  nav.filter{
+    position:sticky;top:0;z-index:60;background:rgba(251,250,246,.94);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);padding:10px 16px;
+  }
+  .filter-inner{max-width:1060px;margin:0 auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .filter-inner .fl{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-2);margin-right:6px}
+  .chip{
+    min-height:44px;padding:10px 16px;border-radius:8px;border:1.5px solid var(--line);
+    background:var(--card);color:var(--ink-2);font:600 13.5px/1 "Noto Sans",sans-serif;cursor:pointer;
+    transition:border-color .2s,color .2s,background .2s;
+  }
+  .chip:hover{border-color:var(--ink)}
+  .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+
+  /* ---------- Cards ---------- */
+  main{max-width:1060px;margin:0 auto;padding:26px 20px 60px}
+  .count{font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-2);margin:2px 0 18px}
+  .grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr))}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 20px 16px;
+    display:flex;flex-direction:column;gap:14px;
+    transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.3,1),border-color .2s,box-shadow .2s;
+  }
+  .card.pre{opacity:0;transform:translateY(22px)}
+  .card:hover{border-color:#c9c6b8;box-shadow:0 10px 24px -16px rgba(20,20,30,.25)}
+  .card-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;border-bottom:2px solid var(--ink);padding-bottom:10px}
+  .card-head h3{margin:0;font-size:1.22rem;font-weight:800;letter-spacing:-.01em}
+  .card-head .nn{font-weight:500;color:var(--ink-2);font-size:.9rem}
+  .regions{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--red);text-align:right}
+  .hello-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .hello-big{font-size:clamp(1.9rem,5vw,2.5rem);font-weight:800;line-height:1.15;overflow-wrap:anywhere}
+  .phrase{display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:center;padding:10px 0;border-top:1px dashed var(--line)}
+  .phrase .pl{grid-column:1 / -1;font-size:10.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-2)}
+  .phrase .pn{font-size:1.12rem;font-weight:600;overflow-wrap:anywhere}
+  .phrase .pr{grid-column:1;color:var(--ink-2);font-size:.86rem;font-style:italic}
+  .speak{
+    grid-row:2 / span 2;grid-column:2;
+    width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line);background:var(--card);
+    display:grid;place-items:center;cursor:pointer;color:var(--ink);
+    transition:background .2s,border-color .2s,opacity .2s;
+  }
+  .speak:hover{background:var(--blue);border-color:var(--blue);color:#fff}
+  .speak.speaking{background:var(--red);border-color:var(--red);color:#fff}
+  .speak svg{width:19px;height:19px;fill:currentColor}
+  .speak[disabled]{opacity:.3;cursor:not-allowed}
+  .speak[disabled]:hover{background:var(--card);color:var(--ink);border-color:var(--line)}
+  body.no-tts .speak,body.no-tts #potdSpeak{display:none}
+  .countries{margin-top:auto;padding-top:10px;border-top:1px dashed var(--line);color:var(--ink-2);font-size:.84rem}
+  .countries b{color:var(--ink);font-weight:700;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;display:block;margin-bottom:2px}
+  .rtl{direction:rtl;unicode-bidi:isolate}
+  .empty{padding:50px 0;text-align:center;color:var(--ink-2);font-style:italic}
+
+  footer{border-top:1px solid var(--line);padding:30px 20px 90px;text-align:center;color:var(--ink-2);font-size:.86rem}
+  footer a{color:var(--blue)}
+
+  @media (min-width:2200px){header.hero,.filter-inner,main{max-width:1420px}body{font-size:17px}}
+  @media (prefers-reduced-motion:reduce){
+    .card{transition:none}
+    .card.pre{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body>
+<a class="hub-link" href="https://thirty-worlds.vercel.app/" aria-label="All thirty sites">← All 30</a>
+
+<header class="hero">
+  <div class="hero-top">
+    <h1>Hello, World</h1>
+    <span class="tag">Greetings in 20 languages</span>
+  </div>
+  <section class="potd" aria-label="Phrase of the day">
+    <span class="label">Phrase of the day</span>
+    <div class="big native" id="potdText" aria-live="polite"></div>
+    <p class="sub" id="potdSub"></p>
+    <div class="potd-actions">
+      <button class="btn" id="potdSpeak"><svg viewBox="0 0 24 24" aria-hidden="true" width="16" height="16" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4.03v8.05A4.47 4.47 0 0 0 16.5 12zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg> Listen</button>
+      <button class="btn" id="potdNext">Show another ↻</button>
+    </div>
+  </section>
+  <p class="hero-note">Tap a speaker button to hear a phrase — pronunciation uses the voices installed on your device, so availability varies. Buttons appear dimmed when no matching voice is found.</p>
+</header>
+
+<nav class="filter" aria-label="Filter languages by region">
+  <div class="filter-inner" role="group" aria-label="Region filters">
+    <span class="fl">Region</span>
+    <button class="chip" data-region="all" aria-pressed="true">All</button>
+    <button class="chip" data-region="Europe" aria-pressed="false">Europe</button>
+    <button class="chip" data-region="Asia" aria-pressed="false">Asia</button>
+    <button class="chip" data-region="Middle East" aria-pressed="false">Middle East</button>
+    <button class="chip" data-region="Africa" aria-pressed="false">Africa</button>
+    <button class="chip" data-region="Americas" aria-pressed="false">Americas</button>
+  </div>
+</nav>
+
+<main>
+  <p class="count" id="count" role="status">20 languages</p>
+  <div class="grid" id="grid"></div>
+  <p class="empty" id="empty" hidden>No languages match this region.</p>
+</main>
+
+<footer>
+  <p>Romanizations are simplified pronunciation guides, not formal transliteration systems. Part of the <a href="/">Thirty Worlds</a> collection.</p>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  var LANGS = [
+    { name: "Spanish", nn: "Español", tag: "es", prefs: ["es"], regions: ["Europe", "Americas"],
+      countries: "Spain, Mexico, Colombia, Argentina, Peru and some 16 more countries",
+      hello: { n: "Hola", r: "OH-lah" },
+      thanks: { n: "Gracias", r: "GRAH-syahs" },
+      myname: { n: "Me llamo…", r: "meh YAH-moh" } },
+    { name: "French", nn: "Français", tag: "fr", prefs: ["fr"], regions: ["Europe", "Africa", "Americas"],
+      countries: "France, Canada (Québec), Belgium, Switzerland, Senegal, Côte d'Ivoire and the wider Francophonie",
+      hello: { n: "Bonjour", r: "bon-ZHOOR" },
+      thanks: { n: "Merci", r: "mehr-SEE" },
+      myname: { n: "Je m'appelle…", r: "zhuh mah-PEHL" } },
+    { name: "German", nn: "Deutsch", tag: "de", prefs: ["de"], regions: ["Europe"],
+      countries: "Germany, Austria, Switzerland, Liechtenstein, Luxembourg",
+      hello: { n: "Hallo", r: "HAH-loh" },
+      thanks: { n: "Danke", r: "DAHN-kuh" },
+      myname: { n: "Ich heiße…", r: "ikh HY-suh" } },
+    { name: "Italian", nn: "Italiano", tag: "it", prefs: ["it"], regions: ["Europe"],
+      countries: "Italy, Switzerland (Ticino), San Marino, Vatican City",
+      hello: { n: "Ciao", r: "chow (informal); buongiorno to be polite" },
+      thanks: { n: "Grazie", r: "GRAH-tsyeh" },
+      myname: { n: "Mi chiamo…", r: "mee KYAH-moh" } },
+    { name: "Portuguese", nn: "Português", tag: "pt", prefs: ["pt"], regions: ["Europe", "Americas", "Africa"],
+      countries: "Portugal, Brazil, Angola, Mozambique, Cape Verde",
+      hello: { n: "Olá", r: "oh-LAH" },
+      thanks: { n: "Obrigado / Obrigada", r: "oh-bree-GAH-doo / -dah — matches the speaker" },
+      myname: { n: "O meu nome é…", r: "oo MEH-oo NOH-mee eh" } },
+    { name: "Russian", nn: "Русский", tag: "ru", prefs: ["ru"], regions: ["Europe", "Asia"],
+      countries: "Russia, Belarus, Kazakhstan, Kyrgyzstan and across Central Asia",
+      hello: { n: "Здравствуйте", r: "ZDRAH-stvooy-tyeh (polite); privyet is casual" },
+      thanks: { n: "Спасибо", r: "spah-SEE-bah" },
+      myname: { n: "Меня зовут…", r: "mee-NYAH zah-VOOT" } },
+    { name: "Arabic", nn: "العربية", tag: "ar", prefs: ["ar"], rtl: true, regions: ["Middle East", "Africa"],
+      countries: "Egypt, Saudi Arabia, Morocco, Iraq, UAE and 20+ countries across the region",
+      hello: { n: "مرحبًا", r: "MAR-ha-ban; as-salāmu ʿalaykum is the fuller greeting" },
+      thanks: { n: "شكرًا", r: "SHUK-ran" },
+      myname: { n: "اسمي…", r: "IS-mee" } },
+    { name: "Hebrew", nn: "עברית", tag: "he", prefs: ["he", "iw"], rtl: true, regions: ["Middle East"],
+      countries: "Israel",
+      hello: { n: "שלום", r: "sha-LOHM — also means peace, and goodbye" },
+      thanks: { n: "תודה", r: "toh-DAH" },
+      myname: { n: "קוראים לי…", r: "kor-EEM lee" } },
+    { name: "Hindi", nn: "हिन्दी", tag: "hi", prefs: ["hi"], regions: ["Asia"],
+      countries: "India (most spoken language); related Fiji Hindi in Fiji",
+      hello: { n: "नमस्ते", r: "nuh-muh-STEH, often with palms joined" },
+      thanks: { n: "धन्यवाद", r: "dhun-yuh-VAAD" },
+      myname: { n: "मेरा नाम … है", r: "MEH-rah naam … heh" } },
+    { name: "Bengali", nn: "বাংলা", tag: "bn", prefs: ["bn"], regions: ["Asia"],
+      countries: "Bangladesh, India (West Bengal &amp; Tripura)",
+      hello: { n: "নমস্কার", r: "naw-mosh-KAR; many Muslims greet with assalamu alaikum" },
+      thanks: { n: "ধন্যবাদ", r: "dhon-no-BAD" },
+      myname: { n: "আমার নাম…", r: "AH-mar nam" } },
+    { name: "Tamil", nn: "தமிழ்", tag: "ta", prefs: ["ta"], regions: ["Asia"],
+      countries: "India (Tamil Nadu), Sri Lanka, Singapore, Malaysia",
+      hello: { n: "வணக்கம்", r: "vuh-nuck-KUM" },
+      thanks: { n: "நன்றி", r: "NUN-dri" },
+      myname: { n: "என் பெயர்…", r: "en PAY-yer" } },
+    { name: "Mandarin Chinese", nn: "普通话", tag: "zh-Hans", prefs: ["zh-cn", "cmn", "zh-tw", "zh-sg", "zh"], regions: ["Asia"],
+      countries: "China, Taiwan, Singapore — the world's most spoken first language",
+      hello: { n: "你好", r: "nǐ hǎo (nee-how)" },
+      thanks: { n: "谢谢", r: "xièxie (shyeh-shyeh)" },
+      myname: { n: "我叫…", r: "wǒ jiào (waw jyow)" } },
+    { name: "Cantonese", nn: "廣東話", tag: "yue", prefs: ["yue", "zh-hk"], regions: ["Asia"],
+      countries: "Hong Kong, Macau, Guangdong province and diaspora communities worldwide",
+      hello: { n: "你好", r: "néih hóu (nay-hoh)" },
+      thanks: { n: "多謝 / 唔該", r: "dō jeh for a gift; m̀h gōi for a favor" },
+      myname: { n: "我叫…", r: "ngóh giu (ngaw gew)" } },
+    { name: "Japanese", nn: "日本語", tag: "ja", prefs: ["ja"], regions: ["Asia"],
+      countries: "Japan",
+      hello: { n: "こんにちは", r: "kon-nee-chee-wah (daytime)" },
+      thanks: { n: "ありがとうございます", r: "ah-ree-gah-TOH go-zai-mas" },
+      myname: { n: "私は…です", r: "wa-ta-shi wa … dess" } },
+    { name: "Korean", nn: "한국어", tag: "ko", prefs: ["ko"], regions: ["Asia"],
+      countries: "South Korea, North Korea",
+      hello: { n: "안녕하세요", r: "ahn-nyong-ha-SEH-yo" },
+      thanks: { n: "감사합니다", r: "gahm-sah-HAHM-nee-dah" },
+      myname: { n: "제 이름은 …입니다", r: "jeh ee-reum-eun … im-nee-dah" } },
+    { name: "Thai", nn: "ภาษาไทย", tag: "th", prefs: ["th"], regions: ["Asia"],
+      countries: "Thailand",
+      hello: { n: "สวัสดี", r: "sa-wat-DEE — add khráp (m) or khâ (f) to be polite" },
+      thanks: { n: "ขอบคุณ", r: "khop-KHUN" },
+      myname: { n: "ผม/ฉันชื่อ…", r: "phǒm (m) / chán (f) chûe…" } },
+    { name: "Vietnamese", nn: "Tiếng Việt", tag: "vi", prefs: ["vi"], regions: ["Asia"],
+      countries: "Vietnam",
+      hello: { n: "Xin chào", r: "sin CHOW" },
+      thanks: { n: "Cảm ơn", r: "kahm UHN" },
+      myname: { n: "Tôi tên là…", r: "toy tehn LAH" } },
+    { name: "Swahili", nn: "Kiswahili", tag: "sw", prefs: ["sw"], regions: ["Africa"],
+      countries: "Tanzania, Kenya, Uganda, DR Congo — East Africa's lingua franca",
+      hello: { n: "Hujambo", r: "hoo-JAHM-boh — reply: sijambo" },
+      thanks: { n: "Asante", r: "ah-SAHN-teh; asante sana = thank you very much" },
+      myname: { n: "Jina langu ni…", r: "JEE-nah LAHN-goo nee" } },
+    { name: "Turkish", nn: "Türkçe", tag: "tr", prefs: ["tr"], regions: ["Europe", "Asia"],
+      countries: "Türkiye, Cyprus, and communities across Europe",
+      hello: { n: "Merhaba", r: "MEHR-hah-bah" },
+      thanks: { n: "Teşekkür ederim", r: "teh-shehk-KUR eh-deh-reem" },
+      myname: { n: "Benim adım…", r: "beh-NEEM ah-DUHM" } },
+    { name: "Greek", nn: "Ελληνικά", tag: "el", prefs: ["el"], regions: ["Europe"],
+      countries: "Greece, Cyprus",
+      hello: { n: "Γειά σας", r: "YAH-sas (polite); yah-soo to a friend" },
+      thanks: { n: "Ευχαριστώ", r: "ef-khah-ree-STOH" },
+      myname: { n: "Με λένε…", r: "meh LEH-neh" } }
+  ];
+
+  var reduceMotion = false;
+  try { reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
+
+  var SPEAKER_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4.03v8.05A4.47 4.47 0 0 0 16.5 12zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>';
+
+  /* ---------------- Speech ---------------- */
+  var ttsOK = ("speechSynthesis" in window) && ("SpeechSynthesisUtterance" in window);
+  if (!ttsOK) document.body.classList.add("no-tts");
+  var voices = [];
+
+  function normLang(l) { return String(l || "").toLowerCase().replace("_", "-"); }
+
+  function findVoice(prefs) {
+    if (!voices.length) return null;
+    for (var i = 0; i < prefs.length; i++) {
+      var p = prefs[i].toLowerCase();
+      for (var v = 0; v < voices.length; v++) {
+        var vl = normLang(voices[v].lang);
+        if (p === "zh" && (vl === "zh-hk" || vl.indexOf("yue") === 0)) continue;
+        if (vl === p || vl.indexOf(p + "-") === 0 || vl.indexOf(p) === 0) return voices[v];
+      }
+    }
+    return null;
+  }
+
+  function refreshVoices() {
+    if (!ttsOK) return;
+    try { voices = window.speechSynthesis.getVoices() || []; } catch (e) { voices = []; }
+    updateAvailability();
+  }
+
+  function updateAvailability() {
+    if (!ttsOK) return;
+    var buttons = document.querySelectorAll("[data-speak-lang]");
+    Array.prototype.forEach.call(buttons, function (btn) {
+      var lang = LANGS[parseInt(btn.getAttribute("data-speak-lang"), 10)];
+      if (!lang) return;
+      /* If the voice list hasn't populated yet, stay optimistic; disable only
+         when we KNOW there is no matching voice. */
+      var unavailable = voices.length > 0 && !findVoice(lang.prefs);
+      btn.disabled = unavailable;
+      btn.title = unavailable ? "No " + lang.name + " voice installed on this device" : "";
+    });
+    var potdBtn = document.getElementById("potdSpeak");
+    if (potdBtn && typeof potdIndex === "number" && LANGS[potdIndex]) {
+      potdBtn.disabled = voices.length > 0 && !findVoice(LANGS[potdIndex].prefs);
+    }
+  }
+
+  var currentBtn = null;
+  function speak(text, prefs, primary, btn) {
+    if (!ttsOK) return;
+    try {
+      window.speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(text.replace(/…/g, ""));
+      var v = findVoice(prefs);
+      if (v) { u.voice = v; u.lang = v.lang; }
+      else { u.lang = primary; }
+      u.rate = 0.9;
+      if (currentBtn) currentBtn.classList.remove("speaking");
+      currentBtn = btn || null;
+      if (currentBtn) currentBtn.classList.add("speaking");
+      u.onend = u.onerror = function () {
+        if (currentBtn) { currentBtn.classList.remove("speaking"); currentBtn = null; }
+      };
+      window.speechSynthesis.speak(u);
+    } catch (e) { /* speech unavailable — stay silent */ }
+  }
+
+  if (ttsOK) {
+    refreshVoices();
+    try {
+      window.speechSynthesis.addEventListener("voiceschanged", refreshVoices);
+    } catch (e) {
+      window.speechSynthesis.onvoiceschanged = refreshVoices;
+    }
+  }
+
+  /* ---------------- Cards ---------------- */
+  var grid = document.getElementById("grid");
+  var countEl = document.getElementById("count");
+  var emptyEl = document.getElementById("empty");
+  var activeRegion = "all";
+  var observer = null;
+
+  if ("IntersectionObserver" in window && !reduceMotion) {
+    observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.remove("pre");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { rootMargin: "0px 0px -5% 0px", threshold: 0.05 });
+  }
+
+  function phraseRow(label, phrase, lang, index, key) {
+    var dirAttr = lang.rtl ? ' dir="rtl" class="pn native rtl"' : ' class="pn native"';
+    return '<div class="phrase">' +
+      '<span class="pl">' + label + "</span>" +
+      '<span lang="' + lang.tag + '"' + dirAttr + ">" + phrase.n + "</span>" +
+      '<span class="pr">' + phrase.r + "</span>" +
+      (ttsOK
+        ? '<button class="speak" data-speak-lang="' + index + '" data-key="' + key + '" aria-label="Listen: ' + label + " in " + lang.name + '">' + SPEAKER_SVG + "</button>"
+        : "") +
+      "</div>";
+  }
+
+  function buildCard(lang, index, order) {
+    var el = document.createElement("article");
+    el.className = "card pre";
+    el.innerHTML =
+      '<div class="card-head">' +
+        "<div><h3>" + lang.name + '</h3><span class="nn native" lang="' + lang.tag + '">' + lang.nn + "</span></div>" +
+        '<span class="regions">' + lang.regions.join(" · ") + "</span>" +
+      "</div>" +
+      phraseRow("Hello", lang.hello, lang, index, "hello") +
+      phraseRow("Thank you", lang.thanks, lang, index, "thanks") +
+      phraseRow("My name is…", lang.myname, lang, index, "myname") +
+      '<p class="countries"><b>Where it’s spoken</b>' + lang.countries + "</p>";
+
+    Array.prototype.forEach.call(el.querySelectorAll(".speak"), function (btn) {
+      btn.addEventListener("click", function () {
+        var key = btn.getAttribute("data-key");
+        speak(lang[key].n, lang.prefs, lang.prefs[0], btn);
+      });
+    });
+
+    if (observer) {
+      el.style.transitionDelay = ((order % 3) * 80) + "ms";
+      observer.observe(el);
+    } else {
+      el.classList.remove("pre");
+    }
+    return el;
+  }
+
+  function render() {
+    grid.innerHTML = "";
+    var shown = 0;
+    LANGS.forEach(function (lang, i) {
+      if (activeRegion === "all" || lang.regions.indexOf(activeRegion) !== -1) {
+        grid.appendChild(buildCard(lang, i, shown));
+        shown++;
+      }
+    });
+    countEl.textContent = shown === 1 ? "1 language" : shown + " languages";
+    emptyEl.hidden = shown !== 0;
+    updateAvailability();
+  }
+
+  var chips = Array.prototype.slice.call(document.querySelectorAll(".chip"));
+  chips.forEach(function (chip) {
+    chip.addEventListener("click", function () {
+      chips.forEach(function (c) { c.setAttribute("aria-pressed", "false"); });
+      chip.setAttribute("aria-pressed", "true");
+      activeRegion = chip.getAttribute("data-region");
+      render();
+    });
+  });
+
+  /* ---------------- Phrase of the day ---------------- */
+  var potdText = document.getElementById("potdText");
+  var potdSub = document.getElementById("potdSub");
+  var potdSpeak = document.getElementById("potdSpeak");
+  var potdNext = document.getElementById("potdNext");
+  var potdIndex = 0;
+
+  function dayOfYear() {
+    var now = new Date();
+    var start = new Date(now.getFullYear(), 0, 0);
+    return Math.floor((now - start) / 86400000);
+  }
+
+  function showPotd(i) {
+    potdIndex = ((i % LANGS.length) + LANGS.length) % LANGS.length;
+    var lang = LANGS[potdIndex];
+    potdText.textContent = lang.hello.n;
+    potdText.setAttribute("lang", lang.tag);
+    potdText.classList.toggle("rtl", !!lang.rtl);
+    potdSub.innerHTML = "That’s <b>“Hello” in " + lang.name + "</b> (" + lang.hello.r + ") — " + lang.countries + ".";
+    if (ttsOK) {
+      var unavailable = voices.length > 0 && !findVoice(lang.prefs);
+      potdSpeak.disabled = unavailable;
+    }
+  }
+
+  potdNext.addEventListener("click", function () { showPotd(potdIndex + 1); });
+  potdSpeak.addEventListener("click", function () {
+    var lang = LANGS[potdIndex];
+    speak(lang.hello.n, lang.prefs, lang.prefs[0], null);
+  });
+
+  showPotd(dayOfYear());
+  render();
+})();
+</script>
+</body>
+</html>

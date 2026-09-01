@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tactic — Tic-Tac-Toe vs a Thinking AI</title>
+<meta name="description" content="Tactic: a clean board-game take on tic-tac-toe. Face an AI on Easy, Medium, or an unbeatable Hard minimax — or pass the board to a friend. Animated wins, running score tally.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⭕</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f0e6;
+  --card:#fffdf7;
+  --ink:#2b2620;
+  --soft:#8a8072;
+  --line:#e3dbc9;
+  --x:#d95d39;        /* terracotta */
+  --o:#2a9d8f;        /* teal */
+  --x-soft:#f8e3db;
+  --o-soft:#dcefed;
+  --gold:#b98a2d;
+  --disp:'Space Grotesk',system-ui,sans-serif;
+  --sans:'Inter',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--sans);
+  min-height:100vh;overflow-x:hidden;
+  background-image:radial-gradient(rgba(43,38,32,.05) 1px, transparent 1.5px);
+  background-size:26px 26px;
+}
+.hub-link{position:fixed;top:14px;left:14px;z-index:1000;padding:8px 14px;border-radius:999px;font:600 13px/1 Inter,system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(8px);background:rgba(43,38,32,.8);color:#fff;border:1px solid rgba(255,255,255,.25)}
+.hub-link:hover{background:rgba(43,38,32,.95)}
+.wrap{max-width:560px;margin:0 auto;padding:70px 16px 44px;display:flex;flex-direction:column;align-items:center}
+header.mast{text-align:center;margin-bottom:20px}
+h1{font-family:var(--disp);font-weight:700;font-size:clamp(2.1rem,7vw,3rem);letter-spacing:-.03em}
+h1 .x-mark{color:var(--x)}
+h1 .o-mark{color:var(--o)}
+.sub{color:var(--soft);font-size:.92rem;margin-top:4px}
+.panel{
+  width:100%;background:var(--card);border:1px solid var(--line);border-radius:18px;
+  box-shadow:0 14px 40px rgba(43,38,32,.1);
+  padding:20px;
+}
+.opts{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:16px}
+.seg{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
+.seg button{
+  appearance:none;border:0;background:transparent;color:var(--soft);
+  font:600 .82rem var(--sans);padding:9px 14px;min-height:44px;min-width:44px;
+  border-radius:9px;cursor:pointer;transition:background .15s,color .15s,transform .1s;
+}
+.seg button:active{transform:scale(.95)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--card)}
+.seg button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.seg button.mx[aria-pressed="true"]{background:var(--x)}
+.seg button.mo[aria-pressed="true"]{background:var(--o)}
+#status{
+  text-align:center;font:700 1rem var(--disp);min-height:1.6em;margin-bottom:14px;
+  transition:transform .15s;
+}
+#status.pop{animation:st-pop .35s}
+@keyframes st-pop{50%{transform:scale(1.12)}}
+#status .think{color:var(--soft);font-weight:500}
+.board-wrap{position:relative;width:min(100%,420px);margin:0 auto;touch-action:manipulation}
+.board{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+  width:100%;aspect-ratio:1/1;
+}
+.board.shake{animation:b-shake .4s}
+@keyframes b-shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}45%{transform:translateX(6px)}70%{transform:translateX(-4px)}}
+.cell{
+  appearance:none;cursor:pointer;position:relative;
+  background:var(--bg);border:1px solid var(--line);border-radius:14px;
+  min-height:80px;min-width:80px;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s,transform .1s,box-shadow .15s;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.7),0 2px 0 rgba(43,38,32,.06);
+}
+.cell:hover:not(:disabled){background:#efe8d8}
+.cell:active:not(:disabled){transform:scale(.96)}
+.cell:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.cell:disabled{cursor:default}
+.cell.win-cell.xwin{background:var(--x-soft)}
+.cell.win-cell.owin{background:var(--o-soft)}
+.mark{
+  font:700 clamp(2.4rem,11vw,4.2rem)/1 var(--disp);
+  animation:drop .32s cubic-bezier(.2,1.5,.4,1);
+  user-select:none;
+}
+.mark.X{color:var(--x)}
+.mark.O{color:var(--o)}
+@keyframes drop{from{opacity:0;transform:translateY(-26px) scale(1.5)}to{opacity:1;transform:none}}
+#winline{
+  position:absolute;inset:0;width:100%;height:100%;
+  pointer-events:none;z-index:2;
+}
+#winline line{
+  stroke-linecap:round;stroke-width:9;fill:none;
+  transition:stroke-dashoffset .55s cubic-bezier(.55,0,.3,1);
+}
+.tally{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+  margin-top:18px;
+}
+.t-cell{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center}
+.t-cell .l{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);font-weight:700}
+.t-cell .v{font:700 1.6rem var(--disp);margin-top:2px;font-variant-numeric:tabular-nums}
+.t-cell.tx .v{color:var(--x)}
+.t-cell.to .v{color:var(--o)}
+.t-cell .v.bump{animation:st-pop .35s}
+.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+.btn{
+  appearance:none;cursor:pointer;
+  font:700 .9rem var(--disp);letter-spacing:.02em;
+  background:var(--ink);color:var(--card);border:0;border-radius:12px;
+  padding:13px 26px;min-height:48px;
+  transition:transform .12s,box-shadow .15s;
+  box-shadow:0 4px 14px rgba(43,38,32,.25);
+}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:scale(.96)}
+.btn:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.btn.quiet{background:transparent;color:var(--ink);border:2px solid var(--line);box-shadow:none}
+footer{margin-top:26px;text-align:center;font-size:.72rem;color:var(--soft)}
+[hidden]{display:none !important}
+@media (max-width:400px){
+  .panel{padding:14px}
+  .seg button{padding:9px 10px}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001s !important;animation-iteration-count:1 !important;transition-duration:.001s !important}
+  #winline line{transition:none}
+}
+</style>
+</head>
+<body>
+<a class="hub-link" href="https://thirty-worlds.vercel.app/" aria-label="All thirty sites">← All 30</a>
+<div class="wrap">
+<header class="mast">
+  <h1>Tac<span class="x-mark">t</span>ic<span class="o-mark">.</span></h1>
+  <p class="sub">Three in a row. Zero mercy on Hard.</p>
+</header>
+
+<main class="panel">
+  <div class="opts">
+    <div class="seg" role="group" aria-label="Opponent">
+      <button type="button" id="opt-ai" aria-pressed="true">vs AI</button>
+      <button type="button" id="opt-2p" aria-pressed="false">2 players</button>
+    </div>
+    <div class="seg" id="diff-seg" role="group" aria-label="AI difficulty">
+      <button type="button" data-diff="easy" aria-pressed="false">Easy</button>
+      <button type="button" data-diff="medium" aria-pressed="false">Medium</button>
+      <button type="button" data-diff="hard" aria-pressed="true">Hard</button>
+    </div>
+    <div class="seg" id="mark-seg" role="group" aria-label="Play as X or O">
+      <button type="button" class="mx" data-mark="X" aria-pressed="true">Play X</button>
+      <button type="button" class="mo" data-mark="O" aria-pressed="false">Play O</button>
+    </div>
+  </div>
+
+  <p id="status" role="status">Your turn — place an X</p>
+
+  <div class="board-wrap">
+    <div class="board" id="board" role="group" aria-label="Tic-tac-toe board"></div>
+    <svg id="winline" viewBox="0 0 300 300" aria-hidden="true"></svg>
+  </div>
+
+  <div class="tally" aria-label="Score tally">
+    <div class="t-cell tx"><div class="l" id="lbl-p1">You</div><div class="v" id="score-p1">0</div></div>
+    <div class="t-cell"><div class="l">Draws</div><div class="v" id="score-draw">0</div></div>
+    <div class="t-cell to"><div class="l" id="lbl-p2">AI</div><div class="v" id="score-p2">0</div></div>
+  </div>
+
+  <div class="actions">
+    <button type="button" class="btn" id="btn-next" hidden>Next round</button>
+    <button type="button" class="btn quiet" id="btn-reset">Reset match</button>
+  </div>
+</main>
+<footer>Hard mode runs full minimax — a perfect game ends in a draw.</footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+var WINS = [
+  [0,1,2],[3,4,5],[6,7,8],
+  [0,3,6],[1,4,7],[2,5,8],
+  [0,4,8],[2,4,6]
+];
+/* line endpoints in the 300x300 viewBox for each win combo */
+var LINE_COORDS = [
+  [20,50,280,50],[20,150,280,150],[20,250,280,250],
+  [50,20,50,280],[150,20,150,280],[250,20,250,280],
+  [25,25,275,275],[275,25,25,275]
+];
+
+var boardEl = document.getElementById('board');
+var winlineEl = document.getElementById('winline');
+var statusEl = document.getElementById('status');
+var btnNext = document.getElementById('btn-next');
+var btnReset = document.getElementById('btn-reset');
+var optAi = document.getElementById('opt-ai');
+var opt2p = document.getElementById('opt-2p');
+var diffSeg = document.getElementById('diff-seg');
+var markSeg = document.getElementById('mark-seg');
+var lblP1 = document.getElementById('lbl-p1');
+var lblP2 = document.getElementById('lbl-p2');
+var scoreP1El = document.getElementById('score-p1');
+var scoreP2El = document.getElementById('score-p2');
+var scoreDrawEl = document.getElementById('score-draw');
+
+var S = {
+  mode: 'ai',            /* 'ai' | '2p' */
+  diff: 'hard',
+  playerMark: 'X',
+  board: [null,null,null,null,null,null,null,null,null],
+  turn: 'X',
+  starter: 'X',
+  locked: false,
+  scores: { p1: 0, p2: 0, draw: 0 },
+  aiTimer: null
+};
+
+var cells = [];
+(function buildCells(){
+  for (var i = 0; i < 9; i++) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'cell';
+    b.setAttribute('data-idx', String(i));
+    b.setAttribute('aria-label', 'Cell ' + (Math.floor(i / 3) + 1) + ',' + (i % 3 + 1));
+    (function(idx, btn){
+      btn.addEventListener('click', function(){ onCell(idx); });
+    })(i, b);
+    boardEl.appendChild(b);
+    cells.push(b);
+  }
+})();
+
+function other(m){ return m === 'X' ? 'O' : 'X'; }
+
+function winnerOf(b){
+  for (var i = 0; i < WINS.length; i++) {
+    var w = WINS[i];
+    if (b[w[0]] && b[w[0]] === b[w[1]] && b[w[1]] === b[w[2]]) {
+      return { mark: b[w[0]], combo: i };
+    }
+  }
+  for (var j = 0; j < 9; j++) { if (!b[j]) return null; }
+  return { mark: 'draw', combo: -1 };
+}
+
+function emptyIndices(b){
+  var out = [];
+  for (var i = 0; i < 9; i++) if (!b[i]) out.push(i);
+  return out;
+}
+
+function minimax(b, current, ai, depth){
+  var w = winnerOf(b);
+  if (w) {
+    if (w.mark === 'draw') return { score: 0, index: -1 };
+    return { score: w.mark === ai ? 10 - depth : depth - 10, index: -1 };
+  }
+  var empties = emptyIndices(b);
+  var bestScore = current === ai ? -Infinity : Infinity;
+  var bestIndex = empties[0];
+  for (var i = 0; i < empties.length; i++) {
+    var idx = empties[i];
+    b[idx] = current;
+    var r = minimax(b, other(current), ai, depth + 1);
+    b[idx] = null;
+    if (current === ai) {
+      if (r.score > bestScore) { bestScore = r.score; bestIndex = idx; }
+    } else {
+      if (r.score < bestScore) { bestScore = r.score; bestIndex = idx; }
+    }
+  }
+  return { score: bestScore, index: bestIndex };
+}
+
+function pickAiMove(){
+  var aiMark = other(S.playerMark);
+  var empties = emptyIndices(S.board);
+  if (empties.length === 0) return -1;
+  if (S.diff === 'easy') {
+    return empties[Math.floor(Math.random() * empties.length)];
+  }
+  if (S.diff === 'medium' && Math.random() < 0.5) {
+    return empties[Math.floor(Math.random() * empties.length)];
+  }
+  return minimax(S.board.slice(), aiMark, aiMark, 0).index;
+}
+
+function setStatus(html, popIt){
+  statusEl.innerHTML = html;
+  if (popIt) {
+    statusEl.classList.remove('pop');
+    void statusEl.offsetWidth;
+    statusEl.classList.add('pop');
+  }
+}
+
+function turnLabel(){
+  if (S.mode === 'ai') {
+    if (S.turn === S.playerMark) return 'Your turn — place an ' + S.playerMark;
+    return '<span class="think">AI is thinking…</span>';
+  }
+  return (S.turn === 'X'
+    ? '<span style="color:var(--x)">X</span>'
+    : '<span style="color:var(--o)">O</span>') + "'s turn";
+}
+
+function renderCell(i){
+  var m = S.board[i];
+  cells[i].textContent = '';
+  if (m) {
+    var sp = document.createElement('span');
+    sp.className = 'mark ' + m;
+    sp.textContent = m;
+    sp.setAttribute('aria-hidden', 'true');
+    cells[i].appendChild(sp);
+    cells[i].setAttribute('aria-label', 'Cell ' + (Math.floor(i / 3) + 1) + ',' + (i % 3 + 1) + ': ' + m);
+    cells[i].disabled = true;
+  } else {
+    cells[i].setAttribute('aria-label', 'Cell ' + (Math.floor(i / 3) + 1) + ',' + (i % 3 + 1) + ': empty');
+    cells[i].disabled = S.locked || (S.mode === 'ai' && S.turn !== S.playerMark);
+  }
+}
+
+function renderAll(){
+  for (var i = 0; i < 9; i++) renderCell(i);
+}
+
+function clearWinline(){
+  winlineEl.textContent = '';
+}
+
+function drawWinline(comboIdx, mark){
+  clearWinline();
+  var c = LINE_COORDS[comboIdx];
+  var ln = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  ln.setAttribute('x1', c[0]); ln.setAttribute('y1', c[1]);
+  ln.setAttribute('x2', c[2]); ln.setAttribute('y2', c[3]);
+  ln.setAttribute('stroke', mark === 'X' ? '#d95d39' : '#2a9d8f');
+  ln.setAttribute('stroke-opacity', '.85');
+  var len = Math.hypot(c[2] - c[0], c[3] - c[1]);
+  ln.style.strokeDasharray = String(len);
+  ln.style.strokeDashoffset = String(len);
+  winlineEl.appendChild(ln);
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){ ln.style.strokeDashoffset = '0'; });
+  });
+}
+
+function markWinCells(comboIdx, mark){
+  WINS[comboIdx].forEach(function(i){
+    cells[i].classList.add('win-cell', mark === 'X' ? 'xwin' : 'owin');
+  });
+}
+
+function bump(el){
+  el.classList.remove('bump');
+  void el.offsetWidth;
+  el.classList.add('bump');
+}
+
+function updateTally(){
+  scoreP1El.textContent = String(S.scores.p1);
+  scoreP2El.textContent = String(S.scores.p2);
+  scoreDrawEl.textContent = String(S.scores.draw);
+  if (S.mode === 'ai') {
+    lblP1.textContent = 'You (' + S.playerMark + ')';
+    lblP2.textContent = 'AI (' + other(S.playerMark) + ')';
+  } else {
+    lblP1.textContent = 'Player X';
+    lblP2.textContent = 'Player O';
+  }
+}
+
+function endRound(result){
+  S.locked = true;
+  cells.forEach(function(c){ c.disabled = true; });
+  if (result.mark === 'draw') {
+    S.scores.draw++;
+    bump(scoreDrawEl);
+    setStatus('A draw. Well matched.', true);
+    boardEl.classList.remove('shake');
+    void boardEl.offsetWidth;
+    boardEl.classList.add('shake');
+  } else {
+    drawWinline(result.combo, result.mark);
+    markWinCells(result.combo, result.mark);
+    var winnerIsP1 = S.mode === 'ai'
+      ? result.mark === S.playerMark
+      : result.mark === 'X';
+    if (winnerIsP1) { S.scores.p1++; bump(scoreP1El); }
+    else { S.scores.p2++; bump(scoreP2El); }
+    if (S.mode === 'ai') {
+      setStatus(result.mark === S.playerMark
+        ? '🎉 You win this round!'
+        : 'AI takes the round.', true);
+    } else {
+      setStatus((result.mark === 'X'
+        ? '<span style="color:var(--x)">X</span>'
+        : '<span style="color:var(--o)">O</span>') + ' wins the round!', true);
+    }
+  }
+  updateTally();
+  btnNext.hidden = false;
+  btnNext.focus();
+}
+
+function place(i){
+  if (S.locked || S.board[i]) return;
+  S.board[i] = S.turn;
+  renderCell(i);
+  var w = winnerOf(S.board);
+  if (w) { endRound(w); return; }
+  S.turn = other(S.turn);
+  setStatus(turnLabel(), false);
+  renderAll();
+  maybeAiMove();
+}
+
+function maybeAiMove(){
+  if (S.mode !== 'ai' || S.locked || S.turn === S.playerMark) return;
+  clearAiTimer();
+  S.aiTimer = setTimeout(function(){
+    S.aiTimer = null;
+    if (S.mode !== 'ai' || S.locked || S.turn === S.playerMark) return;
+    var mv = pickAiMove();
+    if (mv >= 0) place(mv);
+  }, 420);
+}
+
+function clearAiTimer(){
+  if (S.aiTimer !== null) { clearTimeout(S.aiTimer); S.aiTimer = null; }
+}
+
+function onCell(i){
+  if (S.locked || S.board[i]) return;
+  if (S.mode === 'ai' && S.turn !== S.playerMark) return;
+  place(i);
+}
+
+function newRound(alternate){
+  clearAiTimer();
+  S.board = [null,null,null,null,null,null,null,null,null];
+  S.locked = false;
+  if (alternate) S.starter = other(S.starter);
+  S.turn = S.starter;
+  btnNext.hidden = true;
+  clearWinline();
+  cells.forEach(function(c){ c.classList.remove('win-cell','xwin','owin'); });
+  boardEl.classList.remove('shake');
+  renderAll();
+  setStatus(turnLabel(), false);
+  updateTally();
+  maybeAiMove();
+}
+
+function resetMatch(){
+  S.scores = { p1: 0, p2: 0, draw: 0 };
+  S.starter = 'X';
+  newRound(false);
+}
+
+/* controls */
+optAi.addEventListener('click', function(){
+  optAi.setAttribute('aria-pressed', 'true');
+  opt2p.setAttribute('aria-pressed', 'false');
+  S.mode = 'ai';
+  diffSeg.style.display = '';
+  markSeg.style.display = '';
+  resetMatch();
+});
+opt2p.addEventListener('click', function(){
+  optAi.setAttribute('aria-pressed', 'false');
+  opt2p.setAttribute('aria-pressed', 'true');
+  S.mode = '2p';
+  diffSeg.style.display = 'none';
+  markSeg.style.display = 'none';
+  resetMatch();
+});
+diffSeg.querySelectorAll('button').forEach(function(b){
+  b.addEventListener('click', function(){
+    diffSeg.querySelectorAll('button').forEach(function(x){ x.setAttribute('aria-pressed', 'false'); });
+    b.setAttribute('aria-pressed', 'true');
+    S.diff = b.getAttribute('data-diff');
+    resetMatch();
+  });
+});
+markSeg.querySelectorAll('button').forEach(function(b){
+  b.addEventListener('click', function(){
+    markSeg.querySelectorAll('button').forEach(function(x){ x.setAttribute('aria-pressed', 'false'); });
+    b.setAttribute('aria-pressed', 'true');
+    S.playerMark = b.getAttribute('data-mark');
+    resetMatch();
+  });
+});
+btnNext.addEventListener('click', function(){ newRound(true); });
+btnReset.addEventListener('click', resetMatch);
+
+/* number keys 1-9 map to cells (phone-pad layout: 1 = top-left) */
+document.addEventListener('keydown', function(e){
+  if (e.key >= '1' && e.key <= '9') {
+    var idx = parseInt(e.key, 10) - 1;
+    var tag = document.activeElement ? document.activeElement.tagName : '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    onCell(idx);
+  }
+});
+
+/* pause AI think-timer while tab is hidden */
+document.addEventListener('visibilitychange', function(){
+  if (document.hidden) {
+    clearAiTimer();
+  } else {
+    maybeAiMove();
+  }
+});
+
+resetMatch();
+})();
+</script>
+</body>
+</html>

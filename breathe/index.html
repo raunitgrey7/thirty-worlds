@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stillpoint — Guided Breathing for Calm</title>
+<meta name="description" content="Stillpoint is a gentle guided-breathing space: Box 4-4-4-4, Relax 4-7-8 and Coherent 5-5 techniques with a glowing breathing orb, soft audio cues and timed sessions.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🫁</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#f6eef6;
+    --ink-dim:rgba(246,238,246,.72);
+    --ink-faint:rgba(246,238,246,.45);
+    --rose:#c98ba4;
+    --amber:#e8a97e;
+    --glass:rgba(30,22,50,.42);
+    --glass-line:rgba(255,255,255,.14);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    min-height:100vh;
+    min-height:100dvh;
+    font-family:Inter,system-ui,sans-serif;
+    color:var(--ink);
+    background:#181128;
+    overflow-x:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+  /* --- slow dusk sky --- */
+  .sky{position:fixed;inset:0;z-index:-2;background:linear-gradient(168deg,#120e24 0%,#241a3f 34%,#43284e 62%,#7a4157 84%,#b4644f 100%)}
+  .sky-drift{
+    position:fixed;z-index:-1;pointer-events:none;
+    width:130vmax;height:130vmax;border-radius:50%;
+    filter:blur(60px);opacity:.5;
+  }
+  .sky-drift.one{left:-40vmax;top:-45vmax;background:radial-gradient(circle at 50% 50%,rgba(122,84,163,.55),transparent 62%);animation:drift1 75s ease-in-out infinite alternate}
+  .sky-drift.two{right:-55vmax;bottom:-50vmax;background:radial-gradient(circle at 50% 50%,rgba(232,150,110,.4),transparent 60%);animation:drift2 90s ease-in-out infinite alternate}
+  @keyframes drift1{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(12vmax,9vmax,0) scale(1.15)}}
+  @keyframes drift2{from{transform:translate3d(0,0,0) scale(1.1)}to{transform:translate3d(-10vmax,-7vmax,0) scale(.95)}}
+
+  .hub-link{position:fixed;top:14px;left:14px;z-index:1000;padding:8px 14px;border-radius:999px;font:600 13px/1 Inter,system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(8px);background:rgba(15,15,25,.55);color:#fff;border:1px solid rgba(255,255,255,.25)}
+  .hub-link:hover{background:rgba(35,30,55,.7)}
+
+  main{flex:1;width:100%;max-width:640px;margin:0 auto;padding:76px 20px 28px;display:flex;flex-direction:column;align-items:center;gap:22px}
+  h1{font-family:"Cormorant Garamond",Georgia,serif;font-weight:500;font-size:clamp(2.4rem,7vw,3.4rem);letter-spacing:.04em;text-align:center}
+  .tagline{color:var(--ink-dim);font-size:.95rem;text-align:center;max-width:34ch}
+
+  /* --- pickers --- */
+  fieldset{border:0}
+  legend{font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);text-align:center;width:100%;margin-bottom:10px}
+  .row{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+  .pill{
+    min-height:44px;padding:10px 16px;border-radius:999px;cursor:pointer;
+    font:500 .88rem/1.25 Inter,system-ui,sans-serif;color:var(--ink);
+    background:var(--glass);border:1px solid var(--glass-line);
+    backdrop-filter:blur(6px);
+    transition:background .25s,border-color .25s,transform .25s;
+    text-align:center;
+  }
+  .pill small{display:block;font-size:.72rem;color:var(--ink-faint);margin-top:2px}
+  .pill[aria-pressed="true"]{background:rgba(201,139,164,.28);border-color:rgba(232,169,126,.65)}
+  .pill:disabled{opacity:.45;cursor:default}
+  .pill:not(:disabled):hover{transform:translateY(-1px)}
+  :focus-visible{outline:2px solid var(--amber);outline-offset:3px;border-radius:8px}
+  .pill:focus-visible{outline-offset:2px}
+
+  /* --- stage --- */
+  .stage{position:relative;width:min(78vw,330px);aspect-ratio:1;margin:6px 0}
+  .ring{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+  .ring circle{fill:none;stroke-width:3}
+  .ring-bg{stroke:rgba(255,255,255,.12)}
+  .ring-fg{stroke:var(--amber);stroke-linecap:round;stroke-dasharray:980.2;stroke-dashoffset:0}
+  .orb{
+    position:absolute;inset:12%;border-radius:50%;
+    background:radial-gradient(circle at 38% 32%,#ffe9d8 0%,#e8a97e 34%,#b06a86 68%,#6c3f6d 100%);
+    box-shadow:0 0 46px 6px rgba(232,169,126,.4),0 0 110px 20px rgba(180,100,140,.3);
+    transform:scale(.62);
+    transition:transform 4s cubic-bezier(.42,0,.58,1);
+    will-change:transform;
+  }
+  .stage-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;pointer-events:none}
+  #phaseLabel{font-family:"Cormorant Garamond",Georgia,serif;font-size:clamp(1.3rem,4.6vw,1.7rem);font-style:italic;text-shadow:0 1px 10px rgba(20,10,30,.55)}
+  #phaseCount{font:600 clamp(2rem,8vw,2.8rem)/1 Inter,system-ui,sans-serif;text-shadow:0 1px 12px rgba(20,10,30,.6);min-height:1em}
+  #timeLeft{font:500 .95rem/1 Inter,system-ui,sans-serif;color:var(--ink-dim);letter-spacing:.12em;font-variant-numeric:tabular-nums}
+
+  .actions{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+  .btn-main{
+    min-height:50px;padding:14px 38px;border-radius:999px;cursor:pointer;border:0;
+    font:600 1rem/1 Inter,system-ui,sans-serif;color:#2a1830;
+    background:linear-gradient(135deg,#f4d3b5,#dc9db2);
+    box-shadow:0 6px 24px rgba(220,157,178,.35);
+    transition:transform .25s,box-shadow .25s;
+  }
+  .btn-main:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(220,157,178,.45)}
+  .btn-quiet{
+    min-height:44px;padding:11px 20px;border-radius:999px;cursor:pointer;
+    font:500 .9rem/1 Inter,system-ui,sans-serif;color:var(--ink);
+    background:transparent;border:1px solid var(--glass-line);
+    transition:background .25s;
+  }
+  .btn-quiet:hover{background:rgba(255,255,255,.08)}
+  .btn-quiet[hidden]{display:none}
+  #soundBtn[aria-pressed="true"]{background:rgba(201,139,164,.28);border-color:rgba(232,169,126,.65)}
+
+  .note{font-size:.8rem;color:var(--ink-faint);text-align:center;min-height:1.2em}
+
+  /* --- summary overlay --- */
+  .overlay{
+    position:fixed;inset:0;z-index:1200;display:flex;align-items:center;justify-content:center;
+    padding:20px;background:rgba(14,9,26,.72);backdrop-filter:blur(10px);
+  }
+  .overlay[hidden]{display:none}
+  .card{
+    width:min(92vw,380px);border-radius:24px;padding:34px 28px;text-align:center;
+    background:linear-gradient(160deg,rgba(56,38,74,.92),rgba(30,20,48,.94));
+    border:1px solid rgba(255,255,255,.16);box-shadow:0 24px 70px rgba(0,0,0,.5);
+  }
+  .card h2{font-family:"Cormorant Garamond",Georgia,serif;font-weight:500;font-size:1.9rem;margin-bottom:6px}
+  .card p{color:var(--ink-dim);font-size:.92rem}
+  .stats{display:flex;justify-content:center;gap:30px;margin:22px 0}
+  .stat b{display:block;font-size:1.9rem;font-weight:600;color:var(--amber)}
+  .stat span{font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint)}
+
+  footer{padding:18px 20px 24px;text-align:center;font-size:.76rem;color:var(--ink-faint)}
+
+  @media (prefers-reduced-motion: reduce){
+    .sky-drift{animation:none}
+    .orb{transition:none;transform:scale(.82)}
+    .btn-main,.pill,.btn-quiet{transition:none}
+  }
+</style>
+</head>
+<body>
+<a class="hub-link" href="https://thirty-worlds.vercel.app/" aria-label="All thirty sites">← All 30</a>
+<div class="sky" aria-hidden="true"></div>
+<div class="sky-drift one" aria-hidden="true"></div>
+<div class="sky-drift two" aria-hidden="true"></div>
+
+<main>
+  <header>
+    <h1>Stillpoint</h1>
+    <p class="tagline">Settle in. Follow the orb, or the words — either one will carry you.</p>
+  </header>
+
+  <fieldset id="techSet">
+    <legend>Technique</legend>
+    <div class="row" role="group" aria-label="Breathing technique">
+      <button type="button" class="pill tech" data-tech="box" aria-pressed="true">Box<small>4 · 4 · 4 · 4</small></button>
+      <button type="button" class="pill tech" data-tech="relax" aria-pressed="false">Relax<small>4 · 7 · 8</small></button>
+      <button type="button" class="pill tech" data-tech="coherent" aria-pressed="false">Coherent<small>5 · 5</small></button>
+    </div>
+  </fieldset>
+
+  <fieldset id="durSet">
+    <legend>Session length</legend>
+    <div class="row" role="group" aria-label="Session length">
+      <button type="button" class="pill dur" data-min="1" aria-pressed="false">1 min</button>
+      <button type="button" class="pill dur" data-min="3" aria-pressed="true">3 min</button>
+      <button type="button" class="pill dur" data-min="5" aria-pressed="false">5 min</button>
+    </div>
+  </fieldset>
+
+  <div class="stage">
+    <svg class="ring" viewBox="0 0 340 340" aria-hidden="true">
+      <circle class="ring-bg" cx="170" cy="170" r="156"></circle>
+      <circle class="ring-fg" id="ringFg" cx="170" cy="170" r="156"></circle>
+    </svg>
+    <div class="orb" id="orb" aria-hidden="true"></div>
+    <div class="stage-text">
+      <span id="phaseLabel" aria-live="polite">Ready when you are</span>
+      <span id="phaseCount" aria-hidden="true"></span>
+    </div>
+  </div>
+  <div id="timeLeft" role="timer" aria-label="Time remaining">3:00</div>
+
+  <div class="actions">
+    <button type="button" class="btn-main" id="startBtn">Begin</button>
+    <button type="button" class="btn-quiet" id="endBtn" hidden>End session</button>
+    <button type="button" class="btn-quiet" id="soundBtn" aria-pressed="false" aria-label="Toggle gentle sound cues">🔔 Sound off</button>
+  </div>
+  <p class="note" id="noteLine"></p>
+</main>
+
+<div class="overlay" id="doneOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="doneTitle">
+  <div class="card">
+    <h2 id="doneTitle">Session complete</h2>
+    <p id="doneSub">Beautifully done. Notice how you feel.</p>
+    <div class="stats">
+      <div class="stat"><b id="sumBreaths">0</b><span>breaths</span></div>
+      <div class="stat"><b id="sumMinutes">0:00</b><span>time</span></div>
+    </div>
+    <button type="button" class="btn-main" id="againBtn">Breathe again</button>
+  </div>
+</div>
+
+<footer>Breathing exercises are for relaxation, not medical treatment — go gently and stop if you feel dizzy.</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  var TECHNIQUES = {
+    box: {
+      label: 'Box 4-4-4-4',
+      phases: [
+        { key: 'in',   label: 'Breathe in…',  dur: 4 },
+        { key: 'hold', label: 'Hold…',        dur: 4 },
+        { key: 'out',  label: 'Breathe out…', dur: 4 },
+        { key: 'hold2', label: 'Hold…',       dur: 4 }
+      ]
+    },
+    relax: {
+      label: 'Relax 4-7-8',
+      phases: [
+        { key: 'in',   label: 'Breathe in…',  dur: 4 },
+        { key: 'hold', label: 'Hold…',        dur: 7 },
+        { key: 'out',  label: 'Breathe out…', dur: 8 }
+      ]
+    },
+    coherent: {
+      label: 'Coherent 5-5',
+      phases: [
+        { key: 'in',  label: 'Breathe in…',  dur: 5 },
+        { key: 'out', label: 'Breathe out…', dur: 5 }
+      ]
+    }
+  };
+
+  var orb = document.getElementById('orb');
+  var phaseLabel = document.getElementById('phaseLabel');
+  var phaseCount = document.getElementById('phaseCount');
+  var timeLeft = document.getElementById('timeLeft');
+  var ringFg = document.getElementById('ringFg');
+  var startBtn = document.getElementById('startBtn');
+  var endBtn = document.getElementById('endBtn');
+  var soundBtn = document.getElementById('soundBtn');
+  var noteLine = document.getElementById('noteLine');
+  var doneOverlay = document.getElementById('doneOverlay');
+  var sumBreaths = document.getElementById('sumBreaths');
+  var sumMinutes = document.getElementById('sumMinutes');
+  var doneSub = document.getElementById('doneSub');
+  var againBtn = document.getElementById('againBtn');
+  var techBtns = Array.prototype.slice.call(document.querySelectorAll('.tech'));
+  var durBtns = Array.prototype.slice.call(document.querySelectorAll('.dur'));
+
+  var RING_C = 2 * Math.PI * 156;
+  ringFg.style.strokeDasharray = String(RING_C);
+
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  var state = {
+    tech: 'box',
+    minutes: 3,
+    running: false,
+    startedOnce: false,
+    startStamp: 0,       // performance.now() at (re)start
+    elapsedBase: 0,      // seconds banked before the current run segment
+    soundOn: false,
+    lastPhaseKeyIdx: -1,
+    rafId: 0
+  };
+
+  var audioCtx = null;
+
+  function ensureAudio() {
+    if (!state.soundOn) return;
+    try {
+      if (!audioCtx) {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) audioCtx = new AC();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    } catch (e) { audioCtx = null; }
+  }
+
+  function blip(freq, durSec, gainPeak) {
+    if (!state.soundOn || !audioCtx || audioCtx.state !== 'running') return;
+    try {
+      var t = audioCtx.currentTime;
+      var osc = audioCtx.createOscillator();
+      var g = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, t);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(gainPeak, t + 0.04);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + durSec);
+      osc.connect(g).connect(audioCtx.destination);
+      osc.start(t);
+      osc.stop(t + durSec + 0.05);
+    } catch (e) { /* audio is optional */ }
+  }
+
+  function phaseBlip(key) {
+    if (key === 'in') blip(523.25, 0.5, 0.06);
+    else if (key === 'out') blip(329.63, 0.6, 0.06);
+    else blip(392.0, 0.4, 0.045);
+  }
+
+  function endChime() {
+    blip(523.25, 0.9, 0.07);
+    setTimeout(function () { blip(659.25, 1.1, 0.07); }, 260);
+    setTimeout(function () { blip(783.99, 1.5, 0.06); }, 560);
+  }
+
+  function sessionSeconds() { return state.minutes * 60; }
+
+  function cycleInfo() {
+    var t = TECHNIQUES[state.tech];
+    var total = 0;
+    for (var i = 0; i < t.phases.length; i++) total += t.phases[i].dur;
+    return { tech: t, cycleDur: total };
+  }
+
+  function fmt(sec) {
+    sec = Math.max(0, Math.round(sec));
+    var m = Math.floor(sec / 60);
+    var s = sec % 60;
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function currentElapsed() {
+    if (!state.running) return state.elapsedBase;
+    return state.elapsedBase + (performance.now() - state.startStamp) / 1000;
+  }
+
+  function setOrbForPhase(phase) {
+    if (reduceMotion.matches) return; // orb stays static; text carries the session
+    var expand = phase.key === 'in' || phase.key === 'hold';
+    if (phase.key === 'hold' || phase.key === 'hold2') {
+      orb.style.transitionDuration = '0.45s';
+    } else {
+      orb.style.transitionDuration = phase.dur + 's';
+    }
+    orb.style.transform = 'scale(' + (expand ? 1 : 0.62) + ')';
+  }
+
+  function resetOrb() {
+    orb.style.transitionDuration = '0.8s';
+    if (!reduceMotion.matches) orb.style.transform = 'scale(0.62)';
+  }
+
+  function paintIdle() {
+    phaseLabel.textContent = 'Ready when you are';
+    phaseCount.textContent = '';
+    timeLeft.textContent = fmt(sessionSeconds());
+    ringFg.style.strokeDashoffset = '0';
+    resetOrb();
+  }
+
+  function tick() {
+    if (!state.running) return;
+    var elapsed = currentElapsed();
+    var total = sessionSeconds();
+
+    if (elapsed >= total) { finish(); return; }
+
+    var info = cycleInfo();
+    var pos = elapsed % info.cycleDur;
+    var acc = 0, idx = 0, phase = info.tech.phases[0];
+    for (var i = 0; i < info.tech.phases.length; i++) {
+      phase = info.tech.phases[i];
+      if (pos < acc + phase.dur) { idx = i; break; }
+      acc += phase.dur;
+    }
+    var globalIdx = Math.floor(elapsed / info.cycleDur) * info.tech.phases.length + idx;
+    if (globalIdx !== state.lastPhaseKeyIdx) {
+      state.lastPhaseKeyIdx = globalIdx;
+      phaseLabel.textContent = phase.label;
+      setOrbForPhase(phase);
+      phaseBlip(phase.key);
+    }
+    var remainInPhase = Math.ceil(acc + phase.dur - pos);
+    phaseCount.textContent = String(remainInPhase);
+    timeLeft.textContent = fmt(total - elapsed);
+    ringFg.style.strokeDashoffset = String(RING_C * (elapsed / total));
+
+    state.rafId = requestAnimationFrame(tick);
+  }
+
+  function breathsTaken() {
+    var info = cycleInfo();
+    return Math.floor(currentElapsed() / info.cycleDur);
+  }
+
+  function setPickersDisabled(disabled) {
+    techBtns.concat(durBtns).forEach(function (b) { b.disabled = disabled; });
+  }
+
+  function start() {
+    ensureAudio();
+    state.running = true;
+    state.startedOnce = true;
+    state.startStamp = performance.now();
+    state.lastPhaseKeyIdx = -1;
+    startBtn.textContent = 'Pause';
+    endBtn.hidden = false;
+    noteLine.textContent = '';
+    setPickersDisabled(true);
+    cancelAnimationFrame(state.rafId);
+    state.rafId = requestAnimationFrame(tick);
+  }
+
+  function pause(auto) {
+    if (!state.running) return;
+    state.elapsedBase = currentElapsed();
+    state.running = false;
+    cancelAnimationFrame(state.rafId);
+    startBtn.textContent = 'Resume';
+    phaseLabel.textContent = 'Paused';
+    phaseCount.textContent = '';
+    resetOrb();
+    noteLine.textContent = auto ? 'Paused while you were away — resume when ready.' : '';
+  }
+
+  function stopAll(showSummary) {
+    var breaths = breathsTaken();
+    var elapsed = currentElapsed();
+    state.running = false;
+    cancelAnimationFrame(state.rafId);
+    if (showSummary) {
+      sumBreaths.textContent = String(Math.max(breaths, 0));
+      sumMinutes.textContent = fmt(elapsed);
+      doneOverlay.hidden = false;
+      againBtn.focus();
+    }
+    state.elapsedBase = 0;
+    state.startedOnce = false;
+    state.lastPhaseKeyIdx = -1;
+    startBtn.textContent = 'Begin';
+    endBtn.hidden = true;
+    setPickersDisabled(false);
+    paintIdle();
+  }
+
+  function finish() {
+    endChime();
+    doneSub.textContent = 'Beautifully done. Notice how you feel.';
+    stopAll(true);
+  }
+
+  startBtn.addEventListener('click', function () {
+    if (state.running) pause(false);
+    else start();
+  });
+
+  endBtn.addEventListener('click', function () {
+    doneSub.textContent = 'Ended early — every mindful breath still counts.';
+    stopAll(true);
+  });
+
+  againBtn.addEventListener('click', function () {
+    doneOverlay.hidden = true;
+    startBtn.focus();
+  });
+
+  soundBtn.addEventListener('click', function () {
+    state.soundOn = !state.soundOn;
+    soundBtn.setAttribute('aria-pressed', String(state.soundOn));
+    soundBtn.textContent = state.soundOn ? '🔔 Sound on' : '🔔 Sound off';
+    if (state.soundOn) { ensureAudio(); blip(523.25, 0.35, 0.05); }
+  });
+
+  techBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      techBtns.forEach(function (b) { b.setAttribute('aria-pressed', 'false'); });
+      btn.setAttribute('aria-pressed', 'true');
+      state.tech = btn.getAttribute('data-tech');
+      paintIdle();
+    });
+  });
+
+  durBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      durBtns.forEach(function (b) { b.setAttribute('aria-pressed', 'false'); });
+      btn.setAttribute('aria-pressed', 'true');
+      state.minutes = parseInt(btn.getAttribute('data-min'), 10) || 3;
+      paintIdle();
+    });
+  });
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden && state.running) pause(true);
+  });
+
+  var onMotionChange = function () {
+    if (reduceMotion.matches) orb.style.transform = 'scale(0.82)';
+    else if (!state.running) orb.style.transform = 'scale(0.62)';
+  };
+  if (typeof reduceMotion.addEventListener === 'function') {
+    reduceMotion.addEventListener('change', onMotionChange);
+  }
+  onMotionChange();
+  paintIdle();
+})();
+</script>
+</body>
+</html>

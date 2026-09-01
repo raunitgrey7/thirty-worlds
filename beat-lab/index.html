@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beat Lab — Browser Drum Machine &amp; Synth</title>
+<meta name="description" content="A 16-step, 6-track drum machine with kick, snare, hats, clap, tom and cowbell, plus a playable pentatonic synth. Built on Tone.js — no install, just press power.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥁</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#131418;
+  --panel:#1c1e24;
+  --panel-2:#22252d;
+  --line:#2e323c;
+  --ink:#e8eaf0;
+  --dim:#8a90a0;
+  --led-kick:#ff5252;
+  --led-snare:#ffca3a;
+  --led-hat:#59e0ff;
+  --led-clap:#ff7ae0;
+  --led-tom:#ffa94d;
+  --led-cow:#8aff80;
+  --accent:#59e0ff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:
+    radial-gradient(1200px 600px at 70% -10%, rgba(89,224,255,.06), transparent 60%),
+    radial-gradient(900px 500px at 10% 110%, rgba(255,82,82,.05), transparent 60%),
+    var(--bg);
+  color:var(--ink);
+  font-family:"Space Grotesk",system-ui,sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+.hub-link{position:fixed;top:14px;left:14px;z-index:1000;padding:8px 14px;border-radius:999px;font:600 13px/1 Inter,system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(8px);background:rgba(15,15,25,.55);color:#fff;border:1px solid rgba(255,255,255,.25)}
+.hub-link:hover{background:rgba(30,30,45,.7)}
+.wrap{max-width:1100px;margin:0 auto;padding:64px 16px 48px}
+header.masthead{text-align:center;margin-bottom:28px}
+h1{
+  font-size:clamp(2rem,6vw,3.4rem);
+  letter-spacing:.06em;
+  margin:.2em 0 .1em;
+  font-weight:700;
+  text-transform:uppercase;
+}
+h1 .beat{color:var(--ink)}
+h1 .lab{color:var(--accent);text-shadow:0 0 18px rgba(89,224,255,.55)}
+.tagline{color:var(--dim);font-family:"JetBrains Mono",monospace;font-size:.85rem;margin:0;letter-spacing:.04em}
+.panel{
+  background:linear-gradient(180deg,var(--panel-2),var(--panel));
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:18px;
+  margin-bottom:22px;
+  box-shadow:0 12px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
+}
+.panel h2{
+  font-size:.8rem;
+  font-family:"JetBrains Mono",monospace;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--dim);
+  margin:0 0 14px;
+}
+/* Transport */
+.transport{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+button{font-family:inherit;cursor:pointer}
+.btn{
+  min-height:44px;min-width:44px;
+  padding:10px 18px;
+  border-radius:10px;
+  border:1px solid var(--line);
+  background:linear-gradient(180deg,#2a2e37,#1f222a);
+  color:var(--ink);
+  font-weight:600;
+  font-size:.9rem;
+  letter-spacing:.03em;
+  transition:transform .12s ease, box-shadow .12s ease, background .12s ease;
+}
+.btn:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(0,0,0,.35)}
+.btn:active{transform:translateY(1px)}
+.btn.play{
+  border-color:rgba(89,224,255,.4);
+  font-size:1rem;
+  padding:10px 22px;
+}
+.btn.play[aria-pressed="true"]{
+  background:linear-gradient(180deg,#0e5f72,#0a4757);
+  color:#c9f6ff;
+  box-shadow:0 0 18px rgba(89,224,255,.35), inset 0 1px 0 rgba(255,255,255,.1);
+}
+.btn:focus-visible, .cell:focus-visible, .pad:focus-visible, .power-btn:focus-visible, input:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:2px;
+}
+.bpm-box{display:flex;align-items:center;gap:12px;flex:1;min-width:230px}
+.bpm-box label{font-family:"JetBrains Mono",monospace;font-size:.75rem;letter-spacing:.1em;color:var(--dim)}
+#bpm{flex:1;min-width:120px;accent-color:var(--accent);height:44px}
+#bpm-val{
+  font-family:"JetBrains Mono",monospace;
+  font-size:1.1rem;
+  color:var(--accent);
+  min-width:3.4em;
+  text-align:right;
+  text-shadow:0 0 10px rgba(89,224,255,.5);
+}
+.presets{display:flex;flex-wrap:wrap;gap:10px}
+.btn.small{font-size:.8rem;padding:8px 14px}
+.btn.danger{border-color:rgba(255,82,82,.35);color:#ffb4b4}
+/* Sequencer */
+.seq{display:flex;gap:0}
+.labels{flex:0 0 auto;display:flex;flex-direction:column;gap:6px;padding-right:10px}
+.label-row{
+  height:44px;display:flex;align-items:center;gap:8px;
+  font-family:"JetBrains Mono",monospace;font-size:.72rem;letter-spacing:.05em;color:var(--dim);
+  white-space:nowrap;
+}
+.led{width:10px;height:10px;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c);flex:0 0 auto}
+.grid-scroll{overflow-x:auto;flex:1;padding-bottom:6px;-webkit-overflow-scrolling:touch}
+.rows{display:flex;flex-direction:column;gap:6px;width:max-content}
+.row{display:flex;gap:6px}
+.cell{
+  width:44px;height:44px;flex:0 0 auto;
+  border-radius:8px;
+  border:1px solid var(--line);
+  background:#191b21;
+  padding:0;
+  position:relative;
+  transition:transform .1s ease, background .1s ease, box-shadow .1s ease;
+  touch-action:manipulation;
+}
+.cell.q{border-left:2px solid #3c4150}
+.cell:hover{background:#232630}
+.cell[aria-pressed="true"]{
+  background:var(--c);
+  border-color:var(--c);
+  box-shadow:0 0 12px var(--c), inset 0 0 6px rgba(255,255,255,.35);
+}
+.cell.now{transform:scale(.92)}
+.cell.now::after{
+  content:"";position:absolute;inset:-3px;border-radius:10px;
+  border:2px solid rgba(255,255,255,.55);
+}
+.step-nums{display:flex;gap:6px;margin-bottom:8px;width:max-content}
+.step-nums span{
+  width:44px;text-align:center;
+  font-family:"JetBrains Mono",monospace;font-size:.65rem;color:var(--dim);
+}
+.step-nums span:nth-child(4n+1){color:var(--accent)}
+/* Pads */
+.pads{display:grid;grid-template-columns:repeat(8,minmax(44px,1fr));gap:10px}
+.pad{
+  aspect-ratio:1/1;
+  min-height:44px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background:linear-gradient(180deg,#262a33,#1b1e25);
+  color:var(--ink);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  font-weight:600;
+  transition:transform .1s ease, box-shadow .15s ease;
+  touch-action:none;
+  user-select:none;
+  -webkit-user-select:none;
+}
+.pad .note{font-size:.95rem}
+.pad kbd{
+  font-family:"JetBrains Mono",monospace;font-size:.65rem;color:var(--dim);
+  border:1px solid var(--line);border-radius:4px;padding:1px 5px;
+}
+.pad.lit{
+  transform:scale(.94);
+  background:linear-gradient(180deg,#0e5f72,#0a4757);
+  box-shadow:0 0 20px rgba(89,224,255,.55);
+  border-color:rgba(89,224,255,.6);
+}
+.hint{color:var(--dim);font-size:.8rem;margin:12px 0 0;font-family:"JetBrains Mono",monospace}
+footer{color:var(--dim);text-align:center;font-size:.75rem;font-family:"JetBrains Mono",monospace;padding:10px 0 30px}
+/* Power overlay */
+.overlay{
+  position:fixed;inset:0;z-index:2000;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+  background:rgba(10,11,14,.96);
+  backdrop-filter:blur(6px);
+  transition:opacity .45s ease;
+}
+.overlay.off{opacity:0;pointer-events:none}
+.power-btn{
+  width:150px;height:150px;border-radius:50%;
+  border:2px solid rgba(89,224,255,.5);
+  background:radial-gradient(circle at 50% 35%,#2a2e37,#14161b 70%);
+  color:var(--accent);
+  font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:1rem;letter-spacing:.14em;
+  text-transform:uppercase;
+  box-shadow:0 0 40px rgba(89,224,255,.25), inset 0 2px 0 rgba(255,255,255,.08);
+  transition:transform .15s ease, box-shadow .2s ease;
+  animation:pulse 2.2s ease-in-out infinite;
+}
+.power-btn:hover{transform:scale(1.05);box-shadow:0 0 60px rgba(89,224,255,.45)}
+.power-btn:active{transform:scale(.97)}
+@keyframes pulse{
+  0%,100%{box-shadow:0 0 30px rgba(89,224,255,.2)}
+  50%{box-shadow:0 0 55px rgba(89,224,255,.45)}
+}
+.overlay p{color:var(--dim);font-family:"JetBrains Mono",monospace;font-size:.8rem;max-width:34ch;text-align:center;line-height:1.6;margin:0;padding:0 16px}
+.overlay .err{color:#ffb4b4}
+@media (max-width:560px){
+  .pads{grid-template-columns:repeat(4,minmax(44px,1fr))}
+  .transport{gap:10px}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001s !important;animation-iteration-count:1 !important;transition-duration:.001s !important}
+}
+</style>
+</head>
+<body>
+<a class="hub-link" href="https://thirty-worlds.vercel.app/" aria-label="All thirty sites">← All 30</a>
+
+<div class="overlay" id="power-overlay">
+  <button class="power-btn" id="power-btn" type="button">⏻ Power<br>On</button>
+  <p id="power-msg">Browser audio needs one tap to wake up.<br>Headphones recommended.</p>
+</div>
+
+<div class="wrap">
+  <header class="masthead">
+    <h1><span class="beat">Beat</span> <span class="lab">Lab</span></h1>
+    <p class="tagline">16-step sequencer · 6 voices · pentatonic keys</p>
+  </header>
+
+  <main>
+    <section class="panel" aria-label="Transport controls">
+      <h2>Transport</h2>
+      <div class="transport">
+        <button class="btn play" id="play-btn" type="button" aria-pressed="false">▶ Play</button>
+        <div class="bpm-box">
+          <label for="bpm">Tempo</label>
+          <input type="range" id="bpm" min="60" max="180" value="112" step="1" aria-label="Tempo in beats per minute">
+          <span id="bpm-val" aria-live="off">112 BPM</span>
+        </div>
+        <div class="presets" role="group" aria-label="Pattern presets">
+          <button class="btn small" id="preset-house" type="button">House</button>
+          <button class="btn small" id="preset-boombap" type="button">Boom-bap</button>
+          <button class="btn small" id="preset-latin" type="button">Latin</button>
+          <button class="btn small danger" id="clear-btn" type="button">Clear</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-label="Step sequencer">
+      <h2>Sequencer</h2>
+      <div class="seq">
+        <div class="labels" id="labels" aria-hidden="true"></div>
+        <div class="grid-scroll">
+          <div class="step-nums" id="step-nums" aria-hidden="true"></div>
+          <div class="rows" id="seq-rows"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-label="Pentatonic synth pads">
+      <h2>Synth Pads — C minor pentatonic</h2>
+      <div class="pads" id="pads"></div>
+      <p class="hint">Tap the pads, or play keys A S D F G H J K.</p>
+    </section>
+  </main>
+
+  <footer>drum voices &amp; synth generated live by Tone.js — nothing sampled, nothing downloaded</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var STEPS = 16;
+  var TRACKS = [
+    { id: 'kick',    name: 'Kick',    color: 'var(--led-kick)'  },
+    { id: 'snare',   name: 'Snare',   color: 'var(--led-snare)' },
+    { id: 'hat',     name: 'Hi-hat',  color: 'var(--led-hat)'   },
+    { id: 'clap',    name: 'Clap',    color: 'var(--led-clap)'  },
+    { id: 'tom',     name: 'Tom',     color: 'var(--led-tom)'   },
+    { id: 'cowbell', name: 'Cowbell', color: 'var(--led-cow)'   }
+  ];
+
+  var PRESETS = {
+    house:   { bpm: 122, steps: { kick: [0,4,8,12], snare: [], hat: [2,6,10,14], clap: [4,12], tom: [], cowbell: [] } },
+    boombap: { bpm: 90,  steps: { kick: [0,7,10], snare: [4,12], hat: [0,2,4,6,8,10,12,14], clap: [], tom: [15], cowbell: [] } },
+    latin:   { bpm: 108, steps: { kick: [0,6,12], snare: [], hat: [2,6,10,14], clap: [0,3,6,10,12], tom: [10,15], cowbell: [0,4,8,12] } }
+  };
+
+  var PAD_NOTES = ['C4','Eb4','F4','G4','Bb4','C5','Eb5','F5'];
+  var PAD_KEYS  = ['a','s','d','f','g','h','j','k'];
+
+  var grid = TRACKS.map(function () {
+    var row = [];
+    for (var i = 0; i < STEPS; i++) row.push(false);
+    return row;
+  });
+
+  var started = false;
+  var playing = false;
+  var step = 0;
+  var prevCol = -1;
+  var voices = null;
+  var padSynth = null;
+  var cellEls = [];   // cellEls[track][step]
+  var padEls = [];
+
+  var overlay   = document.getElementById('power-overlay');
+  var powerBtn  = document.getElementById('power-btn');
+  var powerMsg  = document.getElementById('power-msg');
+  var playBtn   = document.getElementById('play-btn');
+  var bpmInput  = document.getElementById('bpm');
+  var bpmVal    = document.getElementById('bpm-val');
+  var labelsEl  = document.getElementById('labels');
+  var rowsEl    = document.getElementById('seq-rows');
+  var numsEl    = document.getElementById('step-nums');
+  var padsEl    = document.getElementById('pads');
+
+  // ---------- Build UI ----------
+  (function buildGrid() {
+    // step numbers
+    for (var s = 0; s < STEPS; s++) {
+      var num = document.createElement('span');
+      num.textContent = String(s + 1);
+      numsEl.appendChild(num);
+    }
+    // spacer so labels align with rows (step-nums height)
+    var spacer = document.createElement('div');
+    spacer.className = 'label-row';
+    spacer.style.height = numsEl.offsetHeight ? numsEl.offsetHeight + 'px' : '20px';
+    spacer.style.marginBottom = '2px';
+    labelsEl.appendChild(spacer);
+
+    TRACKS.forEach(function (track, t) {
+      var lab = document.createElement('div');
+      lab.className = 'label-row';
+      var led = document.createElement('span');
+      led.className = 'led';
+      led.style.setProperty('--c', track.color);
+      lab.appendChild(led);
+      lab.appendChild(document.createTextNode(track.name));
+      labelsEl.appendChild(lab);
+
+      var row = document.createElement('div');
+      row.className = 'row';
+      cellEls[t] = [];
+      for (var i = 0; i < STEPS; i++) {
+        (function (t, i) {
+          var cell = document.createElement('button');
+          cell.type = 'button';
+          cell.className = 'cell' + (i % 4 === 0 ? ' q' : '');
+          cell.style.setProperty('--c', track.color);
+          cell.setAttribute('aria-pressed', 'false');
+          cell.setAttribute('aria-label', track.name + ' step ' + (i + 1));
+          cell.addEventListener('click', function () {
+            grid[t][i] = !grid[t][i];
+            cell.setAttribute('aria-pressed', grid[t][i] ? 'true' : 'false');
+          });
+          row.appendChild(cell);
+          cellEls[t][i] = cell;
+        })(t, i);
+      }
+      rowsEl.appendChild(row);
+    });
+  })();
+
+  (function buildPads() {
+    PAD_NOTES.forEach(function (note, i) {
+      var pad = document.createElement('button');
+      pad.type = 'button';
+      pad.className = 'pad';
+      pad.setAttribute('aria-label', 'Play note ' + note);
+      var n = document.createElement('span');
+      n.className = 'note';
+      n.textContent = note.replace('b', '♭');
+      var k = document.createElement('kbd');
+      k.textContent = PAD_KEYS[i].toUpperCase();
+      pad.appendChild(n);
+      pad.appendChild(k);
+      pad.addEventListener('pointerdown', function (e) {
+        e.preventDefault();
+        playPad(i);
+      });
+      pad.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          playPad(i);
+        }
+      });
+      padsEl.appendChild(pad);
+      padEls.push(pad);
+    });
+  })();
+
+  // ---------- Audio ----------
+  function buildVoices() {
+    var kick = new Tone.MembraneSynth({
+      pitchDecay: 0.05, octaves: 6,
+      envelope: { attack: 0.001, decay: 0.4, sustain: 0.01, release: 0.6 }
+    }).toDestination();
+    kick.volume.value = -2;
+
+    var snare = new Tone.NoiseSynth({
+      noise: { type: 'white' },
+      envelope: { attack: 0.001, decay: 0.18, sustain: 0 }
+    }).toDestination();
+    snare.volume.value = -8;
+
+    var hat = new Tone.MetalSynth({
+      envelope: { attack: 0.001, decay: 0.05, release: 0.02 },
+      harmonicity: 5.1, modulationIndex: 32, resonance: 4000, octaves: 1.5
+    }).toDestination();
+    hat.volume.value = -18;
+
+    var clapFilter = new Tone.Filter({ frequency: 1100, type: 'bandpass', Q: 1.4 }).toDestination();
+    var clap = new Tone.NoiseSynth({
+      noise: { type: 'pink' },
+      envelope: { attack: 0.002, decay: 0.16, sustain: 0 }
+    }).connect(clapFilter);
+    clap.volume.value = -2;
+
+    var tom = new Tone.MembraneSynth({
+      pitchDecay: 0.09, octaves: 3,
+      envelope: { attack: 0.001, decay: 0.3, sustain: 0.01, release: 0.4 }
+    }).toDestination();
+    tom.volume.value = -5;
+
+    var cowbell = new Tone.MetalSynth({
+      envelope: { attack: 0.001, decay: 0.25, release: 0.05 },
+      harmonicity: 4.1, modulationIndex: 16, resonance: 3200, octaves: 0.6
+    }).toDestination();
+    cowbell.volume.value = -14;
+
+    voices = {
+      kick:    function (time, v) { kick.triggerAttackRelease('C1', '8n', time, v); },
+      snare:   function (time, v) { snare.triggerAttackRelease('16n', time, v); },
+      hat:     function (time, v) { hat.triggerAttackRelease(250, '64n', time, v * 0.8); },
+      clap:    function (time, v) { clap.triggerAttackRelease('16n', time, v); },
+      tom:     function (time, v) { tom.triggerAttackRelease('A2', '8n', time, v); },
+      cowbell: function (time, v) { cowbell.triggerAttackRelease(540, '16n', time, v * 0.8); }
+    };
+
+    var delay = new Tone.FeedbackDelay('8n', 0.22).toDestination();
+    delay.wet.value = 0.18;
+    padSynth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'triangle' },
+      envelope: { attack: 0.004, decay: 0.15, sustain: 0.25, release: 0.5 }
+    }).connect(delay);
+    padSynth.toDestination();
+    padSynth.volume.value = -6;
+
+    Tone.Transport.bpm.value = parseInt(bpmInput.value, 10);
+    Tone.Transport.scheduleRepeat(onStep, '16n');
+  }
+
+  function onStep(time) {
+    var col = step % STEPS;
+    var accent = (col % 4 === 0) ? 1 : 0.72;
+    for (var t = 0; t < TRACKS.length; t++) {
+      if (grid[t][col]) voices[TRACKS[t].id](time, accent);
+    }
+    Tone.Draw.schedule(function () { paintColumn(col); }, time);
+    step++;
+  }
+
+  function paintColumn(col) {
+    var t;
+    if (prevCol >= 0) {
+      for (t = 0; t < TRACKS.length; t++) cellEls[t][prevCol].classList.remove('now');
+    }
+    for (t = 0; t < TRACKS.length; t++) cellEls[t][col].classList.add('now');
+    prevCol = col;
+  }
+
+  function clearColumnPaint() {
+    if (prevCol >= 0) {
+      for (var t = 0; t < TRACKS.length; t++) cellEls[t][prevCol].classList.remove('now');
+      prevCol = -1;
+    }
+  }
+
+  function playPad(i) {
+    if (!started || !padSynth) return;
+    try { padSynth.triggerAttackRelease(PAD_NOTES[i], '8n'); } catch (e) { /* voice overflow safe-guard */ }
+    var pad = padEls[i];
+    pad.classList.add('lit');
+    window.setTimeout(function () { pad.classList.remove('lit'); }, 160);
+  }
+
+  // ---------- Controls ----------
+  function setPattern(name) {
+    var p = PRESETS[name];
+    TRACKS.forEach(function (track, t) {
+      var on = p.steps[track.id];
+      for (var i = 0; i < STEPS; i++) {
+        grid[t][i] = on.indexOf(i) !== -1;
+        cellEls[t][i].setAttribute('aria-pressed', grid[t][i] ? 'true' : 'false');
+      }
+    });
+    bpmInput.value = String(p.bpm);
+    bpmVal.textContent = p.bpm + ' BPM';
+    if (started) Tone.Transport.bpm.value = p.bpm;
+  }
+
+  function clearPattern() {
+    TRACKS.forEach(function (_track, t) {
+      for (var i = 0; i < STEPS; i++) {
+        grid[t][i] = false;
+        cellEls[t][i].setAttribute('aria-pressed', 'false');
+      }
+    });
+  }
+
+  document.getElementById('preset-house').addEventListener('click', function () { setPattern('house'); });
+  document.getElementById('preset-boombap').addEventListener('click', function () { setPattern('boombap'); });
+  document.getElementById('preset-latin').addEventListener('click', function () { setPattern('latin'); });
+  document.getElementById('clear-btn').addEventListener('click', clearPattern);
+
+  bpmInput.addEventListener('input', function () {
+    var v = parseInt(bpmInput.value, 10);
+    bpmVal.textContent = v + ' BPM';
+    if (started) Tone.Transport.bpm.value = v;
+  });
+
+  playBtn.addEventListener('click', function () {
+    if (!started) return;
+    if (!playing) {
+      step = 0;
+      Tone.Transport.start();
+      playing = true;
+      playBtn.setAttribute('aria-pressed', 'true');
+      playBtn.textContent = '■ Stop';
+    } else {
+      Tone.Transport.stop();
+      playing = false;
+      playBtn.setAttribute('aria-pressed', 'false');
+      playBtn.textContent = '▶ Play';
+      clearColumnPaint();
+    }
+  });
+
+  // Keyboard pads
+  document.addEventListener('keydown', function (e) {
+    if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+    var tag = (e.target && e.target.tagName) || '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    var idx = PAD_KEYS.indexOf(e.key.toLowerCase());
+    if (idx !== -1) playPad(idx);
+  });
+
+  // ---------- Power on ----------
+  var toneLoaded = (typeof Tone !== 'undefined');
+  if (!toneLoaded) {
+    powerMsg.innerHTML = '<span class="err">The audio engine (Tone.js) failed to load.<br>Check your connection and refresh.</span>';
+  }
+
+  powerBtn.addEventListener('click', function () {
+    if (!toneLoaded || started) return;
+    Tone.start().then(function () {
+      buildVoices();
+      started = true;
+      overlay.classList.add('off');
+      overlay.setAttribute('aria-hidden', 'true');
+      // default groove so first Play isn't silence
+      setPattern('house');
+      playBtn.focus();
+    }).catch(function () {
+      powerMsg.innerHTML = '<span class="err">Could not start audio. Tap again, or check that this tab is allowed to play sound.</span>';
+    });
+  });
+
+  // Be polite in background tabs: stop transport sounds from stacking UI paints
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) clearColumnPaint();
+  });
+})();
+</script>
+</body>
+</html>

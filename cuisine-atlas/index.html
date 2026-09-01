@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>World Cuisine Atlas — Sixteen Food Cultures</title>
+<meta name="description" content="An editorial atlas of sixteen world cuisines — signature dishes, key ingredients, spice levels and food-culture facts from Italy to Ethiopia, Peru to Korea.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍜</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#f8f1e3;
+    --cream-2:#fffaf0;
+    --ink:#312014;
+    --ink-soft:#5c4632;
+    --terra:#bc4b26;
+    --terra-deep:#8f3417;
+    --olive:#6b6b34;
+    --line:#e0cfae;
+    --gold:#b98a2e;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{
+    margin:0;
+    font-family:Inter,system-ui,sans-serif;
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(188,75,38,.08), transparent 60%),
+      radial-gradient(900px 500px at -10% 30%, rgba(185,138,46,.09), transparent 55%),
+      var(--cream);
+    color:var(--ink);
+    line-height:1.55;
+    overflow-x:clip;
+  }
+  .hub-link{position:fixed;top:14px;left:14px;z-index:1000;padding:8px 14px;border-radius:999px;font:600 13px/1 Inter,system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(8px);background:rgba(49,32,20,.78);color:#fff;border:1px solid rgba(255,255,255,.25)}
+  .hub-link:hover{background:rgba(143,52,23,.9)}
+  a:focus-visible,button:focus-visible,input:focus-visible,[role="button"]:focus-visible{
+    outline:3px solid var(--terra);outline-offset:3px;border-radius:6px;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    max-width:1100px;margin:0 auto;padding:96px 24px 30px;text-align:center;
+  }
+  .hero .kicker{
+    display:inline-block;font:600 12px/1 Inter,sans-serif;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--terra-deep);border-top:1px solid var(--terra);border-bottom:1px solid var(--terra);
+    padding:8px 4px;margin-bottom:22px;
+  }
+  h1{
+    font-family:"Playfair Display",Georgia,serif;font-weight:700;
+    font-size:clamp(2.4rem,7.5vw,4.6rem);line-height:1.05;margin:0 0 14px;
+    color:var(--ink);
+  }
+  h1 em{font-style:italic;color:var(--terra)}
+  .hero p.lede{
+    max-width:620px;margin:0 auto;color:var(--ink-soft);font-size:clamp(1rem,2.3vw,1.15rem);
+  }
+  .hero .rule{
+    display:flex;align-items:center;gap:14px;justify-content:center;margin:26px auto 0;color:var(--gold);
+  }
+  .hero .rule::before,.hero .rule::after{content:"";height:1px;width:min(120px,22vw);background:var(--line)}
+
+  /* ---------- Controls ---------- */
+  .controls{
+    position:sticky;top:0;z-index:50;
+    background:rgba(248,241,227,.92);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+    padding:12px 16px;
+  }
+  .controls-inner{max-width:1100px;margin:0 auto;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center}
+  .search-wrap{position:relative;flex:1 1 240px;max-width:340px;min-width:200px}
+  .search-wrap svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;fill:var(--ink-soft);pointer-events:none}
+  #search{
+    width:100%;min-height:44px;padding:10px 14px 10px 38px;border-radius:999px;
+    border:1.5px solid var(--line);background:var(--cream-2);color:var(--ink);
+    font:500 15px/1.2 Inter,sans-serif;
+  }
+  #search::placeholder{color:#9a7f61}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+  .chip{
+    min-height:44px;padding:10px 18px;border-radius:999px;cursor:pointer;
+    border:1.5px solid var(--line);background:var(--cream-2);color:var(--ink-soft);
+    font:600 13.5px/1 Inter,sans-serif;transition:background .2s,color .2s,border-color .2s;
+  }
+  .chip:hover{border-color:var(--terra)}
+  .chip[aria-pressed="true"]{background:var(--terra);border-color:var(--terra);color:#fff}
+
+  /* ---------- Grid ---------- */
+  main{max-width:1180px;margin:0 auto;padding:28px 20px 40px}
+  .count{font:600 12px/1 Inter,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);text-align:center;margin:6px 0 22px}
+  .grid{
+    display:grid;gap:22px;
+    grid-template-columns:repeat(auto-fill,minmax(min(285px,100%),1fr));
+  }
+  .card{
+    background:var(--cream-2);border:1px solid var(--line);border-radius:16px;
+    padding:22px 22px 18px;cursor:pointer;position:relative;
+    box-shadow:0 1px 2px rgba(90,60,30,.07);
+    display:flex;flex-direction:column;gap:12px;
+    transition:transform .35s cubic-bezier(.2,.7,.3,1),box-shadow .35s,opacity .6s,border-color .2s;
+  }
+  .card.pre{opacity:0;transform:translateY(26px)}
+  .card:hover{transform:translateY(-4px);box-shadow:0 14px 28px -14px rgba(90,45,20,.35);border-color:#d8b98a}
+  .card:hover .more{color:var(--terra-deep)}
+  .card-top{display:flex;align-items:flex-start;gap:14px}
+  .card-emoji{
+    font-size:2rem;line-height:1;flex:none;width:58px;height:58px;display:grid;place-items:center;
+    background:linear-gradient(160deg,#fdf3df,#f3e2c2);border:1px solid var(--line);border-radius:14px;
+  }
+  .card-title h3{font-family:"Playfair Display",Georgia,serif;font-size:1.35rem;font-weight:700;margin:0;line-height:1.15}
+  .card-title .continent{font:600 11px/1 Inter,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-top:5px;display:block}
+  .dish{border-left:3px solid var(--terra);padding:2px 0 2px 12px}
+  .dish .label{font:600 10.5px/1 Inter,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--terra-deep);display:block;margin-bottom:3px}
+  .dish .name{font-family:"Playfair Display",Georgia,serif;font-style:italic;font-size:1.06rem;color:var(--ink)}
+  .card p.desc{margin:0;font-size:.92rem;color:var(--ink-soft)}
+  .ingredients{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 0;padding:0;list-style:none}
+  .ingredients li{
+    font:500 12px/1 Inter,sans-serif;color:var(--olive);
+    background:rgba(107,107,52,.1);border:1px solid rgba(107,107,52,.22);
+    border-radius:999px;padding:6px 10px;
+  }
+  .badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto;padding-top:10px;border-top:1px dashed var(--line);align-items:center}
+  .badge{font:600 12px/1 Inter,sans-serif;border-radius:8px;padding:7px 10px}
+  .badge.veg{background:rgba(76,110,52,.12);color:#3f5c2a;border:1px solid rgba(76,110,52,.3)}
+  .badge.spice{background:rgba(188,75,38,.1);color:var(--terra-deep);border:1px solid rgba(188,75,38,.3)}
+  .more{margin-left:auto;font:600 12px/1 Inter,sans-serif;color:var(--ink-soft)}
+  .empty{
+    text-align:center;padding:60px 20px;color:var(--ink-soft);
+    font-family:"Playfair Display",Georgia,serif;font-size:1.3rem;font-style:italic;
+  }
+
+  /* ---------- Modal ---------- */
+  .overlay{
+    position:fixed;inset:0;z-index:1100;display:grid;place-items:center;padding:18px;
+    background:rgba(49,32,20,.55);backdrop-filter:blur(4px);
+    opacity:1;transition:opacity .25s;
+  }
+  .overlay[hidden]{display:none}
+  .overlay.closing{opacity:0}
+  .modal{
+    width:min(560px,100%);max-height:min(84vh,760px);overflow-y:auto;
+    background:var(--cream-2);border:1px solid var(--line);border-radius:20px;
+    padding:30px 28px 26px;position:relative;
+    box-shadow:0 30px 60px -20px rgba(40,20,5,.5);
+    transform:translateY(0);opacity:1;
+    transition:transform .3s cubic-bezier(.2,.7,.3,1),opacity .3s;
+  }
+  .overlay.closing .modal{transform:translateY(14px);opacity:0}
+  .modal .m-emoji{font-size:2.6rem;line-height:1}
+  .modal h2{font-family:"Playfair Display",Georgia,serif;font-size:2rem;margin:8px 0 2px;line-height:1.1}
+  .modal .m-dish{font-family:"Playfair Display",Georgia,serif;font-style:italic;color:var(--terra-deep);font-size:1.1rem;margin:0 0 14px}
+  .modal .m-desc{color:var(--ink-soft);font-size:.95rem;margin:0 0 18px}
+  .factbox{
+    background:linear-gradient(160deg,#fdf1da,#f6e3c0);
+    border:1px solid #e5cd9c;border-radius:14px;padding:18px 18px 16px;
+  }
+  .factbox .f-label{font:700 11px/1 Inter,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:var(--terra-deep);display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .factbox p{margin:0;font-size:.94rem;color:var(--ink)}
+  .m-close{
+    position:sticky;top:0;float:right;margin:-12px -10px 0 0;
+    width:44px;height:44px;border-radius:50%;border:1px solid var(--line);
+    background:var(--cream);color:var(--ink);font-size:20px;line-height:1;cursor:pointer;
+  }
+  .m-close:hover{background:var(--terra);color:#fff;border-color:var(--terra)}
+  .m-badges{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
+
+  footer{
+    border-top:1px solid var(--line);margin-top:30px;padding:34px 20px 90px;text-align:center;color:var(--ink-soft);
+    font-size:.86rem;
+  }
+  footer .sig{font-family:"Playfair Display",Georgia,serif;font-style:italic;font-size:1.05rem;color:var(--ink);margin-bottom:6px}
+
+  @media (max-width:420px){
+    .card{padding:18px 16px 14px}
+    .hero{padding-top:84px}
+  }
+  @media (min-width:2200px){
+    main,.controls-inner,.hero{max-width:1500px}
+    body{font-size:18px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .card,.modal,.overlay{transition:none}
+    .card.pre{opacity:1;transform:none}
+    .card:hover{transform:none}
+  }
+</style>
+</head>
+<body>
+<a class="hub-link" href="https://thirty-worlds.vercel.app/" aria-label="All thirty sites">← All 30</a>
+
+<header class="hero">
+  <span class="kicker">Thirty Worlds · Food Cultures</span>
+  <h1>World <em>Cuisine</em> Atlas</h1>
+  <p class="lede">Sixteen food cultures, from the injera tables of Addis Ababa to the cevicherías of Lima. Every cuisine is a library — here is a first shelf.</p>
+  <div class="rule" aria-hidden="true">✦</div>
+</header>
+
+<nav class="controls" aria-label="Filter and search cuisines">
+  <div class="controls-inner">
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+      <label for="search" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Search cuisines</label>
+      <input id="search" type="search" placeholder="Search dish, country, ingredient…" autocomplete="off">
+    </div>
+    <div class="chips" role="group" aria-label="Filter by continent">
+      <button class="chip" data-continent="all" aria-pressed="true">All</button>
+      <button class="chip" data-continent="Europe" aria-pressed="false">Europe</button>
+      <button class="chip" data-continent="Asia" aria-pressed="false">Asia</button>
+      <button class="chip" data-continent="Africa" aria-pressed="false">Africa</button>
+      <button class="chip" data-continent="Americas" aria-pressed="false">Americas</button>
+    </div>
+  </div>
+</nav>
+
+<main id="main">
+  <p class="count" id="count" role="status">16 cuisines</p>
+  <div class="grid" id="grid"></div>
+  <p class="empty" id="empty" hidden>No dishes on this table — try another search.</p>
+</main>
+
+<footer>
+  <p class="sig">“Tell me what you eat, and I shall tell you what you are.”</p>
+  <p>— Jean Anthelme Brillat-Savarin, 1825 · Part of the <a href="/" style="color:var(--terra-deep)">Thirty Worlds</a> collection</p>
+</footer>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle" id="modal">
+    <button class="m-close" id="mClose" aria-label="Close details">✕</button>
+    <div class="m-emoji" id="mEmoji" aria-hidden="true"></div>
+    <h2 id="mTitle"></h2>
+    <p class="m-dish" id="mDish"></p>
+    <div class="m-badges" id="mBadges"></div>
+    <p class="m-desc" id="mDesc"></p>
+    <div class="factbox">
+      <div class="f-label"><span aria-hidden="true">✦</span> Did you know?</div>
+      <p id="mFact"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var CUISINES = [
+    {
+      name: "Italy", emoji: "🍝", continent: "Europe",
+      dish: "Pizza Margherita",
+      desc: "Italian cooking is fiercely regional — Ligurian pesto, Neapolitan pizza, Bolognese ragù — yet united by a philosophy of few ingredients treated with respect. Meals unfold in courses, from antipasti to dolce, and food is inseparable from family and place.",
+      ingredients: ["Olive oil", "San Marzano tomatoes", "Parmigiano-Reggiano", "Basil"],
+      veg: "Excellent", spice: 1,
+      fact: "True Neapolitan pizza follows strict rules — a wood-fired oven near 485 °C and a bake of roughly 60–90 seconds — and in 2017 UNESCO inscribed the art of the Neapolitan pizzaiuolo as Intangible Cultural Heritage. The Margherita's tomato, mozzarella and basil are popularly said to echo the Italian flag, honoring Queen Margherita's 1889 visit to Naples. Italy also counts over 300 recognized pasta shapes, each engineered to hold a particular sauce."
+    },
+    {
+      name: "Japan", emoji: "🍣", continent: "Asia",
+      dish: "Sushi",
+      desc: "Japanese cuisine, washoku, prizes seasonality, presentation and umami — the savory fifth taste drawn from dashi broth of kombu and katsuobushi. From a bowl of ramen to a formal kaiseki dinner, restraint and balance guide every plate.",
+      ingredients: ["Short-grain rice", "Nori", "Soy sauce", "Dashi"],
+      veg: "Moderate", spice: 1,
+      fact: "Umami was identified in 1908 by chemist Kikunae Ikeda, who isolated glutamate from kombu seaweed and named the taste from umai, 'delicious'. Sushi began centuries earlier as narezushi — fish preserved in fermented rice — before Edo-period street stalls turned nigiri into fast food. Washoku itself was inscribed on UNESCO's Intangible Cultural Heritage list in 2013."
+    },
+    {
+      name: "India", emoji: "🍛", continent: "Asia",
+      dish: "Biryani",
+      desc: "Indian food is a continent's worth of cuisines — Punjabi tandoor breads, Bengali fish curries, South Indian dosas with sambar — built on freshly ground spice blends called masalas. Vegetarian traditions run deeper here than almost anywhere on Earth, rooted in centuries of religious and regional practice.",
+      ingredients: ["Garam masala", "Basmati rice", "Lentils", "Ghee"],
+      veg: "Excellent", spice: 3,
+      fact: "Generic 'curry powder' is largely a British-era export invention — Indian kitchens toast and grind masalas fresh for each dish, and the blends differ house to house. India is the world's largest producer and consumer of spices, and a traditional thali aims to balance all six tastes recognized in Ayurveda: sweet, sour, salty, bitter, pungent and astringent — on a single platter."
+    },
+    {
+      name: "Mexico", emoji: "🌮", continent: "Americas",
+      dish: "Tacos al pastor",
+      desc: "Mexican cuisine layers Indigenous foundations — corn, beans, chiles and squash — with centuries of exchange, from Spanish pork to Lebanese shawarma that became tacos al pastor. In 2010 UNESCO recognized traditional Mexican cookery, centered on the milpa farming system, as Intangible Cultural Heritage.",
+      ingredients: ["Corn masa", "Chiles", "Black beans", "Lime"],
+      veg: "Good", spice: 3,
+      fact: "Nixtamalization — simmering corn with slaked lime or wood ash — was developed in Mesoamerica thousands of years ago. It loosens the hulls, deepens the flavor and unlocks the corn's niacin, making tortillas nutritionally complete in ways plain cornmeal is not. Tacos al pastor descend from shawarma brought by Lebanese immigrants in the early 1900s, reimagined with pork, chile adobo and pineapple on the spinning trompo."
+    },
+    {
+      name: "Thailand", emoji: "🍲", continent: "Asia",
+      dish: "Tom yum goong",
+      desc: "Thai cooking balances four pillars — hot, sour, salty, sweet — often in a single spoonful, sharpened with fish sauce, lime, palm sugar and chilies. Regional tables differ sharply: fiery northeastern som tam, coconut-rich southern curries, northern khao soi.",
+      ingredients: ["Fish sauce", "Lemongrass", "Galangal", "Bird's-eye chili"],
+      veg: "Moderate", spice: 4,
+      fact: "Pad thai was championed as a national dish in the late 1930s and 40s under Prime Minister Plaek Phibunsongkhram, promoted partly to build a shared Thai identity and stretch rice supplies by encouraging noodles. And despite the chopstick stereotype, most Thai food is eaten with a spoon in the right hand — the fork's only job is to push food onto it."
+    },
+    {
+      name: "France", emoji: "🥖", continent: "Europe",
+      dish: "Coq au vin",
+      desc: "French cuisine codified much of the professional kitchen — the mother sauces, mise en place, the brigade system — yet its soul lives in regional home cooking, from Provençal ratatouille to Burgundian stews. The 'gastronomic meal of the French', a shared ritual of courses and conviviality, is UNESCO-listed.",
+      ingredients: ["Butter", "Shallots", "Red wine", "Thyme & bay"],
+      veg: "Moderate", spice: 1,
+      fact: "In 2022 UNESCO added the artisanal know-how and culture of baguette bread to its heritage list. France bakes billions of baguettes a year, and by a 1993 decree a 'baguette de tradition' may contain only flour, water, salt and leavening — no additives, no freezing — and must be made where it is sold. The gastronomic meal of the French was inscribed earlier still, in 2010."
+    },
+    {
+      name: "Morocco", emoji: "🫖", continent: "Africa",
+      dish: "Chicken tagine with preserved lemon & olives",
+      desc: "Moroccan cooking is slow and aromatic: conical tagine pots trap steam so meat and vegetables braise gently with saffron, ginger and preserved lemon. It draws on Amazigh, Arab, Andalusi and Jewish traditions, sweetened with dried fruit and warmed with ras el hanout.",
+      ingredients: ["Preserved lemon", "Ras el hanout", "Olives", "Couscous"],
+      veg: "Good", spice: 2,
+      fact: "Couscous — semolina hand-rolled and steamed over broth, traditionally shared from one dish after Friday prayers — was inscribed by UNESCO in 2020 through a rare joint nomination by Morocco, Algeria, Tunisia and Mauritania. Mint tea, poured from a height to raise a crown of foam, is the ritual of hospitality; guests are traditionally offered three glasses, each steep a little different."
+    },
+    {
+      name: "Ethiopia", emoji: "🫓", continent: "Africa",
+      dish: "Doro wat with injera",
+      desc: "Ethiopian meals gather around injera, a tangy sourdough flatbread of fermented teff that serves as plate, utensil and food at once. Rich stews called wat are built on berbere spice and niter kibbeh spiced butter, and Orthodox fasting days sustain one of the world's great vegan repertoires.",
+      ingredients: ["Teff", "Berbere", "Niter kibbeh", "Red lentils"],
+      veg: "Excellent", spice: 3,
+      fact: "Injera works as tablecloth, plate and fork in one: stews are ladled straight onto the spongy bread and diners tear pieces to scoop each bite — finishing the 'plate' is part of the meal. Gursha, placing a choice morsel directly into a companion's mouth, is an act of affection and respect; the larger the gursha, the stronger the bond. Ethiopia is also widely regarded as the birthplace of coffee, honored in the slow, incense-scented buna ceremony."
+    },
+    {
+      name: "Peru", emoji: "🐟", continent: "Americas",
+      dish: "Ceviche",
+      desc: "Peruvian cuisine spans coast, Andes and Amazon, marrying Indigenous staples — potatoes, corn, ají peppers — with Spanish, African, Chinese and Japanese influences in chifa and nikkei cooking. Lima is often called the gastronomic capital of South America.",
+      ingredients: ["Lime", "Ají amarillo", "Red onion", "Sweet potato"],
+      veg: "Good", spice: 2,
+      fact: "The Andes are the potato's homeland: Peru cultivates thousands of native varieties in purples, golds and reds, many growing nowhere else. In ceviche the fish 'cooks' in citrus in minutes; the leftover marinade, leche de tigre — 'tiger's milk' — is drunk as a bracing tonic and reputed hangover cure. Peru's ceviche traditions were inscribed by UNESCO in 2023."
+    },
+    {
+      name: "Turkey", emoji: "🥙", continent: "Asia",
+      dish: "İskender kebap",
+      desc: "Turkish cuisine inherits the Ottoman palace kitchens and Anatolia's crossroads position between Europe and Asia: lavish meze spreads, charcoal kebaps, stuffed vegetables called dolma, and syrup-soaked baklava. Yogurt — a Turkish word — appears everywhere, from soups to sauces.",
+      ingredients: ["Yogurt", "Eggplant", "Lamb", "Pepper paste (biber salçası)"],
+      veg: "Good", spice: 2,
+      fact: "Turkish coffee — thick, unfiltered, brewed slowly in a cezve and read for fortunes in its grounds — was inscribed by UNESCO in 2013. And the beloved eggplant dish imam bayıldı means 'the imam fainted': from sheer pleasure at the taste, or from shock at how much olive oil it took, depending on who tells the story."
+    },
+    {
+      name: "Korea", emoji: "🥢", continent: "Asia",
+      dish: "Bibimbap",
+      desc: "Korean meals center on rice, soup and a constellation of banchan side dishes, with fermentation at the heart — kimchi, doenjang, gochujang. Flavors run deep and communal: tabletop barbecue, bubbling jjigae stews, dishes shared from the middle of the table.",
+      ingredients: ["Gochujang", "Kimchi", "Sesame oil", "Garlic"],
+      veg: "Good", spice: 3,
+      fact: "Kimjang — the communal late-autumn kimchi-making when families and neighbors put up winter's supply together — was inscribed by UNESCO in 2013 as a practice of sharing and solidarity. There are hundreds of documented kimchi varieties beyond napa cabbage, from cubed radish kkakdugi to water kimchi, and many Korean homes run a dedicated kimchi refrigerator tuned to fermentation temperatures."
+    },
+    {
+      name: "Greece", emoji: "🫒", continent: "Europe",
+      dish: "Moussaka",
+      desc: "Greek food is the Mediterranean diet at its most elemental: olive oil, wild greens, legumes, seafood, honey, and sheep's and goat's cheese. Meals are long and shared — mezedes with ouzo, whole fish grilled with lemon, and a wish of kali orexi to begin.",
+      ingredients: ["Olive oil", "Feta", "Oregano", "Eggplant"],
+      veg: "Excellent", spice: 1,
+      fact: "Feta, brined and sharp, carries EU protected-designation status: to bear the name it must be made in specific Greek regions, mainly from sheep's milk. The olive was sacred in antiquity — myth says Athena won the patronage of Athens by gifting the first olive tree, and victors at the ancient Olympic Games were crowned with wild olive. The Mediterranean diet itself is UNESCO-listed."
+    },
+    {
+      name: "Vietnam", emoji: "🍜", continent: "Asia",
+      dish: "Phở",
+      desc: "Vietnamese cuisine is built on freshness and balance: rice noodles, fish sauce called nước mắm, and heaps of raw herbs — mint, cilantro, Thai basil — added at the table. French colonial exchange left its mark too, most famously in the bánh mì baguette sandwich.",
+      ingredients: ["Rice noodles", "Fish sauce", "Star anise", "Fresh herbs"],
+      veg: "Moderate", spice: 2,
+      fact: "Phở emerged in and around Hanoi in the early twentieth century, its broth simmered for hours with charred onion, ginger, star anise and cinnamon. The two schools still differ: northern phở stays spare and clear with little garnish, while southern phở arrives with a garden of herbs, bean sprouts, lime and sauces. Breakfast is its classic hour — phở stalls fill at dawn."
+    },
+    {
+      name: "Lebanon", emoji: "🧆", continent: "Asia",
+      dish: "Kibbeh",
+      desc: "Lebanese dining is the art of mezze: dozens of small plates — hummus, tabbouleh, labneh, fattoush, kibbeh — meant for hours of shared conversation. Bright with lemon, parsley, mint and olive oil, it is one of the region's most vegetable-forward tables.",
+      ingredients: ["Chickpeas", "Tahini", "Bulgur", "Flat-leaf parsley"],
+      veg: "Excellent", spice: 1,
+      fact: "Real tabbouleh is a parsley salad, not a grain salad: mountains of finely chopped parsley and mint with only a scatter of soaked bulgur, tomato and lemon. Kibbeh — bulgur pounded with meat and spices, shaped into torpedoes or baked in trays — is widely held to be Lebanon's national dish, and hospitality custom insists the table offer more than any guest could possibly finish."
+    },
+    {
+      name: "Brazil", emoji: "🍖", continent: "Americas",
+      dish: "Feijoada",
+      desc: "Brazilian food mirrors the country's Indigenous, Portuguese and African roots: cassava in every form, moqueca fish stew with dendê palm oil, pão de queijo cheese bread, and churrasco grilling. Portions and hospitality both run generous.",
+      ingredients: ["Black beans", "Cassava (farofa)", "Collard greens", "Orange"],
+      veg: "Moderate", spice: 1,
+      fact: "Feijoada — black beans slow-cooked with cuts of pork — is by tradition a Wednesday and Saturday lunch, served with rice, toasted-cassava farofa, sautéed collards and orange slices said to aid digestion, ideally followed by a long, unhurried afternoon. Açaí, the Amazonian palm fruit eaten savory with fish in Pará for generations, went on to conquer the world as a frozen smoothie bowl."
+    },
+    {
+      name: "Nigeria", emoji: "🍚", continent: "Africa",
+      dish: "Jollof rice",
+      desc: "Nigerian cooking is bold and celebratory: smoky jollof rice, egusi soup with pounded yam, suya skewers dusted with yaji spice, and pepper soup that earns its name. Food anchors every gathering — no owambe party is complete without jollof.",
+      ingredients: ["Scotch bonnet", "Tomatoes", "Yam", "Egusi (melon seed)"],
+      veg: "Good", spice: 4,
+      fact: "The 'Jollof Wars' — a good-natured rivalry over whose jollof reigns supreme, above all Nigeria versus Ghana — flare up across West African social media every year. The dish traces back to thieboudienne of the Senegambia region, named for the Wolof (Jolof) empire. Nigerians prize 'party jollof' for its smoky depth, traditionally the gift of cooking huge pots over firewood."
+    }
+  ];
+
+  var SPICE_NAMES = ["Mild", "Medium", "Hot", "Fiery"];
+  var reduceMotion = false;
+  try {
+    reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  } catch (e) { reduceMotion = false; }
+
+  var grid = document.getElementById("grid");
+  var countEl = document.getElementById("count");
+  var emptyEl = document.getElementById("empty");
+  var searchEl = document.getElementById("search");
+  var chips = Array.prototype.slice.call(document.querySelectorAll(".chip"));
+  var overlay = document.getElementById("overlay");
+  var modal = document.getElementById("modal");
+  var mClose = document.getElementById("mClose");
+  var lastFocus = null;
+  var activeContinent = "all";
+  var query = "";
+  var observer = null;
+
+  if ("IntersectionObserver" in window && !reduceMotion) {
+    observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.remove("pre");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { rootMargin: "0px 0px -6% 0px", threshold: 0.06 });
+  }
+
+  function spiceBadge(level) {
+    var peppers = "";
+    for (var i = 0; i < level; i++) peppers += "🌶";
+    return '<span class="badge spice">' + peppers + " " + SPICE_NAMES[level - 1] + "</span>";
+  }
+
+  function buildCard(c, i) {
+    var el = document.createElement("article");
+    el.className = "card pre";
+    el.setAttribute("role", "button");
+    el.setAttribute("tabindex", "0");
+    el.setAttribute("aria-haspopup", "dialog");
+    el.setAttribute("aria-label", c.name + " — open food-culture fact");
+    el.innerHTML =
+      '<div class="card-top">' +
+        '<div class="card-emoji" aria-hidden="true">' + c.emoji + "</div>" +
+        '<div class="card-title"><h3>' + c.name + "</h3>" +
+        '<span class="continent">' + c.continent + "</span></div>" +
+      "</div>" +
+      '<div class="dish"><span class="label">Signature dish</span>' +
+      '<span class="name">' + c.dish + "</span></div>" +
+      '<p class="desc">' + c.desc + "</p>" +
+      '<ul class="ingredients" aria-label="Key ingredients">' +
+        c.ingredients.map(function (ing) { return "<li>" + ing + "</li>"; }).join("") +
+      "</ul>" +
+      '<div class="badges">' +
+        '<span class="badge veg">🌿 Veg: ' + c.veg + "</span>" +
+        spiceBadge(c.spice) +
+        '<span class="more" aria-hidden="true">Fact ↗</span>' +
+      "</div>";
+
+    el.addEventListener("click", function () { openModal(c, el); });
+    el.addEventListener("keydown", function (ev) {
+      if (ev.key === "Enter" || ev.key === " " || ev.key === "Spacebar") {
+        ev.preventDefault();
+        openModal(c, el);
+      }
+    });
+
+    if (observer) {
+      el.style.transitionDelay = ((i % 4) * 70) + "ms";
+      observer.observe(el);
+    } else {
+      el.classList.remove("pre");
+    }
+    return el;
+  }
+
+  function matches(c) {
+    if (activeContinent !== "all" && c.continent !== activeContinent) return false;
+    if (!query) return true;
+    var hay = (c.name + " " + c.dish + " " + c.continent + " " + c.ingredients.join(" ") + " " + c.desc).toLowerCase();
+    return hay.indexOf(query) !== -1;
+  }
+
+  function render() {
+    grid.innerHTML = "";
+    var shown = 0;
+    CUISINES.forEach(function (c) {
+      if (matches(c)) {
+        grid.appendChild(buildCard(c, shown));
+        shown++;
+      }
+    });
+    countEl.textContent = shown === 1 ? "1 cuisine" : shown + " cuisines";
+    emptyEl.hidden = shown !== 0;
+  }
+
+  chips.forEach(function (chip) {
+    chip.addEventListener("click", function () {
+      chips.forEach(function (ch) { ch.setAttribute("aria-pressed", "false"); });
+      chip.setAttribute("aria-pressed", "true");
+      activeContinent = chip.getAttribute("data-continent");
+      render();
+    });
+  });
+
+  var debounceTimer = null;
+  searchEl.addEventListener("input", function () {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(function () {
+      query = searchEl.value.trim().toLowerCase();
+      render();
+    }, 120);
+  });
+
+  /* ---------- Modal ---------- */
+  function openModal(c, sourceEl) {
+    lastFocus = sourceEl;
+    document.getElementById("mEmoji").textContent = c.emoji;
+    document.getElementById("mTitle").textContent = c.name;
+    document.getElementById("mDish").textContent = c.dish;
+    document.getElementById("mDesc").textContent = c.desc;
+    document.getElementById("mFact").textContent = c.fact;
+    document.getElementById("mBadges").innerHTML =
+      '<span class="badge veg">🌿 Veg-friendly: ' + c.veg + "</span>" + spiceBadge(c.spice);
+    overlay.hidden = false;
+    overlay.classList.remove("closing");
+    document.body.style.overflow = "hidden";
+    mClose.focus();
+  }
+
+  function closeModal() {
+    if (overlay.hidden) return;
+    var finish = function () {
+      overlay.hidden = true;
+      overlay.classList.remove("closing");
+      document.body.style.overflow = "";
+      if (lastFocus && document.contains(lastFocus)) lastFocus.focus();
+    };
+    if (reduceMotion) {
+      finish();
+    } else {
+      overlay.classList.add("closing");
+      setTimeout(finish, 260);
+    }
+  }
+
+  mClose.addEventListener("click", closeModal);
+  overlay.addEventListener("click", function (ev) {
+    if (ev.target === overlay) closeModal();
+  });
+  document.addEventListener("keydown", function (ev) {
+    if (overlay.hidden) return;
+    if (ev.key === "Escape") { closeModal(); return; }
+    if (ev.key === "Tab") {
+      var focusables = modal.querySelectorAll("button, a[href]");
+      if (!focusables.length) return;
+      var first = focusables[0];
+      var last = focusables[focusables.length - 1];
+      if (ev.shiftKey && document.activeElement === first) {
+        ev.preventDefault(); last.focus();
+      } else if (!ev.shiftKey && document.activeElement === last) {
+        ev.preventDefault(); first.focus();
+      }
+    }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

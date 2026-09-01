@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spark — Twelve Inventions That Changed Everything</title>
+<meta name="description" content="Spark is a scrollytelling timeline of twelve world-changing inventions, from the wheel of ancient Mesopotamia to CRISPR gene editing — with years, places, people and why each mattered.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💡</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f5efe3;
+    --paper-deep:#ede4d2;
+    --ink:#241d12;
+    --ink-soft:#6d6252;
+    --ember:#c2481b;
+    --line:#d8ccb4;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:Inter,system-ui,sans-serif;background:var(--paper);color:var(--ink);
+    overflow-x:hidden;
+  }
+  .hub-link{position:fixed;top:14px;left:14px;z-index:1000;padding:8px 14px;border-radius:999px;font:600 13px/1 Inter,system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(8px);background:rgba(36,29,18,.72);color:#fff;border:1px solid rgba(255,255,255,.25)}
+  .hub-link:hover{background:rgba(36,29,18,.88)}
+  :focus-visible{outline:3px solid var(--ember);outline-offset:3px;border-radius:6px}
+
+  .hero{min-height:82vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:90px 20px 60px}
+  .kicker{font:600 .78rem/1 Inter,sans-serif;letter-spacing:.34em;text-transform:uppercase;color:var(--ember)}
+  h1{font-family:Fraunces,Georgia,serif;font-weight:700;font-size:clamp(3.2rem,12vw,6.5rem);line-height:1;margin:16px 0 18px}
+  .hero p{max-width:44ch;color:var(--ink-soft);font-size:clamp(.95rem,2.5vw,1.1rem);line-height:1.6}
+  .scroll-hint{margin-top:44px;color:var(--ink-soft);font-size:.8rem;letter-spacing:.18em;text-transform:uppercase}
+  .scroll-hint::after{content:"↓";display:block;font-size:1.2rem;margin-top:6px;animation:bob 1.8s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
+
+  .timeline{position:relative;max-width:920px;margin:0 auto;padding:20px 20px 80px}
+  .t-rail,.t-line{position:absolute;top:0;bottom:0;left:50%;width:3px;margin-left:-1.5px;border-radius:2px}
+  .t-rail{background:var(--line)}
+  .t-line{background:var(--ember);transform:scaleY(0);transform-origin:top center}
+
+  .era{position:relative;text-align:center;margin:26px 0 60px;z-index:2}
+  .era span{
+    display:inline-block;padding:10px 22px;border-radius:999px;
+    background:var(--ink);color:var(--paper);
+    font:600 .78rem/1 Inter,sans-serif;letter-spacing:.26em;text-transform:uppercase;
+  }
+  .era small{display:block;margin-top:8px;color:var(--ink-soft);font:500 .78rem Inter,sans-serif;letter-spacing:.06em}
+
+  .chap{
+    position:relative;width:calc(50% - 46px);margin:0 0 58px auto;
+    background:#fffdf8;border:1px solid var(--line);border-radius:16px;
+    padding:24px 24px 26px;box-shadow:0 6px 26px rgba(60,45,20,.08);
+  }
+  .chap.alt{margin:0 auto 58px 0}
+  .chap::before{
+    content:"";position:absolute;top:30px;width:15px;height:15px;border-radius:50%;
+    background:var(--paper);border:3.5px solid var(--ember);
+    left:-54px;
+  }
+  .chap.alt::before{left:auto;right:-54px}
+  .chap .icon{width:44px;height:44px;color:var(--ember);margin-bottom:10px}
+  .chap .icon svg{width:100%;height:100%}
+  .chap-year{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:1.05rem;color:var(--ember)}
+  .chap h3{font-family:Fraunces,Georgia,serif;font-weight:700;font-size:clamp(1.4rem,3.4vw,1.8rem);margin:2px 0 6px}
+  .chap .meta{font:600 .78rem/1.5 Inter,sans-serif;letter-spacing:.04em;color:var(--ink-soft);text-transform:uppercase}
+  .chap .body{margin-top:12px;font-size:.92rem;line-height:1.65;color:var(--ink)}
+  .chap .note{margin-top:10px;font-size:.78rem;color:var(--ink-soft);font-style:italic}
+
+  .outro{text-align:center;padding:30px 20px 40px;max-width:56ch;margin:0 auto}
+  .outro h2{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:clamp(1.5rem,4vw,2rem)}
+  .outro p{margin-top:10px;color:var(--ink-soft);font-size:.92rem;line-height:1.6}
+
+  footer{padding:0 20px 34px;text-align:center;font-size:.76rem;color:var(--ink-soft)}
+
+  @media (max-width:760px){
+    .t-rail,.t-line{left:19px;margin-left:0}
+    .chap,.chap.alt{width:auto;margin:0 0 44px 48px}
+    .chap::before,.chap.alt::before{left:-40px;right:auto}
+    .era{text-align:left;margin-left:48px}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .scroll-hint::after{animation:none}
+  }
+  /* static / reduced-motion fallback */
+  body.static .t-line{transform:scaleY(1)}
+  body.static .chap,body.static .era{opacity:0;transition:opacity .5s ease}
+  body.static .chap.in,body.static .era.in{opacity:1}
+  body.static.nojs .chap,body.static.nojs .era{opacity:1}
+</style>
+</head>
+<body>
+<a class="hub-link" href="https://thirty-worlds.vercel.app/" aria-label="All thirty sites">← All 30</a>
+
+<header class="hero">
+  <p class="kicker">A field guide to human ingenuity</p>
+  <h1>Spark</h1>
+  <p>Twelve inventions, five and a half millennia. Each one looked small at first — a spinning disc, a floating needle, a moldy dish — and each one rewired the world. Scroll to watch the fuse burn.</p>
+  <p class="scroll-hint" aria-hidden="true">Scroll</p>
+</header>
+
+<main class="timeline" id="timeline">
+  <div class="t-rail" aria-hidden="true"></div>
+  <div class="t-line" aria-hidden="true"></div>
+
+  <div class="era"><span>The Ancient World</span><small>c. 3500 BCE – 1500 CE</small></div>
+
+  <article class="chap">
+    <div class="icon" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="20" cy="20" r="14"/><circle cx="20" cy="20" r="3"/><line x1="20" y1="6" x2="20" y2="17"/><line x1="20" y1="23" x2="20" y2="34"/><line x1="6" y1="20" x2="17" y2="20"/><line x1="23" y1="20" x2="34" y2="20"/><line x1="10.2" y1="10.2" x2="17.9" y2="17.9"/><line x1="22.1" y1="22.1" x2="29.8" y2="29.8"/></svg></div>
+    <p class="chap-year">c. 3500 BCE</p>
+    <h3>The Wheel</h3>
+    <p class="meta">Mesopotamia · Sumerian craftspeople</p>
+    <p class="body">The first wheels didn’t carry anything — they spun clay on potters’ tables. When Mesopotamian craftspeople turned one on its side and fixed it to an axle, hauling changed forever: a load that took a team of people to drag could roll behind a single ox. Trade stretched farther, cities fed themselves from distant fields, and nearly every machine since — gears, turbines, hard drives — still turns on the same idea.</p>
+  </article>
+
+  <article class="chap alt">
+    <div class="icon" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="20" cy="20" r="14"/><polygon points="20,9 24,20 20,31 16,20"/><circle cx="20" cy="20" r="1.6" fill="currentColor"/></svg></div>
+    <p class="chap-year">Han dynasty, c. 2nd century BCE</p>
+    <h3>The Compass</h3>
+    <p class="meta">China · Han diviners, later described by Shen Kuo</p>
+    <p class="body">Han dynasty diviners noticed that spoons carved from lodestone always swung to rest pointing the same way. Centuries later, Chinese sailors floated magnetized needles in water — and suddenly the open ocean had signposts. Freed from hugging coastlines or waiting for starry nights, ships could cross whole seas under cloud. The compass made sea charts, global trade routes and the age of exploration possible, and it still steers every map app today.</p>
+  </article>
+
+  <article class="chap">
+    <div class="icon" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 5 h14 l6 6 v24 h-20 z"/><path d="M24 5 v6 h6"/><line x1="14" y1="17" x2="26" y2="17"/><line x1="14" y1="22" x2="26" y2="22"/><line x1="14" y1="27" x2="22" y2="27"/></svg></div>
+    <p class="chap-year">c. 105 CE</p>
+    <h3>Paper</h3>
+    <p class="meta">Luoyang, Han China · Cai Lun</p>
+    <p class="body">Court official Cai Lun refined a pulp of bark, hemp and rags into thin, cheap sheets — and knowledge slipped its heavy bindings of bamboo, silk and stone. Ideas could now be copied, carried and stored by the thousand. The craft traveled the Silk Road, reaching Samarkand by 751 and then Europe through the Islamic world. Books, exams, contracts, letters, money: civilization began keeping its memory on paper.</p>
+  </article>
+
+  <article class="chap alt">
+    <div class="icon" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="6" width="24" height="7" rx="1.5"/><line x1="20" y1="13" x2="20" y2="19"/><rect x="12" y="19" width="16" height="6" rx="1.5"/><rect x="10" y="29" width="20" height="5" rx="1.5"/></svg></div>
+    <p class="chap-year">1440s</p>
+    <h3>The Printing Press</h3>
+    <p class="meta">Mainz, Germany · Johannes Gutenberg</p>
+    <p class="body">China and Korea printed first — Bi Sheng’s movable type around the 1040s, Korea’s metal-type <em>Jikji</em> in 1377. But Gutenberg’s screw press, oil-based ink and cast metal letters turned printing into an industry. A book that took a monk a year could be printed in days, and prices collapsed. Literacy spread, the Reformation caught fire, and science gained its superpower: exact copies of knowledge, everywhere at once.</p>
+    <p class="note">Movable type was an East Asian invention long before Europe’s press.</p>
+  </article>
+
+  <div class="era"><span>The Industrial Age</span><small>1700s – 1800s</small></div>
+
+  <article class="chap">
+    <div class="icon" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="20" cy="24" r="9"/><circle cx="20" cy="24" r="3"/><path d="M20 12 v3 M32 24 h-3 M20 36 v-3 M8 24 h3 M28.5 15.5 l-2.1 2.1 M28.5 32.5 l-2.1 -2.1 M11.5 32.5 l2.1 -2.1 M11.5 15.5 l2.1 2.1"/><path d="M13 7 q2 -3 4 0 q2 3 4 0 q2 -3 4 0"/></svg></div>
+    <p class="chap-year">1712 · 1769</p>
+    <h3>The Steam Engine</h3>
+    <p class="meta">England &amp; Scotland · Thomas Newcomen, James Watt</p>
+    <p class="body">Thomas Newcomen’s 1712 engine pumped water out of flooded coal mines — hungry and wasteful, but it worked. James Watt’s separate condenser of 1769 made steam efficient enough to power almost anything. For the first time, humanity owned muscle that never tired and didn’t depend on wind, water or horses. Factories left the riverbanks, railways and steamships shrank the globe, and the Industrial Revolution roared into motion.</p>
+  </article>
+
+  <div class="era"><span>The Electric Age</span><small>1830s – 1950s</small></div>
+
+  <article class="chap alt">
+    <div class="icon" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22 h6 l3 -8 l4 14 l4 -12 l3 6 h12"/><circle cx="8" cy="31" r="2.4"/><path d="M10.4 31 h20"/><rect x="30.4" y="28.6" width="5.6" height="4.8" rx="1"/></svg></div>
+    <p class="chap-year">1837</p>
+    <h3>The Telegraph</h3>
+    <p class="meta">USA &amp; Britain · Morse &amp; Vail · Cooke &amp; Wheatstone</p>
+    <p class="body">Samuel Morse and Alfred Vail in America — and Cooke and Wheatstone in Britain — taught electricity to carry language down a wire. Before 1837, information traveled only as fast as a horse or a ship; afterward, it moved at nearly the speed of light. Dots and dashes stitched continents together, a transatlantic cable followed in 1866, and news, markets and empires began running on the same clock.</p>
+  </article>
+
+  <article class="chap">
+    <div class="icon" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4 a10 10 0 0 1 10 10 c0 4 -2.5 6.5 -4.5 9 c-1.2 1.5 -1.5 3 -1.5 4.5 h-8 c0 -1.5 -0.3 -3 -1.5 -4.5 c-2 -2.5 -4.5 -5 -4.5 -9 a10 10 0 0 1 10 -10 z"/><line x1="16" y1="31.5" x2="24" y2="31.5"/><line x1="17" y1="35" x2="23" y2="35"/></svg></div>
+    <p class="chap-year">1879</p>
+    <h3>The Light Bulb</h3>
+    <p class="meta">Menlo Park, USA &amp; Newcastle, England · Edison &amp; Swan</p>
+    <p class="body">Edison in New Jersey and Joseph Swan in England raced to the same answer: a carbon filament glowing inside a vacuum. Edison’s deeper genius was the system around the bulb — generators, meters and wiring to light whole districts at once. Night stopped ending the working day. Homes, streets and factories were wired for electricity, and the grid built for light ended up powering everything invented since.</p>
+  </article>
+
+  <article class="chap alt">
+    <div class="icon" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="20" cy="20" r="14"/><circle cx="15" cy="16" r="3"/><circle cx="24" cy="24" r="4"/><circle cx="25" cy="13" r="1.8"/><circle cx="13" cy="26" r="1.8"/></svg></div>
+    <p class="chap-year">1928</p>
+    <h3>Penicillin</h3>
+    <p class="meta">London &amp; Oxford · Fleming · Florey, Chain &amp; Heatley</p>
+    <p class="body">Back from holiday, Alexander Fleming found a stray mold killing bacteria in a forgotten culture dish. A decade later, Florey, Chain and Heatley turned that lucky observation into a mass-produced drug, just in time for World War II. Infections that had killed throughout history — battlefield wounds, childbirth fever, a scratched knee gone bad — became curable in days. Antibiotics made modern surgery and medicine survivable.</p>
+  </article>
+
+  <article class="chap">
+    <div class="icon" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="20" cy="17" r="9"/><line x1="20" y1="8" x2="20" y2="3"/><line x1="14" y1="23.7" x2="9" y2="33"/><line x1="26" y1="23.7" x2="31" y2="33"/><line x1="14" y1="14" x2="26" y2="14"/><line x1="14" y1="20" x2="26" y2="20"/></svg></div>
+    <p class="chap-year">1947</p>
+    <h3>The Transistor</h3>
+    <p class="meta">Bell Labs, New Jersey · Bardeen, Brattain &amp; Shockley</p>
+    <p class="body">In December 1947 at Bell Labs, Bardeen, Brattain and Shockley coaxed a sliver of germanium into amplifying an electrical signal. The transistor replaced hot, fragile vacuum tubes with a tiny, rugged switch that sips power. It became the most manufactured object in human history — a modern chip packs billions — and every computer, phone and satellite is, at heart, an ocean of transistors flicking on and off.</p>
+  </article>
+
+  <div class="era"><span>The Digital Age</span><small>1960s – today</small></div>
+
+  <article class="chap alt">
+    <div class="icon" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="20" cy="8" r="3.4"/><circle cx="8" cy="28" r="3.4"/><circle cx="32" cy="28" r="3.4"/><circle cx="20" cy="22" r="2.2"/><line x1="20" y1="11.4" x2="20" y2="19.8"/><line x1="18" y1="23.6" x2="10.5" y2="26.4"/><line x1="22" y1="23.6" x2="29.5" y2="26.4"/></svg></div>
+    <p class="chap-year">1969 → 1989</p>
+    <h3>The Internet</h3>
+    <p class="meta">UCLA &amp; CERN · ARPANET team · Cerf &amp; Kahn · Berners-Lee</p>
+    <p class="body">In 1969, ARPANET’s first message — meant to say LOGIN — crashed after two letters: “LO”. From that stumble grew a network of networks, standardized by Cerf and Kahn’s TCP/IP in 1983. Then, in 1989, Tim Berners-Lee gave it a human face: the World Wide Web. Knowledge, commerce and conversation moved onto one shared wire, reachable from anywhere on Earth.</p>
+  </article>
+
+  <article class="chap">
+    <div class="icon" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="12" y="4" width="16" height="32" rx="3.5"/><line x1="17" y1="8" x2="23" y2="8"/><circle cx="20" cy="31.5" r="1.6" fill="currentColor"/></svg></div>
+    <p class="chap-year">2007</p>
+    <h3>The Smartphone Era</h3>
+    <p class="meta">Cupertino, USA · Apple, after IBM’s Simon (1994)</p>
+    <p class="body">Handheld computers already existed — IBM’s Simon dialed in 1994, BlackBerrys ruled boardrooms — but 2007’s iPhone fused phone, internet and a multitouch screen into something anyone could use, and app stores soon let it become anything. For billions of people, a phone was their first computer. Camera, map, bank, library and post office collapsed into a slab of glass that fits in a pocket.</p>
+  </article>
+
+  <div class="era"><span>The Genomic Age</span><small>2012 – …</small></div>
+
+  <article class="chap alt">
+    <div class="icon" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M13 4 c0 8 14 8 14 16 c0 8 -14 8 -14 16"/><path d="M27 4 c0 8 -14 8 -14 16 c0 8 14 8 14 16"/><line x1="14.5" y1="9" x2="25.5" y2="9"/><line x1="14.5" y1="31" x2="25.5" y2="31"/><line x1="16" y1="20" x2="24" y2="20"/></svg></div>
+    <p class="chap-year">2012</p>
+    <h3>CRISPR Gene Editing</h3>
+    <p class="meta">Berkeley &amp; Umeå · Jennifer Doudna &amp; Emmanuelle Charpentier</p>
+    <p class="body">Doudna and Charpentier showed in 2012 that a bacterial immune system could be reprogrammed into precise molecular scissors for DNA. Gene editing went from years of specialist labor to weeks in an ordinary lab. The pair won the 2020 Nobel Prize in Chemistry, and by 2023 the first CRISPR medicine — Casgevy, for sickle cell disease — was approved. Editing life’s source code is now a tool, and a responsibility.</p>
+  </article>
+</main>
+
+<section class="outro">
+  <h2>The next spark is unwritten.</h2>
+  <p>Every entry above was once a strange idea in an unlikely place — a workshop, a monastery, a messy lab bench. Whatever belongs at chapter thirteen probably looks small right now, too.</p>
+</section>
+
+<footer>Dates and attributions follow mainstream historical consensus; many inventions had parallel inventors across cultures. · Spark</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var hasGsap = typeof window.gsap !== 'undefined' && typeof window.ScrollTrigger !== 'undefined';
+  var chaps = Array.prototype.slice.call(document.querySelectorAll('.chap'));
+  var eras = Array.prototype.slice.call(document.querySelectorAll('.era'));
+  var all = eras.concat(chaps);
+
+  function staticMode() {
+    // Reduced motion (or no GSAP): line fully drawn, simple fades on reveal.
+    document.body.classList.add('static');
+    if (!('IntersectionObserver' in window)) {
+      document.body.classList.add('nojs');
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) {
+          en.target.classList.add('in');
+          io.unobserve(en.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -8% 0px' });
+    all.forEach(function (el) { io.observe(el); });
+  }
+
+  if (!hasGsap || reduceMotion) {
+    staticMode();
+    return;
+  }
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  // The progress line literally draws as you scroll.
+  gsap.to('.t-line', {
+    scaleY: 1,
+    ease: 'none',
+    scrollTrigger: {
+      trigger: '#timeline',
+      start: 'top 60%',
+      end: 'bottom 75%',
+      scrub: 0.4
+    }
+  });
+
+  chaps.forEach(function (el) {
+    var fromX = el.classList.contains('alt') ? -36 : 36;
+    if (window.innerWidth < 760) fromX = 24;
+    gsap.from(el, {
+      autoAlpha: 0,
+      y: 42,
+      x: fromX,
+      duration: 0.75,
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger: el,
+        start: 'top 82%',
+        toggleActions: 'play none none reverse'
+      }
+    });
+  });
+
+  eras.forEach(function (el) {
+    gsap.from(el, {
+      autoAlpha: 0,
+      scale: 0.85,
+      duration: 0.55,
+      ease: 'back.out(1.6)',
+      scrollTrigger: {
+        trigger: el,
+        start: 'top 86%',
+        toggleActions: 'play none none reverse'
+      }
+    });
+  });
+
+  // Keep triggers honest after orientation / size changes.
+  var rsz = 0;
+  window.addEventListener('resize', function () {
+    clearTimeout(rsz);
+    rsz = setTimeout(function () { ScrollTrigger.refresh(); }, 200);
+  });
+})();
+</script>
+</body>
+</html>

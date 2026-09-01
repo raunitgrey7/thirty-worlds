@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pocket Budget — Money Skills for Teens</title>
+<meta name="description" content="Pocket Budget is a playful budget builder for teens: track money in, slide your spending, see a live donut chart, check the 50/30/20 rule, and plan a savings goal.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#eef7f3;
+    --card:#ffffff;
+    --navy:#14345b;
+    --navy-soft:#4c6684;
+    --mint:#2bbd93;
+    --mint-deep:#0f9b76;
+    --line:#dcebe4;
+    --food:#ffb35c;
+    --transport:#4fc3f7;
+    --fun:#ff7a6b;
+    --subs:#a78bfa;
+    --savings:#2bbd93;
+    --giving:#f472b6;
+    --none:#e2ece7;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:Manrope,Inter,system-ui,sans-serif;background:var(--bg);color:var(--navy);
+    min-height:100vh;overflow-x:hidden;
+  }
+  .hub-link{position:fixed;top:14px;left:14px;z-index:1000;padding:8px 14px;border-radius:999px;font:600 13px/1 Inter,system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(8px);background:rgba(15,15,25,.55);color:#fff;border:1px solid rgba(255,255,255,.25)}
+  .hub-link:hover{background:rgba(15,15,25,.75)}
+  :focus-visible{outline:3px solid var(--mint-deep);outline-offset:2px;border-radius:8px}
+
+  header.top{max-width:1020px;margin:0 auto;padding:72px 20px 6px;text-align:center}
+  h1{font-weight:800;font-size:clamp(1.9rem,5.5vw,2.8rem);letter-spacing:-.02em}
+  h1 .coin{display:inline-block}
+  .sub{color:var(--navy-soft);margin-top:6px;font-size:.95rem}
+
+  .wrap{max-width:1020px;margin:22px auto 46px;padding:0 16px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media (max-width:760px){.wrap{grid-template-columns:1fr}}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px;
+    box-shadow:0 6px 26px rgba(20,52,91,.07);
+  }
+  .card h2{font-size:1.05rem;font-weight:800;display:flex;align-items:center;gap:9px;margin-bottom:14px}
+  .card h2 .em{font-size:1.2rem}
+  .full{grid-column:1/-1}
+
+  /* money in */
+  .in-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0}
+  .in-row label{font:500 .92rem/1.3 Inter,sans-serif;color:var(--navy)}
+  .in-row small{display:block;color:var(--navy-soft);font-size:.75rem}
+  .money-input{position:relative}
+  .money-input span{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--navy-soft);font:600 .9rem Inter,sans-serif}
+  .money-input input{
+    width:110px;min-height:44px;padding:10px 10px 10px 26px;border-radius:12px;
+    border:1.5px solid var(--line);font:600 .95rem Inter,sans-serif;color:var(--navy);
+    background:#fafdfb;
+  }
+  .money-input input:hover{border-color:var(--mint)}
+  .total-line{margin-top:12px;padding-top:14px;border-top:1.5px dashed var(--line);display:flex;justify-content:space-between;font-weight:800}
+  .total-line b{color:var(--mint-deep);font-size:1.15rem}
+
+  /* sliders */
+  .sl-row{padding:8px 0}
+  .sl-head{display:flex;justify-content:space-between;align-items:center;font:500 .9rem Inter,sans-serif}
+  .sl-head .amt{font-weight:700;font-variant-numeric:tabular-nums}
+  .sl-head .swatch{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px;vertical-align:-1px}
+  input[type=range]{
+    width:100%;height:34px;margin-top:2px;accent-color:var(--mint-deep);cursor:pointer;background:transparent;
+  }
+  .leftover{margin-top:10px;padding:11px 14px;border-radius:12px;font:600 .88rem Inter,sans-serif;background:#f2faf6;color:var(--mint-deep)}
+  .leftover.bad{background:#fdeeee;color:#c2413b}
+
+  /* donut */
+  .donut-wrap{display:flex;flex-wrap:wrap;align-items:center;gap:18px;justify-content:center}
+  .donut-box{width:min(100%,240px)}
+  canvas{display:block;width:100%;height:auto}
+  .legend{list-style:none;display:grid;gap:6px;font:500 .84rem Inter,sans-serif;min-width:150px}
+  .legend .swatch{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:8px;vertical-align:-1px}
+  .legend .v{float:right;font-weight:700;margin-left:14px}
+
+  /* 50/30/20 */
+  .rule-row{margin:12px 0}
+  .rule-top{display:flex;justify-content:space-between;font:600 .84rem Inter,sans-serif;margin-bottom:5px}
+  .rule-top .tgt{color:var(--navy-soft);font-weight:500}
+  .bar{position:relative;height:14px;border-radius:999px;background:var(--none);overflow:hidden}
+  .bar .fill{position:absolute;inset:0;right:auto;width:0%;border-radius:999px;transition:width .5s ease}
+  .bar .mark{position:absolute;top:-3px;bottom:-3px;width:2.5px;background:var(--navy);opacity:.55;border-radius:2px}
+  .verdict{margin-top:14px;padding:13px 15px;border-radius:14px;background:#f2faf6;border-left:4px solid var(--mint);font:500 .9rem/1.5 Inter,sans-serif}
+
+  /* goal */
+  .goal-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  @media (max-width:520px){.goal-grid{grid-template-columns:1fr}}
+  .goal-grid label{font:600 .78rem Inter,sans-serif;color:var(--navy-soft);display:block;margin-bottom:4px}
+  .goal-grid input{
+    width:100%;min-height:44px;padding:10px 12px;border-radius:12px;
+    border:1.5px solid var(--line);font:600 .95rem Inter,sans-serif;color:var(--navy);background:#fafdfb;
+  }
+  .goal-out{margin-top:14px;font:500 .92rem/1.55 Inter,sans-serif}
+  .goal-out b{color:var(--mint-deep)}
+  .proj{margin-top:10px;height:16px;border-radius:999px;background:var(--none);overflow:hidden}
+  .proj .fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--mint),var(--mint-deep));transition:width .8s ease}
+
+  /* tips */
+  .tip-box{position:relative;min-height:96px;display:flex;align-items:center}
+  .tip-text{font:500 .95rem/1.6 Inter,sans-serif;transition:opacity .4s;padding-right:4px}
+  .tip-text.fade{opacity:0}
+  .tip-nav{display:flex;align-items:center;gap:10px;margin-top:10px}
+  .tip-nav button{
+    min-width:44px;min-height:44px;border-radius:12px;border:1.5px solid var(--line);
+    background:#fafdfb;color:var(--navy);font-size:1.05rem;cursor:pointer;
+  }
+  .tip-nav button:hover{border-color:var(--mint)}
+  .tip-dots{display:flex;gap:5px;margin-left:auto}
+  .tip-dots span{width:7px;height:7px;border-radius:50%;background:var(--none)}
+  .tip-dots span.on{background:var(--mint-deep)}
+
+  footer{padding:10px 20px 30px;text-align:center;font:500 .78rem Inter,sans-serif;color:var(--navy-soft)}
+
+  @media (prefers-reduced-motion: reduce){
+    .bar .fill,.proj .fill{transition:none}
+    .tip-text{transition:none}
+  }
+</style>
+</head>
+<body>
+<a class="hub-link" href="https://thirty-worlds.vercel.app/" aria-label="All thirty sites">← All 30</a>
+
+<header class="top">
+  <h1><span class="coin" aria-hidden="true">🪙</span> Pocket Budget</h1>
+  <p class="sub">Your money, your rules — practice budgeting like a pro before the stakes get big.</p>
+</header>
+
+<div class="wrap">
+  <section class="card" aria-labelledby="hIn">
+    <h2 id="hIn"><span class="em" aria-hidden="true">📥</span>Money in <span style="font-weight:500;color:var(--navy-soft);font-size:.8rem">/ month</span></h2>
+    <div class="in-row">
+      <label for="incAllow">Allowance<small>the classic</small></label>
+      <div class="money-input"><span aria-hidden="true">$</span><input id="incAllow" type="number" min="0" max="9999" step="1" value="40" inputmode="numeric"></div>
+    </div>
+    <div class="in-row">
+      <label for="incJob">Part-time job<small>weekend shifts, tutoring…</small></label>
+      <div class="money-input"><span aria-hidden="true">$</span><input id="incJob" type="number" min="0" max="9999" step="1" value="120" inputmode="numeric"></div>
+    </div>
+    <div class="in-row">
+      <label for="incHustle">Side hustle<small>reselling, art commissions…</small></label>
+      <div class="money-input"><span aria-hidden="true">$</span><input id="incHustle" type="number" min="0" max="9999" step="1" value="25" inputmode="numeric"></div>
+    </div>
+    <div class="total-line"><span>Total in</span><b id="totalIn">$0</b></div>
+  </section>
+
+  <section class="card" aria-labelledby="hOut">
+    <h2 id="hOut"><span class="em" aria-hidden="true">🎚️</span>Where it goes</h2>
+    <div id="sliders"></div>
+    <p class="leftover" id="leftover">Left over: $0</p>
+  </section>
+
+  <section class="card" aria-labelledby="hDonut">
+    <h2 id="hDonut"><span class="em" aria-hidden="true">🍩</span>Your money donut</h2>
+    <div class="donut-wrap">
+      <div class="donut-box"><canvas id="donut" width="240" height="240" role="img" aria-label="Donut chart of your monthly spending plan"></canvas></div>
+      <ul class="legend" id="legend"></ul>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="hRule">
+    <h2 id="hRule"><span class="em" aria-hidden="true">⚖️</span>The 50 / 30 / 20 check</h2>
+    <div class="rule-row">
+      <div class="rule-top"><span>Needs <span style="color:var(--navy-soft);font-weight:500">(food, transport)</span></span><span class="tgt">target ≤ 50%</span></div>
+      <div class="bar"><div class="fill" id="barNeeds" style="background:var(--transport)"></div><div class="mark" style="left:50%"></div></div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-top"><span>Wants <span style="color:var(--navy-soft);font-weight:500">(fun, subs, giving)</span></span><span class="tgt">target ≤ 30%</span></div>
+      <div class="bar"><div class="fill" id="barWants" style="background:var(--fun)"></div><div class="mark" style="left:30%"></div></div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-top"><span>Savings</span><span class="tgt">target ≥ 20%</span></div>
+      <div class="bar"><div class="fill" id="barSav" style="background:var(--savings)"></div><div class="mark" style="left:20%"></div></div>
+    </div>
+    <p class="verdict" id="verdict">Move the sliders to see how your plan stacks up.</p>
+  </section>
+
+  <section class="card full" aria-labelledby="hGoal">
+    <h2 id="hGoal"><span class="em" aria-hidden="true">🎯</span>Savings goal</h2>
+    <div class="goal-grid">
+      <div><label for="goalName">What are you saving for?</label><input id="goalName" type="text" maxlength="40" value="New headphones" autocomplete="off"></div>
+      <div><label for="goalCost">It costs ($)</label><input id="goalCost" type="number" min="1" max="99999" step="1" value="180" inputmode="numeric"></div>
+      <div><label for="goalWeekly">I can save weekly ($)</label><input id="goalWeekly" type="number" min="0" max="9999" step="1" value="12" inputmode="numeric"></div>
+    </div>
+    <p class="goal-out" id="goalOut"></p>
+    <div class="proj" aria-hidden="true"><div class="fill" id="projFill"></div></div>
+  </section>
+
+  <section class="card full" aria-labelledby="hTips">
+    <h2 id="hTips"><span class="em" aria-hidden="true">💡</span>Money tip</h2>
+    <div class="tip-box"><p class="tip-text" id="tipText"></p></div>
+    <div class="tip-nav">
+      <button type="button" id="tipPrev" aria-label="Previous tip">←</button>
+      <button type="button" id="tipNext" aria-label="Next tip">→</button>
+      <div class="tip-dots" id="tipDots" aria-hidden="true"></div>
+    </div>
+  </section>
+</div>
+
+<footer>Practice money, real habits. Pocket Budget is a learning toy, not financial advice.</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  var CATS = [
+    { key: 'food',      label: 'Food & snacks', color: '#ffb35c', bucket: 'needs',  def: 45 },
+    { key: 'transport', label: 'Transport',     color: '#4fc3f7', bucket: 'needs',  def: 20 },
+    { key: 'fun',       label: 'Fun & games',   color: '#ff7a6b', bucket: 'wants',  def: 35 },
+    { key: 'subs',      label: 'Subscriptions', color: '#a78bfa', bucket: 'wants',  def: 12 },
+    { key: 'savings',   label: 'Savings',       color: '#2bbd93', bucket: 'savings', def: 40 },
+    { key: 'giving',    label: 'Giving',        color: '#f472b6', bucket: 'wants',  def: 8 }
+  ];
+
+  var TIPS = [
+    'Pay yourself first: the moment money lands, move your savings cut before you spend a cent. What you never see, you never miss.',
+    'The 24-hour rule: want something on impulse? Wait one full day. If you still want it tomorrow, it might be worth it — most of the time the itch fades.',
+    'Track every dollar for one month. You cannot steer money you cannot see, and the results are almost always surprising.',
+    'Audit your subscriptions every few months. Three “small” $5 apps quietly eat $180 a year.',
+    'Starting early beats starting big. Money saved as a teen has decades to grow — time is the one ingredient you can never buy back.',
+    'Needs before wants: cover the must-haves first, then let fun money be truly guilt-free.',
+    'Give your goal a name. “Saving $180 for headphones by March” gets funded; “saving some money” never does.',
+    'Use a 30-day wish list: write the item down instead of buying it. At the end of the month, buy only what still matters.'
+  ];
+
+  var STORE_KEY = 'pocketBudget.v1';
+
+  var els = {
+    incAllow: document.getElementById('incAllow'),
+    incJob: document.getElementById('incJob'),
+    incHustle: document.getElementById('incHustle'),
+    totalIn: document.getElementById('totalIn'),
+    sliders: document.getElementById('sliders'),
+    leftover: document.getElementById('leftover'),
+    donut: document.getElementById('donut'),
+    legend: document.getElementById('legend'),
+    barNeeds: document.getElementById('barNeeds'),
+    barWants: document.getElementById('barWants'),
+    barSav: document.getElementById('barSav'),
+    verdict: document.getElementById('verdict'),
+    goalName: document.getElementById('goalName'),
+    goalCost: document.getElementById('goalCost'),
+    goalWeekly: document.getElementById('goalWeekly'),
+    goalOut: document.getElementById('goalOut'),
+    projFill: document.getElementById('projFill'),
+    tipText: document.getElementById('tipText'),
+    tipPrev: document.getElementById('tipPrev'),
+    tipNext: document.getElementById('tipNext'),
+    tipDots: document.getElementById('tipDots')
+  };
+
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function money(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+  function num(input) {
+    var v = parseFloat(input.value);
+    return isFinite(v) && v >= 0 ? v : 0;
+  }
+
+  // ---- build sliders ----
+  var slEls = {};
+  CATS.forEach(function (c) {
+    var row = document.createElement('div');
+    row.className = 'sl-row';
+    row.innerHTML =
+      '<div class="sl-head"><label for="sl-' + c.key + '"><span class="swatch" style="background:' + c.color + '"></span>' + c.label + '</label>' +
+      '<span class="amt" id="amt-' + c.key + '">$0</span></div>' +
+      '<input type="range" id="sl-' + c.key + '" min="0" max="200" step="1" value="' + c.def + '" aria-label="' + c.label + ' monthly amount in dollars">';
+    els.sliders.appendChild(row);
+    slEls[c.key] = {
+      range: row.querySelector('input'),
+      amt: row.querySelector('.amt')
+    };
+  });
+
+  // ---- persistence ----
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORE_KEY);
+      if (!raw) return;
+      var s = JSON.parse(raw);
+      if (s && s.inc) {
+        if (typeof s.inc.allow === 'number') els.incAllow.value = s.inc.allow;
+        if (typeof s.inc.job === 'number') els.incJob.value = s.inc.job;
+        if (typeof s.inc.hustle === 'number') els.incHustle.value = s.inc.hustle;
+      }
+      if (s && s.cat) {
+        CATS.forEach(function (c) {
+          if (typeof s.cat[c.key] === 'number') slEls[c.key].range.value = s.cat[c.key];
+        });
+      }
+      if (s && s.goal) {
+        if (typeof s.goal.name === 'string') els.goalName.value = s.goal.name;
+        if (typeof s.goal.cost === 'number') els.goalCost.value = s.goal.cost;
+        if (typeof s.goal.weekly === 'number') els.goalWeekly.value = s.goal.weekly;
+      }
+    } catch (e) { /* storage unavailable — carry on */ }
+  }
+
+  var saveTimer = 0;
+  function saveState() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function () {
+      try {
+        var s = {
+          inc: { allow: num(els.incAllow), job: num(els.incJob), hustle: num(els.incHustle) },
+          cat: {},
+          goal: { name: els.goalName.value.slice(0, 40), cost: num(els.goalCost), weekly: num(els.goalWeekly) }
+        };
+        CATS.forEach(function (c) { s.cat[c.key] = parseFloat(slEls[c.key].range.value) || 0; });
+        localStorage.setItem(STORE_KEY, JSON.stringify(s));
+      } catch (e) { /* storage unavailable — carry on */ }
+    }, 250);
+  }
+
+  // ---- core math + render ----
+  function incomeTotal() {
+    return num(els.incAllow) + num(els.incJob) + num(els.incHustle);
+  }
+
+  function catValues() {
+    var out = {};
+    CATS.forEach(function (c) { out[c.key] = parseFloat(slEls[c.key].range.value) || 0; });
+    return out;
+  }
+
+  function drawDonut(vals, income) {
+    var cv = els.donut;
+    var ctx = cv.getContext('2d');
+    if (!ctx) return;
+    var cssW = cv.clientWidth || 240;
+    var dpr = Math.min(window.devicePixelRatio || 1, 3);
+    if (cv.width !== Math.round(cssW * dpr)) {
+      cv.width = Math.round(cssW * dpr);
+      cv.height = Math.round(cssW * dpr);
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cssW, cssW);
+
+    var cx = cssW / 2, cy = cssW / 2;
+    var rOut = cssW / 2 - 6, rIn = rOut * 0.62;
+    var allocated = 0;
+    CATS.forEach(function (c) { allocated += vals[c.key]; });
+    var base = Math.max(income, allocated);
+
+    var segs = [];
+    CATS.forEach(function (c) {
+      if (vals[c.key] > 0) segs.push({ v: vals[c.key], color: c.color });
+    });
+    if (income > allocated) segs.push({ v: income - allocated, color: '#e2ece7' });
+
+    var start = -Math.PI / 2;
+    if (base <= 0 || segs.length === 0) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, (rOut + rIn) / 2, 0, Math.PI * 2);
+      ctx.lineWidth = rOut - rIn;
+      ctx.strokeStyle = '#e2ece7';
+      ctx.stroke();
+    } else {
+      var gap = segs.length > 1 ? 0.03 : 0;
+      segs.forEach(function (s) {
+        var ang = (s.v / base) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.arc(cx, cy, (rOut + rIn) / 2, start + gap / 2, start + ang - gap / 2);
+        ctx.lineWidth = rOut - rIn;
+        ctx.lineCap = 'butt';
+        ctx.strokeStyle = s.color;
+        ctx.stroke();
+        start += ang;
+      });
+    }
+
+    ctx.fillStyle = '#14345b';
+    ctx.textAlign = 'center';
+    ctx.font = '800 ' + Math.round(cssW * 0.115) + 'px Manrope, sans-serif';
+    ctx.fillText(money(allocated), cx, cy - 2);
+    ctx.fillStyle = '#4c6684';
+    ctx.font = '500 ' + Math.round(cssW * 0.058) + 'px Inter, sans-serif';
+    ctx.fillText('of ' + money(income) + ' planned', cx, cy + Math.round(cssW * 0.075));
+  }
+
+  function renderLegend(vals, income) {
+    var html = '';
+    CATS.forEach(function (c) {
+      html += '<li><span class="swatch" style="background:' + c.color + '"></span>' + c.label +
+        '<span class="v">' + money(vals[c.key]) + '</span></li>';
+    });
+    var allocated = 0;
+    CATS.forEach(function (c) { allocated += vals[c.key]; });
+    if (income > allocated) {
+      html += '<li><span class="swatch" style="background:#e2ece7"></span>Unallocated<span class="v">' + money(income - allocated) + '</span></li>';
+    }
+    els.legend.innerHTML = html;
+  }
+
+  function renderRule(vals, income) {
+    var needs = vals.food + vals.transport;
+    var wants = vals.fun + vals.subs + vals.giving;
+    var sav = vals.savings;
+    var allocated = needs + wants + sav;
+
+    var pn = income > 0 ? (needs / income) * 100 : 0;
+    var pw = income > 0 ? (wants / income) * 100 : 0;
+    var ps = income > 0 ? (sav / income) * 100 : 0;
+
+    els.barNeeds.style.width = Math.min(pn, 100) + '%';
+    els.barWants.style.width = Math.min(pw, 100) + '%';
+    els.barSav.style.width = Math.min(ps, 100) + '%';
+
+    var msg;
+    if (income <= 0) {
+      msg = 'Add some money in up top, then plan where it goes.';
+    } else if (allocated > income) {
+      msg = 'Whoa — you have planned ' + money(allocated - income) + ' more than you actually have. Something has to give!';
+    } else if (allocated === 0) {
+      msg = 'Move the sliders to see how your plan stacks up against 50/30/20.';
+    } else if (ps >= 20 && pn <= 50 && pw <= 30) {
+      msg = 'Chef’s kiss: needs ' + Math.round(pn) + '%, wants ' + Math.round(pw) + '%, savings ' + Math.round(ps) + '%. Future-you is doing a happy dance.';
+    } else if (ps < 20) {
+      msg = 'You are saving ' + Math.round(ps) + '% — try nudging it toward 20%. Pay yourself first, even if it is small.';
+    } else if (pw > 30) {
+      msg = 'Wants are at ' + Math.round(pw) + '% (target 30%). Fun matters — just check if a subscription or two could go.';
+    } else {
+      msg = 'Needs are at ' + Math.round(pn) + '% (target 50%). Tough to shrink, but shared rides or packed snacks can help.';
+    }
+    els.verdict.textContent = msg;
+  }
+
+  function renderGoal() {
+    var name = els.goalName.value.trim() || 'your goal';
+    var cost = num(els.goalCost);
+    var weekly = num(els.goalWeekly);
+    if (cost <= 0) {
+      els.goalOut.textContent = 'Give your goal a price and a weekly amount to see the plan.';
+      els.projFill.style.width = '0%';
+      return;
+    }
+    if (weekly <= 0) {
+      els.goalOut.textContent = 'Saving $0 a week means ' + name + ' stays a dream — even $5 a week gets the ball rolling.';
+      els.projFill.style.width = '0%';
+      return;
+    }
+    var weeks = Math.ceil(cost / weekly);
+    var months = weeks / 4.345;
+    var target = new Date();
+    target.setDate(target.getDate() + weeks * 7);
+    var when = target.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    var monthsTxt = months < 1.05 ? 'under a month' : 'about ' + Math.round(months) + ' month' + (Math.round(months) === 1 ? '' : 's');
+    els.goalOut.innerHTML = 'Saving <b>' + money(weekly) + '/week</b>, you will hit <b>' + money(cost) + '</b> for ' +
+      name.replace(/</g, '&lt;').replace(/>/g, '&gt;') + ' in <b>' + weeks + ' week' + (weeks === 1 ? '' : 's') + '</b> (' + monthsTxt + ') — around ' + when + '.';
+    els.projFill.style.width = '0%';
+    var pct = Math.min(100, Math.round((weekly * 4.345 / cost) * 100));
+    // fill shows one month of progress toward the goal
+    requestAnimationFrame(function () {
+      els.projFill.style.width = Math.max(pct, 2) + '%';
+    });
+    els.goalOut.innerHTML += '<br><span style="color:var(--navy-soft);font-size:.82rem">The bar shows one month of saving: ' + pct + '% of the way there.</span>';
+  }
+
+  function syncSliderBounds(income) {
+    var max = Math.max(100, Math.ceil(income / 5) * 5);
+    CATS.forEach(function (c) {
+      var r = slEls[c.key].range;
+      r.max = String(max);
+      if (parseFloat(r.value) > max) r.value = String(max);
+    });
+  }
+
+  function renderAll() {
+    var income = incomeTotal();
+    els.totalIn.textContent = money(income);
+    syncSliderBounds(income);
+    var vals = catValues();
+    CATS.forEach(function (c) { slEls[c.key].amt.textContent = money(vals[c.key]); });
+
+    var allocated = 0;
+    CATS.forEach(function (c) { allocated += vals[c.key]; });
+    var left = income - allocated;
+    if (left >= 0) {
+      els.leftover.className = 'leftover';
+      els.leftover.textContent = 'Left over: ' + money(left) + (left > 0 ? ' — park it in savings?' : ' — every dollar has a job!');
+    } else {
+      els.leftover.className = 'leftover bad';
+      els.leftover.textContent = 'Over budget by ' + money(-left) + ' — dial something back.';
+    }
+
+    drawDonut(vals, income);
+    renderLegend(vals, income);
+    renderRule(vals, income);
+    saveState();
+  }
+
+  // ---- tips carousel ----
+  var tipIdx = 0;
+  var tipTimer = 0;
+  var dotEls = [];
+  TIPS.forEach(function (_, i) {
+    var s = document.createElement('span');
+    if (i === 0) s.className = 'on';
+    els.tipDots.appendChild(s);
+    dotEls.push(s);
+  });
+  function showTip(i, instant) {
+    tipIdx = (i + TIPS.length) % TIPS.length;
+    dotEls.forEach(function (d, j) { d.className = j === tipIdx ? 'on' : ''; });
+    if (instant || reduceMotion.matches) {
+      els.tipText.textContent = TIPS[tipIdx];
+      return;
+    }
+    els.tipText.classList.add('fade');
+    setTimeout(function () {
+      els.tipText.textContent = TIPS[tipIdx];
+      els.tipText.classList.remove('fade');
+    }, 380);
+  }
+  function startTipTimer() {
+    stopTipTimer();
+    tipTimer = setInterval(function () { showTip(tipIdx + 1, false); }, 8000);
+  }
+  function stopTipTimer() {
+    if (tipTimer) { clearInterval(tipTimer); tipTimer = 0; }
+  }
+  els.tipNext.addEventListener('click', function () { showTip(tipIdx + 1, false); startTipTimer(); });
+  els.tipPrev.addEventListener('click', function () { showTip(tipIdx - 1, false); startTipTimer(); });
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) stopTipTimer(); else startTipTimer();
+  });
+
+  // ---- wire inputs ----
+  [els.incAllow, els.incJob, els.incHustle].forEach(function (inp) {
+    inp.addEventListener('input', renderAll);
+  });
+  CATS.forEach(function (c) {
+    slEls[c.key].range.addEventListener('input', renderAll);
+  });
+  [els.goalName, els.goalCost, els.goalWeekly].forEach(function (inp) {
+    inp.addEventListener('input', function () { renderGoal(); saveState(); });
+  });
+
+  var resizeTimer = 0;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      drawDonut(catValues(), incomeTotal());
+    }, 150);
+  });
+
+  loadState();
+  renderAll();
+  renderGoal();
+  showTip(0, true);
+  startTipTimer();
+})();
+</script>
+</body>
+</html>
