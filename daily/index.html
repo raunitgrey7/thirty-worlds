@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Daily Post — Thirty Worlds</title>
-<meta name="description" content="One click a day: today's Thirty Worlds website, its screenshot, and a ready-made LinkedIn post — drafted straight into the composer.">
+<meta name="description" content="One click a day: today's Thirty Worlds website, its screenshot saved for attaching, and a full LinkedIn post drafted straight into the composer.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📅</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -33,14 +33,14 @@
   .site-row h2{font-family:'Space Grotesk',sans-serif;font-size:22px;letter-spacing:-.01em;flex:1;min-width:150px}
   .site-row a.visit{font:600 13px/1 Inter,sans-serif;color:var(--accent);text-decoration:none;border:1px solid rgba(126,162,255,.4);padding:10px 15px;border-radius:999px;transition:background .2s}
   .site-row a.visit:hover{background:rgba(126,162,255,.12)}
-  textarea{width:100%;min-height:230px;resize:vertical;background:#0b0c16;border:1px solid var(--line);border-radius:14px;color:var(--ink);font:400 14.5px/1.65 Inter,sans-serif;padding:16px;transition:border-color .2s}
+  textarea{width:100%;min-height:340px;resize:vertical;background:#0b0c16;border:1px solid var(--line);border-radius:14px;color:var(--ink);font:400 14.5px/1.65 Inter,sans-serif;padding:16px;transition:border-color .2s}
   textarea:focus{outline:none;border-color:rgba(126,162,255,.6)}
   .meta-row{display:flex;justify-content:space-between;align-items:center;margin:8px 2px 18px;color:var(--muted);font-size:12.5px}
   .actions{display:flex;gap:12px;flex-wrap:wrap}
   button,.btn{font:600 15px/1 Inter,sans-serif;border-radius:999px;padding:16px 22px;cursor:pointer;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);transition:transform .15s,background .2s;min-height:48px}
   button:hover,.btn:hover{transform:translateY(-2px)}
   button:focus-visible,.btn:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-  .primary{background:var(--go);border-color:var(--go);color:#fff;flex:1;min-width:220px;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:9px}
+  .primary{background:var(--go);border-color:var(--go);color:#fff;flex:1;min-width:250px;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:9px}
   .primary:hover{background:#0a5cb0}
   .posted-btn.on{background:rgba(74,222,128,.15);border-color:#4ade80;color:#4ade80}
   .nav{display:flex;justify-content:space-between;margin-top:22px;gap:12px}
@@ -48,8 +48,10 @@
   .howto{margin-top:34px;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:18px;padding:22px clamp(16px,4vw,26px);color:var(--muted);font-size:14px;line-height:1.75}
   .howto h3{color:var(--ink);font-family:'Space Grotesk',sans-serif;font-size:16px;margin-bottom:8px}
   .howto ol{padding-left:20px}
+  .howto li{margin-bottom:4px}
   .howto li::marker{color:var(--accent)}
-  .toast{position:fixed;bottom:26px;left:50%;transform:translate(-50%,80px);background:#1a1c30;border:1px solid var(--line);color:var(--ink);padding:13px 22px;border-radius:999px;font:600 14px/1 Inter,sans-serif;transition:transform .35s cubic-bezier(.2,.7,.2,1);z-index:2000}
+  .howto a{color:var(--accent)}
+  .toast{position:fixed;bottom:26px;left:50%;transform:translate(-50%,80px);background:#1a1c30;border:1px solid var(--line);color:var(--ink);padding:13px 22px;border-radius:999px;font:600 14px/1 Inter,sans-serif;transition:transform .35s cubic-bezier(.2,.7,.2,1);z-index:2000;max-width:90vw;text-align:center}
   .toast.show{transform:translate(-50%,0)}
   @media (prefers-reduced-motion:reduce){*{transition-duration:.01ms !important}}
   @media (max-width:480px){.actions .primary{min-width:100%}}
@@ -78,8 +80,9 @@
       <textarea id="post" spellcheck="false"></textarea>
       <div class="meta-row"><span>Edit freely — the buttons use whatever is in the box.</span><span id="count"></span></div>
       <div class="actions">
-        <a class="btn primary" id="draft" href="#" target="_blank" rel="noopener">✍️ Draft on LinkedIn</a>
-        <button id="copy">📋 Copy text</button>
+        <a class="btn primary" id="draft" href="#" target="_blank" rel="noopener">✍️ Draft on LinkedIn + save screenshot</a>
+        <button id="dl">🖼️ Screenshot</button>
+        <button id="copy">📋 Copy</button>
         <button id="posted" class="posted-btn" aria-pressed="false">Mark posted</button>
       </div>
       <div class="nav">
@@ -91,13 +94,14 @@
   </article>
 
   <section class="howto">
-    <h3>Your 60-second daily routine</h3>
+    <h3>Your 90-second daily routine</h3>
     <ol>
-      <li>Open this page (bookmark it) — it already shows <strong>today's</strong> website and post.</li>
-      <li>Click <strong>Draft on LinkedIn</strong> — LinkedIn opens with the whole post typed into the composer.</li>
-      <li>Wait a second for the link preview card (the screenshot) to attach, then hit <strong>Post</strong>. Done.</li>
+      <li>Open this page (bookmark it) — it already shows <strong>today's</strong> website and full post.</li>
+      <li>Click <strong>Draft on LinkedIn + save screenshot</strong>. Two things happen: the screenshot (e.g. <em>day-01-cosmos.jpg</em>) lands in your Downloads, and LinkedIn opens with the whole post typed into the composer.</li>
+      <li>In the composer, click the <strong>photo icon</strong> (or drag the file in) and pick the day-XX image you just downloaded.</li>
+      <li>Hit <strong>Post</strong>. Done.</li>
     </ol>
-    <p style="margin-top:10px">The screenshot attaches itself automatically — every site now carries its screenshot as its social preview image, so pasting the link is enough. Works best on desktop LinkedIn; if the composer ever opens empty, use <strong>Copy text</strong> and paste. If a preview looks stale, refresh it once at <a href="https://www.linkedin.com/post-inspector/" target="_blank" rel="noopener" style="color:var(--accent)">LinkedIn Post Inspector</a>.</p>
+    <p style="margin-top:10px"><strong>Why attach the image?</strong> Attached photos show big and bold in the feed. If you ever skip the attach step, you're still covered — every site carries its screenshot as its social preview, so the bare link unfurls into a (smaller) preview card on its own. Attaching wins; the preview is the safety net. Works best on desktop LinkedIn — on mobile, use <strong>Copy</strong> and paste. Stale preview? Refresh it at the <a href="https://www.linkedin.com/post-inspector/" target="_blank" rel="noopener">LinkedIn Post Inspector</a>.</p>
   </section>
 </main>
 <div class="toast" id="toast" role="status"></div>
@@ -107,37 +111,158 @@
   "use strict";
   var START = "2026-09-02"; // Day 1 — change this one line to shift the whole campaign
   var TAG = "#buildinpublic #webdev #sideproject";
+  /* [folder, emoji, name, pitch, story, [4 features], tech line, extra tags] */
   var S = [
-    ["cosmos","🪐","Cosmos Explorer","A whole solar system in one HTML file. Drag to orbit, scroll to zoom, tap a planet for its story — real relative speeds, built with Three.js.","#threejs #creativecoding"],
-    ["alphabet-safari","🦁","Alphabet Safari","Built for the smallest users: 26 letters that bounce, speak out loud and explode into confetti. Watching a 3-year-old find their favourite animal is the whole point.","#edtech #kids"],
-    ["festivals","🎆","Festivals of the World","One year on Earth, ten ways to celebrate it. Scroll from Lunar New Year to Hogmanay — every festival gets its own palette and animated motif, from drifting lanterns to Holi powder.","#culture #scrollytelling"],
-    ["snake","🐍","Neon Serpent","The classic snake, reborn in CRT neon. Keyboard, swipe or on-screen D-pad — and the speed creeps up as you feast.","#gamedev #retro"],
-    ["beat-lab","🥁","Beat Lab","A 16-step drum machine with six voices and pentatonic synth pads — entirely in the browser with Tone.js. Comes with house, boom-bap and latin presets.","#webaudio #musictech"],
-    ["breathe","🫁","Stillpoint","Box breathing, 4-7-8 and coherent breathing, guided by a slowly glowing orb. Five minutes with this and your shoulders drop an inch.","#wellness #mindfulness"],
-    ["periodic-table","🧪","Element Lab","All 118 elements, correctly laid out, color-coded by family, searchable — with a real-world use for every element you'd recognise.","#chemistry #edtech"],
-    ["flag-quest","🚩","Flag Quest","Ten flags, four choices, sixty countries across every continent — and you pick up capital cities as bonus facts along the way.","#geography #quiz"],
-    ["haiku-garden","🌸","Haiku Garden","A generative poet in a zen garden. Every haiku is a hand-counted 5-7-5, and the whole scene changes with the seasons — petals, fireflies, leaves, snow.","#generativeart #poetry"],
-    ["mind-gym","🧠","Mind Gym","Brain training designed for seniors: big adjustable type, warm colors, zero time pressure. Trivia, number recall and odd-one-out — with kind feedback, always.","#accessibility #seniors"],
-    ["ocean-depths","🌊","Into the Deep","Scroll 11,000 meters down through the five ocean zones — past the scuba limit, past the Titanic, into the hadal dark. Everything you meet on the way is real.","#scrollytelling #ocean"],
-    ["recipe-roulette","🍳","Recipe Roulette","Dinner indecision, solved by physics. Fling the wheel, get one of 16 real dishes with a cookable five-step recipe. Vegetarian toggle included.","#food #uidesign"],
-    ["hello-world","👋","Hello, World","How to say hello, thank you and 'my name is…' in 20 languages — in native script, romanized, and spoken aloud by your browser.","#languages #culture"],
-    ["pixel-studio","👾","Pixel Studio","A tiny pixel-art editor: paint, fill, mirror mode, undo — then export your sprite as a crisp PNG. Surprisingly hard to stop using.","#pixelart #creativecoding"],
-    ["fit-seven","💪","Fit Seven","The science-backed 7-minute workout: 12 exercises, a big honest countdown ring, form cues and beeps. No app, no account, no excuses.","#fitness #health"],
-    ["night-sky","✨","Night Sky Stories","Eight real constellations on a twinkling star map — tap Orion or Cassiopeia and read the myth that named it, plus when to find it in your sky.","#astronomy #storytelling"],
-    ["tic-tac-toe","⭕","Tactic","Tic-tac-toe with a minimax brain. Easy is friendly, Hard has mathematically never lost — I verified all 642 possible games. Come take a draw.","#gamedev #algorithms"],
-    ["cuisine-atlas","🍜","World Cuisine Atlas","Sixteen food cultures, one shelf: doro wat from Ethiopia, ceviche from Peru, jollof from Nigeria — with ingredients, spice levels and did-you-know food lore.","#foodculture #design"],
-    ["color-play","🎨","Color Theory Playground","Pick one color, get six classic harmonies computed live — plus a proper WCAG contrast checker so your palettes actually pass accessibility.","#designtools #a11y"],
-    ["pocket-budget","💰","Pocket Budget","Financial literacy for teens: build a monthly budget with sliders, watch the donut chart react live, and check yourself against the 50/30/20 rule.","#finlit #teens"],
-    ["physics-lab","⚡","Physics Playground","Click to spawn bouncing balls, then mess with gravity, wind, friction and bounciness. Moon, Earth and Jupiter presets — because physics is better hands-on.","#stem #physics"],
-    ["memory-match","🃏","Memory Match","The card-flip memory game, three themes and three difficulties deep, with star ratings and best times. Simple to build, weirdly competitive to play.","#games #kids"],
-    ["myth-codex","🏺","Myth Codex","Thirty divine figures from five great traditions — Greek, Norse, Egyptian, Hindu, Japanese — with their domains, symbols and the stories told of them.","#mythology #culture"],
-    ["story-forge","📖","Story Forge","Kids pick a hero, a sidekick, a place, a magical object and a problem — and forge a five-paragraph adventure that reads itself aloud. No two tales alike.","#kids #creativity"],
-    ["body-atlas","🫀","Body Atlas","Five human body systems on one interactive map — toggle bones, blood, nerves, digestion and breath, tap any organ for a real fact, then quiz yourself.","#biology #edtech"],
-    ["type-racer","⌨️","Typing Velocity","A terminal-styled typing test with real passages from literature and science. Live WPM, accuracy, and a speed graph at the finish. My best is on the line now.","#typing #productivity"],
-    ["ancient-wonders","🏛️","Seven Wonders","A parallax journey through the seven wonders of the ancient world — layered SVG scenes, each with its story and its fate. Only one still stands.","#history #webdesign"],
-    ["math-arena","🔢","Math Arena","Sixty seconds, four answer buttons, streaks on fire. Mental-math sprints for kids from 'numbers to 10' up to three-digit mixed operations.","#edtech #math"],
-    ["cloud-atlas","☁️","Cloud Atlas","Every cloud belongs to one of ten families, and each one is a weather forecast written in water. Learn the ten, then quiz yourself.","#weather #science"],
-    ["inventions","💡","Spark","Twelve inventions, five and a half millennia — from the wheel to CRISPR — on a timeline that draws itself as you scroll. Each one rewired the world.","#history #scrollytelling"]
+    ["cosmos","🪐","Cosmos Explorer","a full 3D solar system in a single HTML file.",
+      "I wanted to see how far one file can go — no framework, no build step, no bundler. Turns out: all the way to space. Every orbit is real astronomy squeezed close enough to see, so you can literally watch Mercury lap Neptune.",
+      ["Drag to orbit, pinch or scroll to zoom — the camera is hand-rolled pointer math","Tap any planet for its real stats: diameter, day length, year length, one wow-fact","Saturn keeps its ring, the Sun glows, a full starfield turns behind everything","Orbit-speed slider, pause button and planet labels when you want them"],
+      "Built with Three.js in one self-contained HTML file. Works from a phone to a 4K monitor.",
+      "#threejs #creativecoding"],
+    ["alphabet-safari","🦁","Alphabet Safari","an alphabet that talks back — built for 2-to-6-year-olds.",
+      "Designing for toddlers is a different sport: huge touch targets, instant feedback, zero menus. Every design decision here answers one question — will this make a small human giggle and tap again?",
+      ["Tap a letter: it bounces, bursts confetti and says \"A! Alligator!\" out loud","26 animals from Alligator to Zebra (X is an X-ray fish, naturally)","A play-the-whole-alphabet mode that walks through all 26 with highlights","ABC / abc toggle so uppercase and lowercase both get learned"],
+      "The voice is the browser's own speech engine — no accounts, no ads, no app store.",
+      "#edtech #kids"],
+    ["festivals","🎆","Festivals of the World","a scroll through one year of human celebration.",
+      "Ten festivals in calendar order, and every one gets its own world: its own palette, its own animated motif, its own 90 words written with care — from the Nian legend behind Lunar New Year to first-footing at Hogmanay.",
+      ["Lanterns drift for Lunar New Year, Holi throws color powder across your screen","Marigolds and papel picado for Día de los Muertos, glowing diyas for Diwali","Eid al-Fitr, Songkran, Inti Raymi, Obon, Hanami and Hogmanay complete the year","A fixed month-rail tracks where in the calendar you've scrolled"],
+      "Scrollytelling built with GSAP ScrollTrigger — with a calm fallback for reduced-motion users.",
+      "#culture #scrollytelling"],
+    ["snake","🐍","Neon Serpent","the 1976 arcade classic, rebuilt in neon.",
+      "The game is simple; the game *feel* is everything. Most of the work went into what you don't see — the input queue that blocks fatal 180° turns, the speed curve, the pause that triggers itself when you switch tabs.",
+      ["Play with arrow keys, WASD, swipe gestures or an on-screen D-pad","Speed rises gently with every bite — score and best are saved locally","CRT scanlines, glow trails and a pulsing food orb for the full arcade feel","Walls are fatal. That's the law."],
+      "Vanilla JavaScript on a devicePixelRatio-crisp canvas. No engine, no library.",
+      "#gamedev #retrogaming"],
+    ["beat-lab","🥁","Beat Lab","a drum machine that lives in a webpage.",
+      "Nothing here is a sample — every kick, snare and cowbell is synthesized live in your browser the moment you hit play. Tap the grid, build a groove, lose twenty minutes.",
+      ["16 steps × 6 voices: kick, snare, hi-hat, clap, tom, cowbell","Three real grooves preloaded — four-on-the-floor house, boom-bap, latin","Tempo slider from 60 to 180 BPM with a live step highlight","Eight pentatonic synth pads underneath, playable with keys A–K"],
+      "Built on Tone.js and the Web Audio API, in one self-contained HTML file.",
+      "#webaudio #musictech"],
+    ["breathe","🫁","Stillpoint","a breathing coach with no account, no app, no ads.",
+      "Three techniques, honestly timed: box breathing (4-4-4-4), the relaxing 4-7-8, and coherent 5-5. A glowing orb swells as you inhale and settles as you exhale — follow it, or follow the words. Five minutes and your shoulders drop an inch.",
+      ["Pick a technique and a session length: 1, 3 or 5 minutes","The orb, a phase label and a per-phase countdown keep you on rhythm","Optional soft audio cues at each phase change, plus an end chime","A reduced-motion mode carries the whole session in text"],
+      "The timing engine runs on timestamps, so it stays honest even when the tab lags.",
+      "#mindfulness #wellness"],
+    ["periodic-table","🧪","Element Lab","all 118 elements on one interactive wall.",
+      "The hard part wasn't the layout — it was the data discipline: symbol, name, atomic number and mass for every element, checked, plus a real-world use for every element you'd actually recognize.",
+      ["Correct 18-column layout, lanthanides and actinides in their proper rows","Ten color-coded families — filter chips dim everything else","Live search by name, symbol or number","Tap any tile for period, group, category and what the element is used for"],
+      "Pure HTML/CSS grid and vanilla JS. The table scrolls in its own lane on phones — the page never breaks.",
+      "#chemistry #edtech"],
+    ["flag-quest","🚩","Flag Quest","a geography quiz that sneaks capitals into your head.",
+      "Ten flags per expedition, four choices each — but the trick is in the wrong answers: distractors come from the same continent, so you can't coast on vibes. Every answer teaches you a capital city on the way out.",
+      ["60 countries across every continent, with region-filtered expeditions","Same-continent distractors keep the guessing honest","Streak-scaled scoring with rank titles from rookie to Cartographer","A capital-city fact after every single answer"],
+      "Flag images served from flagcdn with graceful fallbacks. Best scores saved per region.",
+      "#geography #quiz"],
+    ["haiku-garden","🌸","Haiku Garden","a poetry generator that actually respects the form.",
+      "Generative poetry usually cheats on syllables. Here every line was written and counted by hand — dozens of five-syllable and seven-syllable lines per season — so every poem is a true 5-7-5 with real nature imagery and a turn.",
+      ["Four seasons change everything: palette, word banks, particles","Petals fall in spring, fireflies drift in summer, leaves in autumn, snow in winter","No haiku repeats back-to-back; each one crossfades in like ink settling","A footnote explains kigo and kireji — what makes a haiku a haiku"],
+      "Canvas particles, hand-counted verse, one HTML file. Reduced motion stills the garden.",
+      "#generativeart #poetry"],
+    ["mind-gym","🧠","Mind Gym","brain training that respects its audience.",
+      "Built specifically for seniors, which changed every decision: the Atkinson Hyperlegible typeface, a warm high-contrast palette, buttons you cannot miss, and — most importantly — no timers, no pressure, no flashing anything.",
+      ["Trivia: 20 real questions, each answer explained in a kind sentence","Number Recall: starts at 4 digits, grows to 7 as you succeed","Odd One Out: 15 word puzzles with the reasoning shown after","A−/A+ text-size control from big to very big, remembered between visits"],
+      "Accessibility wasn't a checklist here — it was the design brief.",
+      "#accessibility #inclusivedesign"],
+    ["ocean-depths","🌊","Into the Deep","an 11,000-meter scroll to the bottom of the ocean.",
+      "The ocean is a vertical world, so the website is too. As you scroll, the water darkens through five real zones — sunlight, twilight, midnight, abyss, hadal — and a live depth meter tracks your descent past the scuba limit, past the Titanic, all the way to Challenger Deep.",
+      ["Twenty real creatures appear at their true depths, each with a fact card","The background darkens continuously — by the abyss it's nearly black","Landmark callouts: 40 m scuba limit, 3,800 m Titanic, 10,935 m Challenger Deep","A fixed depth meter rides along for the whole descent"],
+      "Scroll-driven with GSAP ScrollTrigger; every creature and fact is real.",
+      "#scrollytelling #ocean"],
+    ["recipe-roulette","🍳","Recipe Roulette","dinner indecision, solved by physics.",
+      "The nightly \"what do you want? — I don't know, what do you want?\" loop, ended by a spinning wheel. Fling it, let friction pick, and get a real recipe you can actually cook tonight.",
+      ["16 real dinners on the wheel — shakshuka, dal tadka, fish tacos, miso ramen…","Spin with the button or grab the wheel and fling it — real ease-out physics","Every result opens a card: 6 ingredients, 5 numbered steps, time and difficulty","A vegetarian toggle rebuilds the wheel with the 10 veggie dishes"],
+      "Canvas wheel, pointer-event flinging, and recipes written to be genuinely cookable.",
+      "#food #uidesign"],
+    ["hello-world","👋","Hello, World","your first words in 20 languages.",
+      "\"Hello\", \"thank you\" and \"my name is…\" in twenty languages — shown in native script (right-to-left handled properly for Arabic and Hebrew), romanized for pronunciation, and spoken aloud by your browser when it has a matching voice.",
+      ["20 languages from Spanish and Swahili to Tamil, Korean and Greek","Native script + romanization + which countries speak it","Speaker buttons use your device's own voices — dimmed honestly when absent","A phrase-of-the-day hero that changes every day"],
+      "No flags, no stereotypes — just scripts, sounds and places, done carefully.",
+      "#languagelearning #i18n"],
+    ["pixel-studio","👾","Pixel Studio","a pocket pixel-art studio.",
+      "Everything a tiny sprite needs: a grid, a palette, a fill bucket and an undo button. The export secretly scales your art 16× with image smoothing off, so the PNG comes out razor-crisp instead of blurry.",
+      ["8×8, 16×16 or 32×32 grids with paint, erase, fill and eyedropper","Mirror-X mode for instant symmetry — characters in half the taps","40 steps of undo, plus save/load right in your browser","One-click PNG export, transparency preserved"],
+      "Pointer events + touch-action:none make drag-painting feel right on touch screens too.",
+      "#pixelart #creativetools"],
+    ["fit-seven","💪","Fit Seven","the science-backed 7-minute workout, honestly timed.",
+      "The real 12-exercise circuit — jumping jacks to side plank — with 30 seconds of work, 10 of rest, and a countdown ring that never lies: the timer runs on timestamps, so a laggy tab can't stretch your wall sit.",
+      ["All 12 classic exercises with a one-line form cue for each","A big SVG countdown ring, 3-2-1 beeps and a next-up preview during rests","Animated stick-figure demos so you never wonder what a triceps dip is","Pause, resume, skip — and 12 progress dots to pace yourself"],
+      "No app, no account, no equipment beyond a wall and a chair.",
+      "#fitness #health"],
+    ["night-sky","✨","Night Sky Stories","eight constellations and the myths that named them.",
+      "A procedural night sky — twinkling stars, the occasional meteor, parallax that follows your pointer — with eight real constellations drawn in their true patterns. Tap one and its story unfolds: why Orion hunts, why Cassiopeia hangs upside down.",
+      ["Orion, Ursa Major, Cassiopeia, Scorpius, Cygnus, Leo, Lyra and Crux","Each myth retold in about 90 words, faithful to the source lore","Best viewing season and hemisphere for every constellation","Shooting stars, if you're patient"],
+      "Hand-plotted star patterns on a vanilla canvas — no astronomy library, just coordinates and care.",
+      "#astronomy #storytelling"],
+    ["tic-tac-toe","⭕","Tactic","an unbeatable opponent in zero dependencies.",
+      "The Hard AI runs full minimax — and I didn't just trust the theory, I tested it: all 642 possible terminal games, played as both X and O. Zero losses. Easy and Medium exist so the game stays fun for humans.",
+      ["Three difficulties: Easy (random), Medium (half sharp), Hard (mathematically perfect)","Two-player local mode for settling actual arguments","Pick X or O, alternating first moves, running score tally","An animated stroke draws through the winning line"],
+      "Minimax with memoized game states, in a few hundred lines of vanilla JS.",
+      "#algorithms #gamedev"],
+    ["cuisine-atlas","🍜","World Cuisine Atlas","sixteen food cultures, one shelf.",
+      "Every cuisine is a library; this is a first shelf. Sixteen countries, each with its signature dish — doro wat on injera from Ethiopia, ceviche from Peru, jollof from Nigeria — plus the ingredients that define its pantry.",
+      ["16 cuisines across four continents, from Italy and Japan to Lebanon and Brazil","Key ingredients, spice level and veg-friendliness at a glance","Did-you-know food lore in every detail view — injera is plate AND utensil","Continent filters and live search across dishes and ingredients"],
+      "Warm editorial design: Playfair Display, cream and terracotta, cards that reveal on scroll.",
+      "#foodculture #design"],
+    ["color-play","🎨","Color Theory Playground","color theory you can poke.",
+      "Pick one base color and six classic harmonies compute live on the HSL wheel — complementary, analogous, triadic, split, tetradic, monochrome — each with a note on when designers actually reach for it.",
+      ["Click any swatch to copy its hex; export a whole palette as CSS variables","A proper WCAG contrast checker with live AA / AAA pass-fail badges","The relative-luminance math is implemented to spec, not approximated","Two-sentence explainers turn each harmony into a usable tool"],
+      "For designers, developers, and anyone who's ever shipped #3B82F6 on faith.",
+      "#designsystems #a11y"],
+    ["pocket-budget","💰","Pocket Budget","money skills for teens, before the stakes get real.",
+      "A budget you can *feel*: drag the spending sliders and watch a hand-drawn donut chart redraw instantly, then check yourself against the 50/30/20 rule. The savings-goal calculator answers the only question that matters — how many weeks until I can afford it?",
+      ["Three income sources and six spending categories with live sliders","The donut chart is drawn on a raw canvas — no chart library","A 50/30/20 needs/wants/savings check with a friendly verdict","Eight rotating money tips, including the 24-hour rule for impulse buys"],
+      "Everything persists in your browser. No sign-up, because teens deserve tools, not funnels.",
+      "#financialliteracy #edtech"],
+    ["physics-lab","⚡","Physics Playground","a gravity sandbox you'll poke for twenty minutes.",
+      "Click anywhere to spawn bouncing balls, then bend the rules: crank gravity to Jupiter, kill the friction, add wind, flip which way \"down\" is. The collisions are hand-rolled impulse physics — mass proportional to area, like nature intended.",
+      ["Sliders for gravity, bounciness, air drag and wind","One-tap presets: Moon (1.6), Earth (9.8), Jupiter (24.8 m/s²)","Flip gravity in any of four directions mid-flight","Trails toggle, live ball counter, up to 300 balls before it says enough"],
+      "Vanilla canvas at 60fps. The best physics lesson is the one you can break.",
+      "#physics #stem"],
+    ["memory-match","🃏","Memory Match","the memory game, three themes and three difficulties deep.",
+      "Flip two cards, find a pair, feel unreasonably smug. Under the candy-soft surface there's real polish: proper 3D card flips, a shake on mismatch, a pop on match, and star ratings that judge your move count honestly.",
+      ["Three emoji themes — Animals, Food, Space — 16 characters each","Easy 4×3 up to Hard 6×4 (that's 12 pairs to hold in your head)","Moves counter, timer, and 1–3 stars on the win screen","Best time per difficulty saved in your browser"],
+      "CSS 3D transforms do the flipping; your hippocampus does the rest.",
+      "#casualgames #frontend"],
+    ["myth-codex","🏺","Myth Codex","thirty divine figures from five great traditions.",
+      "Greek, Norse, Egyptian, Hindu and Japanese — six figures each, with their domains, symbols and sacred animals, and a story of about 80 words apiece. Written with respect: living traditions are described reverently, not mined for content.",
+      ["Zeus to Hermes, Odin to Hel, Ra to Bastet, Vishnu to Saraswati, Amaterasu to Benzaiten","Every figure: domain, symbol, sacred animal, and a told story","Dark-academia design — gold leaf on near-black, Cinzel and EB Garamond","A three-layer parallax starfield turns slowly behind it all"],
+      "Five tabs, thirty stories, one quiet night of reading.",
+      "#mythology #culture"],
+    ["story-forge","📖","Story Forge","a story engine for kids — 32,768 possible adventures.",
+      "Pick a hero, a sidekick, a place, a magical object and a problem (or roll the dice for all five) and the forge writes a five-paragraph adventure around your choices. Three different story skeletons keep repeat visits fresh, and the browser reads the whole tale aloud.",
+      ["8 options × 5 choices = 32,768 different stories","\"New twist\" re-rolls just the ending — six endings to land on","Read-aloud narration via the browser's own voice","Storybook design: warm paper, drop caps, a serif that means business"],
+      "Mad-libs mechanics, but the writing came first — every skeleton reads like a real bedtime story.",
+      "#kids #creativity"],
+    ["body-atlas","🫀","Body Atlas","five body systems on one interactive map.",
+      "One schematic human figure, five toggleable overlays: skeleton, circulation, nerves, digestion, breath. Stack them to see how you fit together, tap any part to light it up and learn one real fact — your femur is your longest bone; your small intestine is six meters of you.",
+      ["Skeletal, circulatory, nervous, digestive and respiratory systems — stackable","Five key parts per system, each tappable with a real fact","Clean clinical design: one accent color per system","A 10-question flashcard quiz to close the loop"],
+      "The whole figure is hand-drawn inline SVG — no images, no library.",
+      "#biology #edtech"],
+    ["type-racer","⌨️","Typing Velocity","a typing test with taste.",
+      "No random word salad — you type real passages: Austen and Melville, Darwin and Sagan, proverbs from around the world. Every character colors as you hit or miss it, and the clock starts on your first keystroke, not before.",
+      ["30 real attributed passages across Literature, Science and Proverbs","Live WPM and accuracy, plus raw vs. accurate WPM at the finish","A canvas sparkline graphs your speed across the whole run","30s and 60s modes with personal bests per pack"],
+      "Terminal aesthetic, JetBrains Mono, and a hidden input trick that makes it work on phones.",
+      "#productivity #developertools"],
+    ["ancient-wonders","🏛️","Seven Wonders","seven monuments — six of them ghosts.",
+      "The Seven Wonders of the Ancient World, walked as a parallax journey. Every chapter is a hand-drawn scene in three layers that drift apart as you scroll — and every wonder ends the same way but one: only the Great Pyramid still stands.",
+      ["All seven: Giza, Babylon, Olympia, Ephesus, Halicarnassus, Rhodes, Alexandria","Layered SVG scenes — sky, monument, foreground — moving at different speeds","Era, location, build date and fate for each wonder","The stories too: Herostratus burning Artemis's temple for fame, the Colossus's 54-year stand"],
+      "GSAP ScrollTrigger drives the parallax; the scenes are hand-drawn inline SVG.",
+      "#history #webdesign"],
+    ["math-arena","🔢","Math Arena","sixty seconds of mental math, engineered to be addictive.",
+      "Choose your weapon (+ − × ÷ or mix), choose your level, and sprint: big questions, four big answer buttons, a streak counter that catches fire at 3. The wrong answers are plausible on purpose — off-by-one traps, sign slips — so you have to actually compute.",
+      ["Three levels: numbers to 10, to 50, to 100","Division problems always come out even — no trick remainders","Streak bonuses, accuracy stats and saved best scores","End-screen verdicts from \"warming up\" to \"calculator, who?\""],
+      "Built for kids 6–12, dangerous for adults who think they still remember their times tables.",
+      "#math #edtech"],
+    ["cloud-atlas","☁️","Cloud Atlas","learn to read tomorrow's weather overhead.",
+      "Every cloud in the sky belongs to one of ten families, and each one is a forecast written in water. Cirrus wisps mean change is coming; a lowering nimbostratus means steady rain; cumulonimbus means get inside. Learn the ten and the sky becomes legible.",
+      ["All ten WMO cloud types, each with a hand-built CSS/SVG illustration","Altitude bands — High, Mid, Low — tap one to filter the sky","\"Weather it brings\" for every type, grounded in real meteorology","An 8-round guessing quiz to test your new superpower"],
+      "The cloud illustrations are layered blurred shapes — no images anywhere on the page.",
+      "#weather #science"],
+    ["inventions","💡","Spark","five and a half millennia of human ingenuity, one scroll.",
+      "Twelve inventions from the wheel to CRISPR, told as a timeline that literally draws itself as you scroll. Each one looked small at first — a spinning disc, a floating needle, a moldy dish — and each one rewired the world.",
+      ["Wheel, paper, compass, printing press, steam, telegraph, lightbulb…","…penicillin, transistor, internet, smartphone, CRISPR","Who, where, when and why it mattered — in 80 careful words each","Era markers from Ancient to Genomic track the acceleration"],
+      "The progress line is drawn by GSAP ScrollTrigger as you descend through history.",
+      "#innovation #history"]
   ];
 
   var status=document.getElementById("status"),dots=document.getElementById("dots"),shot=document.getElementById("shot"),
@@ -157,13 +282,32 @@
 
   function buildPost(i){
     var s=S[i];
-    return "Day "+(i+1)+"/30 of shipping 30 tiny websites 🚀\n\n"+s[1]+" "+s[2]+" — "+s[3]+
-      "\n\nTry it → https://tw-"+s[0]+".vercel.app\n\n"+TAG+" "+s[4];
+    return "Day "+(i+1)+"/30 — I'm shipping one tiny website every day for a month 🚀\n\n"
+      +s[1]+" "+s[2].toUpperCase()+" — "+s[3]+"\n\n"
+      +s[4]+"\n\n"
+      +"What's inside:\n"+s[5].map(function(f){return "▸ "+f}).join("\n")+"\n\n"
+      +s[6]+"\n\n"
+      +"🔗 Try it: https://tw-"+s[0]+".vercel.app\n"
+      +"🌐 The whole collection: https://thirty-worlds.vercel.app\n\n"
+      +TAG+" "+s[7];
+  }
+  function fileName(i){ return "day-"+String(i+1).padStart(2,"0")+"-"+S[i][0]+".jpg"; }
+  function downloadShot(i,quiet){
+    fetch("/"+S[i][0]+"/og.jpg").then(function(r){ if(!r.ok)throw 0; return r.blob(); }).then(function(b){
+      var a=document.createElement("a"), u=URL.createObjectURL(b);
+      a.href=u; a.download=fileName(i);
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){URL.revokeObjectURL(u)},5000);
+      if(!quiet)pop("Saved "+fileName(i)+" to your Downloads");
+    }).catch(function(){
+      window.open("https://tw-"+S[i][0]+".vercel.app/og.jpg","_blank");
+      if(!quiet)pop("Opened the screenshot — right-click it to save");
+    });
   }
   function show(i){
     current=i;
     var s=S[i], url="https://tw-"+s[0]+".vercel.app";
-    shot.src=url+"/og.jpg";
+    shot.src="/"+s[0]+"/og.jpg";
     shot.alt="Screenshot of "+s[2];
     badge.textContent="Day "+(i+1)+" / 30";
     emoji.textContent=s[1]; name.textContent=s[2];
@@ -182,7 +326,7 @@
     pb.setAttribute("aria-pressed",done?"true":"false");
   }
   function sync(){
-    count.textContent=post.value.length+" chars";
+    count.textContent=post.value.length+" / 3,000 chars";
     draft.href="https://www.linkedin.com/feed/?shareActive=true&text="+encodeURIComponent(post.value);
   }
   function paintDots(){
@@ -198,10 +342,11 @@
   }
   function pop(msg){
     toast.textContent=msg; toast.classList.add("show");
-    clearTimeout(toastT); toastT=setTimeout(function(){toast.classList.remove("show")},2200);
+    clearTimeout(toastT); toastT=setTimeout(function(){toast.classList.remove("show")},2600);
   }
 
   post.addEventListener("input",sync);
+  document.getElementById("dl").addEventListener("click",function(){ downloadShot(current,false); });
   document.getElementById("copy").addEventListener("click",function(){
     var t=post.value;
     if(navigator.clipboard&&navigator.clipboard.writeText){
@@ -219,7 +364,10 @@
   document.getElementById("prev").addEventListener("click",function(){show((current+29)%30)});
   document.getElementById("next").addEventListener("click",function(){show((current+1)%30)});
   document.getElementById("today").addEventListener("click",function(){show(todayIndex())});
-  draft.addEventListener("click",function(){ pop("LinkedIn is opening — hit Post when the preview loads"); });
+  draft.addEventListener("click",function(){
+    downloadShot(current,true);
+    pop("Screenshot saved + LinkedIn opening — attach "+fileName(current)+", then Post");
+  });
 
   show(todayIndex());
 })();
