@@ -45,6 +45,10 @@ Each world is also deployed as its **own standalone Vercel project**:
 
 Every world also lives on the hub at `https://thirty-worlds.vercel.app/<folder>/` (e.g. `/cosmos/`).
 
+## 📅 Daily Post console
+
+**https://thirty-worlds.vercel.app/daily/** — a one-page tool for a 30-day LinkedIn campaign (one website per day, starting Sep 2, 2026). It shows today's site with its screenshot and a pre-written post; **Draft on LinkedIn** opens LinkedIn with the post already typed into the composer — you just hit Post. Every site carries its own screenshot as its Open Graph image (`og.jpg`), so the shared link automatically unfurls into a preview card with the screenshot.
+
 ## 📁 Structure
 
 ```

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Post — Thirty Worlds</title>
+<meta name="description" content="One click a day: today's Thirty Worlds website, its screenshot, and a ready-made LinkedIn post — drafted straight into the composer.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📅</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#07070f;--panel:#101120;--ink:#eef0ff;--muted:#9aa0c3;--line:rgba(255,255,255,.1);--accent:#7ea2ff;--go:#0a66c2}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:radial-gradient(70vw 50vw at 50% -15%,rgba(94,110,255,.16),transparent 60%),var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+  .hub-link{position:fixed;top:14px;left:14px;z-index:1000;padding:8px 14px;border-radius:999px;font:600 13px/1 Inter,system-ui,sans-serif;text-decoration:none;backdrop-filter:blur(8px);background:rgba(15,15,25,.55);color:#fff;border:1px solid rgba(255,255,255,.25)}
+  main{max-width:760px;margin:0 auto;padding:clamp(60px,9vh,90px) 20px 60px}
+  .kicker{font:600 12px/1 Inter,sans-serif;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);text-align:center}
+  h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(30px,6vw,46px);text-align:center;margin:12px 0 6px;letter-spacing:-.02em}
+  .status{text-align:center;color:var(--muted);font-size:14.5px;line-height:1.6;margin-bottom:26px}
+  .status strong{color:var(--ink)}
+  .dots{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin:0 auto 30px;max-width:420px}
+  .dot{width:11px;height:11px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid var(--line);cursor:pointer;padding:0;transition:transform .15s}
+  .dot:hover{transform:scale(1.35)}
+  .dot:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .dot.done{background:#4ade80;border-color:#4ade80}
+  .dot.today{box-shadow:0 0 0 3px rgba(126,162,255,.45);background:var(--accent);border-color:var(--accent)}
+  .card{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));border:1px solid var(--line);border-radius:22px;overflow:hidden}
+  .shot{position:relative;aspect-ratio:1408/840;background:#0c0d18}
+  .shot img{width:100%;height:100%;object-fit:cover;display:block}
+  .day-badge{position:absolute;top:14px;left:14px;background:rgba(10,10,18,.75);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.25);color:#fff;font:700 13px/1 'Space Grotesk',sans-serif;padding:9px 14px;border-radius:999px}
+  .body{padding:22px clamp(16px,4vw,28px) 26px}
+  .site-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .site-row .emoji{font-size:30px}
+  .site-row h2{font-family:'Space Grotesk',sans-serif;font-size:22px;letter-spacing:-.01em;flex:1;min-width:150px}
+  .site-row a.visit{font:600 13px/1 Inter,sans-serif;color:var(--accent);text-decoration:none;border:1px solid rgba(126,162,255,.4);padding:10px 15px;border-radius:999px;transition:background .2s}
+  .site-row a.visit:hover{background:rgba(126,162,255,.12)}
+  textarea{width:100%;min-height:230px;resize:vertical;background:#0b0c16;border:1px solid var(--line);border-radius:14px;color:var(--ink);font:400 14.5px/1.65 Inter,sans-serif;padding:16px;transition:border-color .2s}
+  textarea:focus{outline:none;border-color:rgba(126,162,255,.6)}
+  .meta-row{display:flex;justify-content:space-between;align-items:center;margin:8px 2px 18px;color:var(--muted);font-size:12.5px}
+  .actions{display:flex;gap:12px;flex-wrap:wrap}
+  button,.btn{font:600 15px/1 Inter,sans-serif;border-radius:999px;padding:16px 22px;cursor:pointer;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--ink);transition:transform .15s,background .2s;min-height:48px}
+  button:hover,.btn:hover{transform:translateY(-2px)}
+  button:focus-visible,.btn:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .primary{background:var(--go);border-color:var(--go);color:#fff;flex:1;min-width:220px;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:9px}
+  .primary:hover{background:#0a5cb0}
+  .posted-btn.on{background:rgba(74,222,128,.15);border-color:#4ade80;color:#4ade80}
+  .nav{display:flex;justify-content:space-between;margin-top:22px;gap:12px}
+  .nav button{flex:1}
+  .howto{margin-top:34px;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:18px;padding:22px clamp(16px,4vw,26px);color:var(--muted);font-size:14px;line-height:1.75}
+  .howto h3{color:var(--ink);font-family:'Space Grotesk',sans-serif;font-size:16px;margin-bottom:8px}
+  .howto ol{padding-left:20px}
+  .howto li::marker{color:var(--accent)}
+  .toast{position:fixed;bottom:26px;left:50%;transform:translate(-50%,80px);background:#1a1c30;border:1px solid var(--line);color:var(--ink);padding:13px 22px;border-radius:999px;font:600 14px/1 Inter,sans-serif;transition:transform .35s cubic-bezier(.2,.7,.2,1);z-index:2000}
+  .toast.show{transform:translate(-50%,0)}
+  @media (prefers-reduced-motion:reduce){*{transition-duration:.01ms !important}}
+  @media (max-width:480px){.actions .primary{min-width:100%}}
+</style>
+</head>
+<body>
+<a class="hub-link" href="https://thirty-worlds.vercel.app/" aria-label="All thirty sites">← All 30</a>
+<main>
+  <p class="kicker">Thirty Worlds · LinkedIn campaign</p>
+  <h1>Daily Post</h1>
+  <p class="status" id="status"></p>
+  <div class="dots" id="dots" role="group" aria-label="Jump to a day"></div>
+
+  <article class="card">
+    <div class="shot">
+      <img id="shot" src="" alt="Screenshot of today's website">
+      <span class="day-badge" id="badge"></span>
+    </div>
+    <div class="body">
+      <div class="site-row">
+        <span class="emoji" id="emoji" aria-hidden="true"></span>
+        <h2 id="name"></h2>
+        <a class="visit" id="visit" href="#" target="_blank" rel="noopener">Open site ↗</a>
+      </div>
+      <label for="post" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Post text</label>
+      <textarea id="post" spellcheck="false"></textarea>
+      <div class="meta-row"><span>Edit freely — the buttons use whatever is in the box.</span><span id="count"></span></div>
+      <div class="actions">
+        <a class="btn primary" id="draft" href="#" target="_blank" rel="noopener">✍️ Draft on LinkedIn</a>
+        <button id="copy">📋 Copy text</button>
+        <button id="posted" class="posted-btn" aria-pressed="false">Mark posted</button>
+      </div>
+      <div class="nav">
+        <button id="prev">← Previous day</button>
+        <button id="today">Today</button>
+        <button id="next">Next day →</button>
+      </div>
+    </div>
+  </article>
+
+  <section class="howto">
+    <h3>Your 60-second daily routine</h3>
+    <ol>
+      <li>Open this page (bookmark it) — it already shows <strong>today's</strong> website and post.</li>
+      <li>Click <strong>Draft on LinkedIn</strong> — LinkedIn opens with the whole post typed into the composer.</li>
+      <li>Wait a second for the link preview card (the screenshot) to attach, then hit <strong>Post</strong>. Done.</li>
+    </ol>
+    <p style="margin-top:10px">The screenshot attaches itself automatically — every site now carries its screenshot as its social preview image, so pasting the link is enough. Works best on desktop LinkedIn; if the composer ever opens empty, use <strong>Copy text</strong> and paste. If a preview looks stale, refresh it once at <a href="https://www.linkedin.com/post-inspector/" target="_blank" rel="noopener" style="color:var(--accent)">LinkedIn Post Inspector</a>.</p>
+  </section>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+  "use strict";
+  var START = "2026-09-02"; // Day 1 — change this one line to shift the whole campaign
+  var TAG = "#buildinpublic #webdev #sideproject";
+  var S = [
+    ["cosmos","🪐","Cosmos Explorer","A whole solar system in one HTML file. Drag to orbit, scroll to zoom, tap a planet for its story — real relative speeds, built with Three.js.","#threejs #creativecoding"],
+    ["alphabet-safari","🦁","Alphabet Safari","Built for the smallest users: 26 letters that bounce, speak out loud and explode into confetti. Watching a 3-year-old find their favourite animal is the whole point.","#edtech #kids"],
+    ["festivals","🎆","Festivals of the World","One year on Earth, ten ways to celebrate it. Scroll from Lunar New Year to Hogmanay — every festival gets its own palette and animated motif, from drifting lanterns to Holi powder.","#culture #scrollytelling"],
+    ["snake","🐍","Neon Serpent","The classic snake, reborn in CRT neon. Keyboard, swipe or on-screen D-pad — and the speed creeps up as you feast.","#gamedev #retro"],
+    ["beat-lab","🥁","Beat Lab","A 16-step drum machine with six voices and pentatonic synth pads — entirely in the browser with Tone.js. Comes with house, boom-bap and latin presets.","#webaudio #musictech"],
+    ["breathe","🫁","Stillpoint","Box breathing, 4-7-8 and coherent breathing, guided by a slowly glowing orb. Five minutes with this and your shoulders drop an inch.","#wellness #mindfulness"],
+    ["periodic-table","🧪","Element Lab","All 118 elements, correctly laid out, color-coded by family, searchable — with a real-world use for every element you'd recognise.","#chemistry #edtech"],
+    ["flag-quest","🚩","Flag Quest","Ten flags, four choices, sixty countries across every continent — and you pick up capital cities as bonus facts along the way.","#geography #quiz"],
+    ["haiku-garden","🌸","Haiku Garden","A generative poet in a zen garden. Every haiku is a hand-counted 5-7-5, and the whole scene changes with the seasons — petals, fireflies, leaves, snow.","#generativeart #poetry"],
+    ["mind-gym","🧠","Mind Gym","Brain training designed for seniors: big adjustable type, warm colors, zero time pressure. Trivia, number recall and odd-one-out — with kind feedback, always.","#accessibility #seniors"],
+    ["ocean-depths","🌊","Into the Deep","Scroll 11,000 meters down through the five ocean zones — past the scuba limit, past the Titanic, into the hadal dark. Everything you meet on the way is real.","#scrollytelling #ocean"],
+    ["recipe-roulette","🍳","Recipe Roulette","Dinner indecision, solved by physics. Fling the wheel, get one of 16 real dishes with a cookable five-step recipe. Vegetarian toggle included.","#food #uidesign"],
+    ["hello-world","👋","Hello, World","How to say hello, thank you and 'my name is…' in 20 languages — in native script, romanized, and spoken aloud by your browser.","#languages #culture"],
+    ["pixel-studio","👾","Pixel Studio","A tiny pixel-art editor: paint, fill, mirror mode, undo — then export your sprite as a crisp PNG. Surprisingly hard to stop using.","#pixelart #creativecoding"],
+    ["fit-seven","💪","Fit Seven","The science-backed 7-minute workout: 12 exercises, a big honest countdown ring, form cues and beeps. No app, no account, no excuses.","#fitness #health"],
+    ["night-sky","✨","Night Sky Stories","Eight real constellations on a twinkling star map — tap Orion or Cassiopeia and read the myth that named it, plus when to find it in your sky.","#astronomy #storytelling"],
+    ["tic-tac-toe","⭕","Tactic","Tic-tac-toe with a minimax brain. Easy is friendly, Hard has mathematically never lost — I verified all 642 possible games. Come take a draw.","#gamedev #algorithms"],
+    ["cuisine-atlas","🍜","World Cuisine Atlas","Sixteen food cultures, one shelf: doro wat from Ethiopia, ceviche from Peru, jollof from Nigeria — with ingredients, spice levels and did-you-know food lore.","#foodculture #design"],
+    ["color-play","🎨","Color Theory Playground","Pick one color, get six classic harmonies computed live — plus a proper WCAG contrast checker so your palettes actually pass accessibility.","#designtools #a11y"],
+    ["pocket-budget","💰","Pocket Budget","Financial literacy for teens: build a monthly budget with sliders, watch the donut chart react live, and check yourself against the 50/30/20 rule.","#finlit #teens"],
+    ["physics-lab","⚡","Physics Playground","Click to spawn bouncing balls, then mess with gravity, wind, friction and bounciness. Moon, Earth and Jupiter presets — because physics is better hands-on.","#stem #physics"],
+    ["memory-match","🃏","Memory Match","The card-flip memory game, three themes and three difficulties deep, with star ratings and best times. Simple to build, weirdly competitive to play.","#games #kids"],
+    ["myth-codex","🏺","Myth Codex","Thirty divine figures from five great traditions — Greek, Norse, Egyptian, Hindu, Japanese — with their domains, symbols and the stories told of them.","#mythology #culture"],
+    ["story-forge","📖","Story Forge","Kids pick a hero, a sidekick, a place, a magical object and a problem — and forge a five-paragraph adventure that reads itself aloud. No two tales alike.","#kids #creativity"],
+    ["body-atlas","🫀","Body Atlas","Five human body systems on one interactive map — toggle bones, blood, nerves, digestion and breath, tap any organ for a real fact, then quiz yourself.","#biology #edtech"],
+    ["type-racer","⌨️","Typing Velocity","A terminal-styled typing test with real passages from literature and science. Live WPM, accuracy, and a speed graph at the finish. My best is on the line now.","#typing #productivity"],
+    ["ancient-wonders","🏛️","Seven Wonders","A parallax journey through the seven wonders of the ancient world — layered SVG scenes, each with its story and its fate. Only one still stands.","#history #webdesign"],
+    ["math-arena","🔢","Math Arena","Sixty seconds, four answer buttons, streaks on fire. Mental-math sprints for kids from 'numbers to 10' up to three-digit mixed operations.","#edtech #math"],
+    ["cloud-atlas","☁️","Cloud Atlas","Every cloud belongs to one of ten families, and each one is a weather forecast written in water. Learn the ten, then quiz yourself.","#weather #science"],
+    ["inventions","💡","Spark","Twelve inventions, five and a half millennia — from the wheel to CRISPR — on a timeline that draws itself as you scroll. Each one rewired the world.","#history #scrollytelling"]
+  ];
+
+  var status=document.getElementById("status"),dots=document.getElementById("dots"),shot=document.getElementById("shot"),
+      badge=document.getElementById("badge"),emoji=document.getElementById("emoji"),name=document.getElementById("name"),
+      visit=document.getElementById("visit"),post=document.getElementById("post"),count=document.getElementById("count"),
+      draft=document.getElementById("draft"),toast=document.getElementById("toast");
+  var current=0, toastT=null;
+
+  function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch(e){return null}}
+  function postedSet(){try{return JSON.parse(store("tw-posted")||"[]")}catch(e){return []}}
+  function dayDiff(){
+    var p=START.split("-"), s=new Date(+p[0],+p[1]-1,+p[2]), n=new Date();
+    var a=new Date(s.getFullYear(),s.getMonth(),s.getDate()), b=new Date(n.getFullYear(),n.getMonth(),n.getDate());
+    return Math.round((b-a)/86400000);
+  }
+  function todayIndex(){ return Math.min(Math.max(dayDiff(),0),29); }
+
+  function buildPost(i){
+    var s=S[i];
+    return "Day "+(i+1)+"/30 of shipping 30 tiny websites 🚀\n\n"+s[1]+" "+s[2]+" — "+s[3]+
+      "\n\nTry it → https://tw-"+s[0]+".vercel.app\n\n"+TAG+" "+s[4];
+  }
+  function show(i){
+    current=i;
+    var s=S[i], url="https://tw-"+s[0]+".vercel.app";
+    shot.src=url+"/og.jpg";
+    shot.alt="Screenshot of "+s[2];
+    badge.textContent="Day "+(i+1)+" / 30";
+    emoji.textContent=s[1]; name.textContent=s[2];
+    visit.href=url;
+    post.value=buildPost(i);
+    sync(); paintDots();
+    var d=dayDiff();
+    if(d<0){ status.innerHTML="Campaign starts <strong>Sep 2</strong> — previewing <strong>Day "+(i+1)+"</strong>. Everything is ready."; }
+    else if(d>29){ status.innerHTML="🎉 All 30 days are behind you. Browsing <strong>Day "+(i+1)+"</strong> — repost favourites any time."; }
+    else if(i===todayIndex()){ status.innerHTML="Today is <strong>Day "+(i+1)+" of 30</strong> — "+s[2]+" day."; }
+    else { status.innerHTML="Browsing <strong>Day "+(i+1)+"</strong> · today is Day "+(todayIndex()+1)+"."; }
+    var done=postedSet().indexOf(i)>-1;
+    var pb=document.getElementById("posted");
+    pb.textContent=done?"✓ Posted":"Mark posted";
+    pb.classList.toggle("on",done);
+    pb.setAttribute("aria-pressed",done?"true":"false");
+  }
+  function sync(){
+    count.textContent=post.value.length+" chars";
+    draft.href="https://www.linkedin.com/feed/?shareActive=true&text="+encodeURIComponent(post.value);
+  }
+  function paintDots(){
+    dots.innerHTML="";
+    var done=postedSet(), t=todayIndex();
+    for(var i=0;i<30;i++){
+      var b=document.createElement("button");
+      b.className="dot"+(done.indexOf(i)>-1?" done":"")+(i===t&&dayDiff()>=0&&dayDiff()<=29?" today":"");
+      b.setAttribute("aria-label","Day "+(i+1)+": "+S[i][2]);
+      (function(j){b.addEventListener("click",function(){show(j)});})(i);
+      dots.appendChild(b);
+    }
+  }
+  function pop(msg){
+    toast.textContent=msg; toast.classList.add("show");
+    clearTimeout(toastT); toastT=setTimeout(function(){toast.classList.remove("show")},2200);
+  }
+
+  post.addEventListener("input",sync);
+  document.getElementById("copy").addEventListener("click",function(){
+    var t=post.value;
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t).then(function(){pop("Copied — paste it into LinkedIn")},function(){fallback()});
+    } else fallback();
+    function fallback(){ try{post.select();document.execCommand("copy");pop("Copied — paste it into LinkedIn");}catch(e){pop("Select the text and copy manually");} }
+  });
+  document.getElementById("posted").addEventListener("click",function(){
+    var d=postedSet(), k=d.indexOf(current);
+    if(k>-1)d.splice(k,1); else d.push(current);
+    store("tw-posted",JSON.stringify(d));
+    show(current);
+    if(k===-1)pop("Day "+(current+1)+" marked as posted 🎉");
+  });
+  document.getElementById("prev").addEventListener("click",function(){show((current+29)%30)});
+  document.getElementById("next").addEventListener("click",function(){show((current+1)%30)});
+  document.getElementById("today").addEventListener("click",function(){show(todayIndex())});
+  draft.addEventListener("click",function(){ pop("LinkedIn is opening — hit Post when the preview loads"); });
+
+  show(todayIndex());
+})();
+</script>
+</body>
+</html>
